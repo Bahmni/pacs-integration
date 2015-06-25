@@ -1,9 +1,11 @@
 package org.bahmni.pacsintegration.model;
 
 
-import javafx.scene.effect.BlendMode;
-
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "modality")

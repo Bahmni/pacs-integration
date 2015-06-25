@@ -1,8 +1,9 @@
-package org.bahmni.pacsintegration.schedulers;
+package org.bahmni.pacsintegration.atomfeed;
 
 import org.apache.log4j.Logger;
-import org.bahmni.pacsintegration.model.QuartzScheduler;
-import org.bahmni.pacsintegration.repository.QuartzSchedulerRepository;
+import org.bahmni.pacsintegration.atomfeed.jobs.Job;
+import org.bahmni.pacsintegration.model.CronJob;
+import org.bahmni.pacsintegration.repository.CronJobRepository;
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -34,7 +35,7 @@ public class ScheduledTasks implements SchedulingConfigurer {
     ApplicationContext applicationContext;
 
     @Autowired
-    private QuartzSchedulerRepository quartzSchedulerRepository;
+    private CronJobRepository cronJobRepository;
 
     private static Logger logger = Logger.getLogger(ScheduledTasks.class);
 
@@ -45,14 +46,14 @@ public class ScheduledTasks implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        List<QuartzScheduler> schedulers = quartzSchedulerRepository.findAll();
+        List<CronJob> crobJobs = cronJobRepository.findAll();
         taskRegistrar.setScheduler(taskExecutor());
-        for (final QuartzScheduler scheduler : schedulers) {
+        for (final CronJob cronJob : crobJobs) {
             CronExpression cronExpression = null;
             try {
-                cronExpression = new CronExpression(scheduler.getCronStatement());
+                cronExpression = new CronExpression(cronJob.getCronStatement());
             } catch (ParseException e) {
-                logger.error("Could not parse the cron statement: " + scheduler.getCronStatement() + " for: " + scheduler.getName());
+                logger.error("Could not parse the cron statement: " + cronJob.getCronStatement() + " for: " + cronJob.getName());
                 continue;
             }
 
@@ -62,7 +63,7 @@ public class ScheduledTasks implements SchedulingConfigurer {
                     new Runnable() {
                         @Override
                         public void run() {
-                            Job applicationContextBean = (Job) applicationContext.getBean(scheduler.getName());
+                            Job applicationContextBean = (Job) applicationContext.getBean(cronJob.getName());
                             applicationContextBean.process();
                         }
                     }, new Trigger() {

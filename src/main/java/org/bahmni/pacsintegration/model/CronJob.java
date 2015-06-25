@@ -1,7 +1,5 @@
 package org.bahmni.pacsintegration.model;
 
-import org.quartz.CronExpression;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,8 +7,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "quartz_scheduler")
-public class QuartzScheduler {
+@Table(name = "cron_job")
+public class CronJob {
 
     @Id
     @Column(name = "id", unique = true)
@@ -22,16 +20,22 @@ public class QuartzScheduler {
 
     @Column(name = "enabled")
     private Boolean enabled;
+
+    @Column(name = "cron_statement")
     private String cronStatement;
 
-    public QuartzScheduler() {
+    @Column(name = "start_delay")
+    private Integer startDelay;
+
+    public CronJob() {
     }
 
-    public QuartzScheduler(Integer id, String name, Boolean enabled, String cronStatement) {
+    public CronJob(Integer id, String name, Boolean enabled, String cronStatement, Integer startDelay) {
         this.id = id;
         this.name = name;
         this.enabled = enabled;
         this.cronStatement = cronStatement;
+        this.startDelay = startDelay;
     }
 
     public Integer getId() {
@@ -64,5 +68,13 @@ public class QuartzScheduler {
 
     public void setCronStatement(String cronStatement) {
         this.cronStatement = cronStatement;
+    }
+
+    public Integer getStartDelay() {
+        return startDelay;
+    }
+
+    public void setStartDelay(Integer startDelay) {
+        this.startDelay = startDelay;
     }
 }

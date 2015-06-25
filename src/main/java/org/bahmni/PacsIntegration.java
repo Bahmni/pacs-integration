@@ -1,21 +1,20 @@
 package org.bahmni;
 
-import org.bahmni.pacsintegration.model.Modality;
-import org.bahmni.pacsintegration.model.OrderType;
-import org.bahmni.pacsintegration.model.QuartzScheduler;
+import org.bahmni.pacsintegration.model.CronJob;
 import org.bahmni.pacsintegration.repository.ModalityRepository;
 import org.bahmni.pacsintegration.repository.OrderTypeRepository;
-import org.bahmni.pacsintegration.repository.QuartzSchedulerRepository;
+import org.bahmni.pacsintegration.repository.CronJobRepository;
+import org.hibernate.SessionFactory;
+import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Random;
 
 @RestController
 @EnableAutoConfiguration
@@ -29,14 +28,19 @@ public class PacsIntegration {
     private ModalityRepository modalityRepository;
 
     @Autowired
-    QuartzSchedulerRepository quartzSchedulerRepository;
+    CronJobRepository cronJobRepository;
 
     @RequestMapping("/")
-    List<QuartzScheduler> home() {
-        return quartzSchedulerRepository.findAll();
+    List<CronJob> home() {
+        return cronJobRepository.findAll();
     }
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(PacsIntegration.class, args);
+    }
+
+    @Bean
+    public SessionFactory sessionFactory(HibernateEntityManagerFactory hemf) {
+        return hemf.getSessionFactory();
     }
 }
