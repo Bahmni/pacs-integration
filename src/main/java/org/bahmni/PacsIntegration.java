@@ -1,14 +1,16 @@
 package org.bahmni;
 
-import org.bahmni.pacsintegration.SchedulerConfig;
 import org.bahmni.pacsintegration.model.Modality;
 import org.bahmni.pacsintegration.model.OrderType;
+import org.bahmni.pacsintegration.model.QuartzScheduler;
 import org.bahmni.pacsintegration.repository.ModalityRepository;
 import org.bahmni.pacsintegration.repository.OrderTypeRepository;
+import org.bahmni.pacsintegration.repository.QuartzSchedulerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +19,7 @@ import java.util.Random;
 
 @RestController
 @EnableAutoConfiguration
-@Import({SchedulerConfig.class})
+@ComponentScan(basePackages = "org.bahmni")
 public class PacsIntegration {
 
     @Autowired
@@ -26,12 +28,12 @@ public class PacsIntegration {
     @Autowired
     private ModalityRepository modalityRepository;
 
+    @Autowired
+    QuartzSchedulerRepository quartzSchedulerRepository;
+
     @RequestMapping("/")
-    List<OrderType> home() {
-        Modality modality = new Modality(new Random().nextInt(), "Modality", "Some description", "http://google.com");
-        modalityRepository.save(modality);
-        orderTypeRepository.save(new OrderType(new Random().nextInt(), "noname", modality));
-        return orderTypeRepository.findAll();
+    List<QuartzScheduler> home() {
+        return quartzSchedulerRepository.findAll();
     }
 
     public static void main(String[] args) throws Exception {

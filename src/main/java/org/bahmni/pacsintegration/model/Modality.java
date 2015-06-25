@@ -20,24 +20,32 @@ public class Modality extends BaseModel{
     @Column(name = "description")
     private String description;
 
-    @Column(name = "url")
-    private String url;
+    @Column(name = "ip", nullable = false)
+    private String ip;
 
-    public Modality(int id, String name, String description, String url) {
+    @Column(name = "port")
+    private Integer port;
+
+    @Column(name = "timeout")
+    private Integer timeout;
+
+    public Modality(Integer id, String name, String description, String ip, Integer port, Integer timeout) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.url = url;
+        this.ip = ip;
+        this.port = port;
+        this.timeout = timeout;
     }
 
     public Modality() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -57,11 +65,27 @@ public class Modality extends BaseModel{
         this.description = description;
     }
 
-    public String getUrl() {
-        return url;
+    public String getIp() {
+        return ip;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 }
