@@ -43,8 +43,8 @@
     </changeSet>
 
     <changeSet id="PACS-201506250509" author="Sandeep, Hemanth">
-        <comment>Creating Cron Jobs Table</comment>
-        <createTable tableName="cron_job">
+        <comment>Creating quartz cron scheduler Table</comment>
+        <createTable tableName="quartz_cron_scheduler">
             <column name="id" type="int" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>

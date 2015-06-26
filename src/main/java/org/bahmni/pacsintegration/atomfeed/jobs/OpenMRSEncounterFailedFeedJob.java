@@ -20,21 +20,17 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 @DisallowConcurrentExecution
-@Component("openMRSEncounterFeedJob")
-public class OpenMRSEncounterFeedJob extends OpenMRSFeedJob {
-    @Autowired
-    private AtomFeedClientFactory atomFeedClientFactory;
+@Component("openMRSEncounterFailedFeedJob")
+public class OpenMRSEncounterFailedFeedJob extends OpenMRSFeedJob {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    public OpenMRSEncounterFeedJob() {
-    }
+    @Autowired
+    private AtomFeedClientFactory atomFeedClientFactory;
 
     @Override
-    public void process() throws InterruptedException {
-        logger.info("Processing feed...");
-        FeedClient atomFeedClient = createAtomFeedClient(AtomFeedProperties.getInstance(), atomFeedClientFactory);
-        atomFeedClient.processEvents();
+    String getFeedName() {
+        return OPENMRS_ENCOUNTER_FEED_NAME;
     }
 
     @Override
@@ -43,7 +39,9 @@ public class OpenMRSEncounterFeedJob extends OpenMRSFeedJob {
     }
 
     @Override
-    String getFeedName() {
-        return OPENMRS_ENCOUNTER_FEED_NAME;
+    public void process() {
+        logger.info("Processing failed events.");
+        FeedClient atomFeedClient = createAtomFeedClient(AtomFeedProperties.getInstance(), atomFeedClientFactory);
+        atomFeedClient.processFailedEvents();
     }
 }

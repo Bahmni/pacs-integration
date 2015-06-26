@@ -6,18 +6,18 @@ import java.util.Properties;
 public class AtomFeedProperties {
 
 
-        private static final String FEED_CONNECT_TIMEOUT = "feed.connectionTimeoutInMilliseconds";
-        private static final String FEED_REPLY_TIMEOUT = "feed.replyTimeoutInMilliseconds";
-        private static final String FEED_MAX_FAILED_EVENTS = "feed.maxFailedEvents";
-        private static final String FAILED_EVENT_MAX_RETRY = "feed.failedEventMaxRetry";
+    private static final String FEED_CONNECT_TIMEOUT = "feed.connectionTimeoutInMilliseconds";
+    private static final String FEED_REPLY_TIMEOUT = "feed.replyTimeoutInMilliseconds";
+    private static final String FEED_MAX_FAILED_EVENTS = "feed.maxFailedEvents";
+    private static final String FAILED_EVENT_MAX_RETRY = "feed.failedEventMaxRetry";
 
-        public static final String DEFAULT_PROPERTY_FILENAME = "/atomfeed.properties";
+    public static final String DEFAULT_PROPERTY_FILENAME = "/atomfeed.properties";
 
-        private Properties properties;
+    private Properties properties;
 
-        private static AtomFeedProperties atomFeedProperties;
+    private static AtomFeedProperties atomFeedProperties;
 
-        private AtomFeedProperties() {
+    private AtomFeedProperties() {
         InputStream propertyStream = null;
         try {
             propertyStream = this.getClass().getResourceAsStream(DEFAULT_PROPERTY_FILENAME);

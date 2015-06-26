@@ -1,4 +1,4 @@
-package org.bahmni.pacsintegration.encounter;
+package org.bahmni.pacsintegration.atomfeed.contract.encounter;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 

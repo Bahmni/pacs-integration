@@ -1,6 +1,6 @@
 package org.bahmni;
 
-import org.bahmni.pacsintegration.model.CronJob;
+import org.bahmni.pacsintegration.model.QuartzCronScheduler;
 import org.bahmni.pacsintegration.repository.ModalityRepository;
 import org.bahmni.pacsintegration.repository.OrderTypeRepository;
 import org.bahmni.pacsintegration.repository.CronJobRepository;
@@ -11,6 +11,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +33,7 @@ public class PacsIntegration {
     CronJobRepository cronJobRepository;
 
     @RequestMapping("/")
-    List<CronJob> home() {
+    List<QuartzCronScheduler> home() {
         return cronJobRepository.findAll();
     }
 

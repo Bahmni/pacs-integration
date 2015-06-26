@@ -7,8 +7,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "cron_job")
-public class CronJob {
+@Table(name = "quartz_cron_scheduler")
+public class QuartzCronScheduler {
 
     @Id
     @Column(name = "id", unique = true)
@@ -27,10 +27,10 @@ public class CronJob {
     @Column(name = "start_delay")
     private Integer startDelay;
 
-    public CronJob() {
+    public QuartzCronScheduler() {
     }
 
-    public CronJob(Integer id, String name, Boolean enabled, String cronStatement, Integer startDelay) {
+    public QuartzCronScheduler(Integer id, String name, Boolean enabled, String cronStatement, Integer startDelay) {
         this.id = id;
         this.name = name;
         this.enabled = enabled;

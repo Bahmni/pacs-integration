@@ -1,6 +1,6 @@
-package org.bahmni.pacsintegration;
+package org.bahmni.pacsintegration.atomfeed.mappers;
 
-import org.bahmni.pacsintegration.encounter.OpenMRSEncounter;
+import org.bahmni.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;

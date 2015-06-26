@@ -9,9 +9,5 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ModalityRepository extends JpaRepository<Modality, Integer> {
-
-    @Query("select m from Modality m " +
-            "where m.name = :name")
-    List<Modality> findByasdfName(@org.springframework.data.repository.query.Param(value = "name") String modality);
-
+    List<Modality> findByName(String name);
 }
