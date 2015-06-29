@@ -1,0 +1,1 @@
+INSERT INTO order_type (id, name, modality_id) VALUES (1, 'Radiology Order', 1);

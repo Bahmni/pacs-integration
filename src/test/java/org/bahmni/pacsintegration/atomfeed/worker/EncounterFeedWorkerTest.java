@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import javax.annotation.Resource;
 import java.net.URI;
 
 import static org.mockito.Matchers.any;
@@ -27,7 +26,7 @@ public class EncounterFeedWorkerTest extends OpenMRSMapperBaseTest {
     private OpenMRSEncounterService openMRSEncounterService;
 
     @InjectMocks
-    private EncounterFeedWorker encounterFeedWorker;
+    private EncounterFeedWorker encounterFeedWorker = new EncounterFeedWorker();
 
     @Before
     public void setUp() throws Exception {
@@ -36,20 +35,18 @@ public class EncounterFeedWorkerTest extends OpenMRSMapperBaseTest {
 
     @Test
     public void shouldGetEncounterDataFromTheEventContentAndSaveIt() throws Exception {
-        when(webClient.get(any(URI.class))).thenReturn(deserialize("../sampleOpenMRSEncounter.json"));
+        when(webClient.get(any(URI.class))).thenReturn(deserialize("/sampleOpenMRSEncounter.json"));
 
-        encounterFeedWorker = new EncounterFeedWorker(webClient, "http://localhost:8080/", openMRSEncounterService);
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
 
         verify(webClient, times(1)).get(any(URI.class));
         verify(openMRSEncounterService, times(1)).save(any(OpenMRSEncounter.class));
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void shouldThrowExceptionIfJsonParseFails() throws Exception {
         when(webClient.get(any(URI.class))).thenReturn("Incorrect JSON");
 
-        encounterFeedWorker = new EncounterFeedWorker(webClient, "http://localhost:8080/", openMRSEncounterService);
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
     }
 }

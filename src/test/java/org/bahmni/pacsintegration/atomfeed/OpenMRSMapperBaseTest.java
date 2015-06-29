@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 
-public abstract class OpenMRSMapperBaseTest {
-    protected String deserialize(String fileName) throws IOException {
+public class OpenMRSMapperBaseTest {
+    public String deserialize(String fileName) throws IOException {
         InputStream inputStream = this.getClass().getResourceAsStream(fileName);
         Assert.assertNotNull(inputStream);
         StringWriter writer = new StringWriter();

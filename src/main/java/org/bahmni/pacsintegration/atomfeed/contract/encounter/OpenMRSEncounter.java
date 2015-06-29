@@ -39,23 +39,6 @@ public class OpenMRSEncounter {
         this.testOrders = orders;
     }
 
-    public boolean hasLabOrder() {
-        for (OpenMRSOrder openMRSOrder : testOrders) {
-            if (openMRSOrder.isLabOrder())
-                return true;
-        }
-        return false;
-    }
-
-    public List<OpenMRSOrder> getLabOrders() {
-        List<OpenMRSOrder> labOrders = new ArrayList<OpenMRSOrder>();
-        for (OpenMRSOrder openMRSOrder : testOrders) {
-            if (openMRSOrder.isLabOrder() && !openMRSOrder.isVoided())
-                labOrders.add(openMRSOrder);
-        }
-        return labOrders;
-    }
-
     public String getPatientUuid() {
         return patientUuid;
     }
@@ -70,5 +53,9 @@ public class OpenMRSEncounter {
 
     public void setProviders(List<OpenMRSProvider> providers) {
         this.providers = providers;
+    }
+
+    public void addTestOrder(OpenMRSOrder order) {
+        testOrders.add(order);
     }
 }

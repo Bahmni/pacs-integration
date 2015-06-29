@@ -38,6 +38,10 @@ public class OpenMRSConcept {
         return set;
     }
 
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

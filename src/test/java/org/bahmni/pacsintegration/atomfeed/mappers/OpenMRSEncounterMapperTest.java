@@ -16,7 +16,7 @@ public class OpenMRSEncounterMapperTest extends OpenMRSMapperBaseTest {
 
     @Test
     public void shouldMapJsonIntoOpenMRSEncounter() throws IOException {
-        String json = deserialize("../sampleOpenMRSEncounter.json");
+        String json = deserialize("/sampleOpenMRSEncounter.json");
         OpenMRSEncounterMapper openMRSEncounterMapper = new OpenMRSEncounterMapper(getObjectMapperThatAllowsComments());
         OpenMRSEncounter openMRSEncounter = openMRSEncounterMapper.map(json);
         Assert.assertNotNull(openMRSEncounter);
@@ -39,11 +39,10 @@ public class OpenMRSEncounterMapperTest extends OpenMRSMapperBaseTest {
 
     private void checkOrder(OpenMRSOrder openMRSOrder, String expectedOrderUUID, String expectedTestOrPanelUUID, String testOrPanelName, boolean isPanel) {
         Assert.assertEquals(expectedOrderUUID, openMRSOrder.getUuid());
-        Assert.assertEquals("Lab Order", openMRSOrder.getOrderType());
 
         OpenMRSConcept concept = openMRSOrder.getConcept();
         Assert.assertEquals(expectedTestOrPanelUUID, concept.getUuid());
-        Assert.assertEquals(expectedTestOrPanelUUID, openMRSOrder.getTestOrPanelUUID());
+        Assert.assertEquals(expectedTestOrPanelUUID, openMRSOrder.getUUID());
 
         OpenMRSConceptName conceptName = concept.getName();
         Assert.assertEquals(testOrPanelName, conceptName.getName());

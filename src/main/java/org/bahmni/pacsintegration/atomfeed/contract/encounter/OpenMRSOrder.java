@@ -4,8 +4,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSOrder {
-    public static final String LAB_ORDER_TYPE = "Lab Order";
-
     private String uuid;
     private String orderType;
     private Boolean voided;
@@ -25,6 +23,10 @@ public class OpenMRSOrder {
         return uuid;
     }
 
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getOrderType() {
         return orderType;
     }
@@ -41,15 +43,9 @@ public class OpenMRSOrder {
         this.concept = concept;
     }
 
-    public boolean isLabOrder() {
-        return LAB_ORDER_TYPE.equals(orderType);
-    }
-
-    public boolean isLabOrderForPanel() {
-        return concept != null && concept.isSet();
-    }
-
     public Boolean isVoided() {
+        if (voided == null)
+            return false;
         return voided;
     }
 
@@ -57,15 +53,11 @@ public class OpenMRSOrder {
         this.voided = voided;
     }
 
-    public String getLabTestName() {
-        if (!isLabOrder())
-            return null;
+    public String getTestName() {
         return concept.getName().getName();
     }
 
-    public String getTestOrPanelUUID() {
-        if (!isLabOrder())
-            return null;
+    public String getUUID() {
         return concept.getUuid();
     }
 }

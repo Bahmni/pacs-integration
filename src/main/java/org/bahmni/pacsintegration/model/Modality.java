@@ -3,6 +3,8 @@ package org.bahmni.pacsintegration.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -13,7 +15,7 @@ public class Modality extends BaseModel{
 
     @Id
     @Column(name = "id", unique = true)
-    @SequenceGenerator(name = "modality_seq", initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
     @Column(name = "name")

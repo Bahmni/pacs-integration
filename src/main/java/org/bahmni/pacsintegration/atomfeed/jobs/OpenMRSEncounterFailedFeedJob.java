@@ -3,6 +3,7 @@ package org.bahmni.pacsintegration.atomfeed.jobs;
 import org.apache.log4j.Logger;
 import org.bahmni.pacsintegration.atomfeed.client.AtomFeedClientFactory;
 import org.bahmni.pacsintegration.atomfeed.client.AtomFeedProperties;
+import org.bahmni.pacsintegration.atomfeed.services.OpenMRSEncounterService;
 import org.bahmni.pacsintegration.atomfeed.worker.EncounterFeedWorker;
 import org.bahmni.webclients.ClientCookies;
 import org.bahmni.webclients.ConnectionDetails;
@@ -28,6 +29,10 @@ public class OpenMRSEncounterFailedFeedJob extends OpenMRSFeedJob {
     @Autowired
     private AtomFeedClientFactory atomFeedClientFactory;
 
+    @Autowired
+    private OpenMRSEncounterService openMRSEncounterService;
+
+
     @Override
     String getFeedName() {
         return OPENMRS_ENCOUNTER_FEED_NAME;
@@ -35,7 +40,7 @@ public class OpenMRSEncounterFailedFeedJob extends OpenMRSFeedJob {
 
     @Override
     EventWorker createWorker(HttpClient authenticatedWebClient, String urlPrefix) {
-        return new EncounterFeedWorker(authenticatedWebClient, urlPrefix);
+        return new EncounterFeedWorker(authenticatedWebClient, urlPrefix, openMRSEncounterService);
     }
 
     @Override

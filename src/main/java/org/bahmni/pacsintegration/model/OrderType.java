@@ -9,7 +9,7 @@ public class OrderType extends BaseModel{
 
     @Id
     @Column(name = "id", unique = true)
-    @SequenceGenerator(name = "order_type_seq", initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
     @Column(name = "name", nullable = false)
