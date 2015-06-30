@@ -8,10 +8,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Entity
 @Table(name = "orders")
-public class Orders extends BaseModel{
+public class Orders extends BaseModel {
 
     @Id
     @Column(name = "id", unique = true)
@@ -32,6 +33,18 @@ public class Orders extends BaseModel{
 
     @Column(name = "result")
     private String result;
+
+    @Column(name = "creator")
+    private String creator;
+
+    @Column(name = "date_created")
+    private Date dateCreated;
+
+    @Column(name = "modifier")
+    private String modifier;
+
+    @Column(name = "date_modified")
+    private Date dateModified;
 
     public Orders(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result) {
         this.id = id;
@@ -91,5 +104,37 @@ public class Orders extends BaseModel{
 
     public void setResult(String result) {
         this.result = result;
+    }
+
+    public Date getDateModified() {
+        return dateModified;
+    }
+
+    public void setDateModified(Date dateModified) {
+        this.dateModified = dateModified;
+    }
+
+    public String getModifier() {
+        return modifier;
+    }
+
+    public void setModifier(String modifier) {
+        this.modifier = modifier;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }

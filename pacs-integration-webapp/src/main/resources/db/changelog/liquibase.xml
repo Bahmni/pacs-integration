@@ -48,7 +48,7 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="name" type="varchar(25)">
+            <column name="name" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="enabled" type="boolean" defaultValue="true">
@@ -120,8 +120,16 @@
             </column>
             <column name="result" type="varchar(255)">
             </column>
+            <column name="creator" type="varchar(255)">
+            </column>
+            <column name="date_created" type="datetime">
+            </column>
+            <column name="modifier" type="varchar(255)">
+            </column>
+            <column name="date_modified" type="datetime">
+            </column>
         </createTable>
-        <addForeignKeyConstraint baseTableName="order" baseColumnNames="order_type_id" constraintName="fk_os_order_type"
+        <addForeignKeyConstraint baseTableName="orders" baseColumnNames="order_type_id" constraintName="fk_os_order_type"
                                  referencedTableName="order_type"
                                  referencedColumnNames="id"/>
     </changeSet>

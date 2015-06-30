@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 @DisallowConcurrentExecution
-@Component("openMRSEncounterFailedJob")
+@Component("openMRSEncounterFailedFeedJob")
 @ConditionalOnExpression("'${enable.scheduling}'=='true'")
 public class EncounterFailedFeedJob implements FeedJob {
     private static final String OPENMRS_ENCOUNTER_FEED_NAME = "openmrs.encounter.feed.uri";
