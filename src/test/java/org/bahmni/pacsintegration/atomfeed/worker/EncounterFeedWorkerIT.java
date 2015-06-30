@@ -36,7 +36,7 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
     private OrderRepository orderRepository;
 
     @Autowired
-    private OpenMRSEncounterService openMRSEncounterService;
+    private EncounterFeedWorker encounterFeedWorker;
 
     @Before
     public void setUp() throws Exception {
@@ -47,7 +47,8 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
     public void shouldOnlySaveRadiologyOrdersInEncounterFeed() throws Exception {
         when(webClient.get(any(URI.class))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
 
-        EncounterFeedWorker encounterFeedWorker = new EncounterFeedWorker(webClient, "Prefix", openMRSEncounterService);
+        encounterFeedWorker.setWebClient(webClient);
+        encounterFeedWorker.setUrlPrefix("Prefix");
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
 
         List<Order> savedOrders = orderRepository.findAll();

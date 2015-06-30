@@ -20,16 +20,25 @@ public class EncounterFeedWorker implements EventWorker {
 
     private HttpClient webClient;
     private String urlPrefix;
-    private OpenMRSEncounterService openMRSEncounterService;
-    private static Logger logger = Logger.getLogger(EncounterFeedWorker.class);
+    private static final Logger logger = Logger.getLogger(EncounterFeedWorker.class);
 
-    public EncounterFeedWorker(HttpClient authenticatedWebClient, String urlPrefix, OpenMRSEncounterService openMRSEncounterService) {
-        this.webClient = authenticatedWebClient;
-        this.urlPrefix = urlPrefix;
-        this.openMRSEncounterService = openMRSEncounterService;
-    }
+    @Autowired
+    private OpenMRSEncounterService openMRSEncounterService;
 
     public EncounterFeedWorker() {
+    }
+
+    public EncounterFeedWorker(HttpClient webClient, String prefix) {
+        this.urlPrefix = prefix;
+        this.webClient = webClient;
+    }
+
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
+    }
+
+    public void setWebClient(HttpClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override

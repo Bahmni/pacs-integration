@@ -1,7 +1,7 @@
 package org.bahmni.pacsintegration.atomfeed;
 
 import org.apache.log4j.Logger;
-import org.bahmni.pacsintegration.atomfeed.jobs.OpenMRSFeedJob;
+import org.bahmni.pacsintegration.atomfeed.jobs.FeedJob;
 import org.bahmni.pacsintegration.model.QuartzCronScheduler;
 import org.bahmni.pacsintegration.repository.CronJobRepository;
 import org.quartz.CronExpression;
@@ -34,7 +34,7 @@ public class ScheduledTasks implements SchedulingConfigurer {
     @Autowired
     private CronJobRepository cronJobRepository;
 
-    private Map<String, OpenMRSFeedJob> jobs = new HashMap<String, OpenMRSFeedJob>();
+    private Map<String, FeedJob> jobs = new HashMap<String, FeedJob>();
 
     private static Logger logger = Logger.getLogger(ScheduledTasks.class);
 
@@ -48,7 +48,7 @@ public class ScheduledTasks implements SchedulingConfigurer {
         final List<QuartzCronScheduler> crobJobs = cronJobRepository.findAll();
 
         for (final QuartzCronScheduler quartzCronScheduler : crobJobs) {
-            jobs.put(quartzCronScheduler.getName(), (OpenMRSFeedJob) applicationContext.getBean(quartzCronScheduler.getName()));
+            jobs.put(quartzCronScheduler.getName(), ((FeedJob) applicationContext.getBean(quartzCronScheduler.getName())));
 
             try {
                 taskRegistrar.setScheduler(taskExecutor());
@@ -73,9 +73,9 @@ public class ScheduledTasks implements SchedulingConfigurer {
         return new Runnable() {
             @Override
             public void run() {
-                OpenMRSFeedJob openMRSFeedJob = jobs.get(quartzCronScheduler.getName());
+                FeedJob feedJob = jobs.get(quartzCronScheduler.getName());
                 try {
-                    openMRSFeedJob.process();
+                    feedJob.process();
                 } catch (InterruptedException e) {
                     logger.warn("Thread interrupted for the job: " + quartzCronScheduler.getName());
                 }

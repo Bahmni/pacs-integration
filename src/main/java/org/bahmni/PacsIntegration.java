@@ -1,9 +1,10 @@
 package org.bahmni;
 
+import org.bahmni.pacsintegration.atomfeed.client.AtomFeedClientFactory;
 import org.bahmni.pacsintegration.model.QuartzCronScheduler;
+import org.bahmni.pacsintegration.repository.CronJobRepository;
 import org.bahmni.pacsintegration.repository.ModalityRepository;
 import org.bahmni.pacsintegration.repository.OrderTypeRepository;
-import org.bahmni.pacsintegration.repository.CronJobRepository;
 import org.hibernate.SessionFactory;
 import org.hibernate.jpa.HibernateEntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +24,9 @@ public class PacsIntegration {
 
     @Autowired
     private OrderTypeRepository orderTypeRepository;
+
+    @Autowired
+    private AtomFeedClientFactory atomFeedClientFactory;
 
     @Autowired
     private ModalityRepository modalityRepository;
