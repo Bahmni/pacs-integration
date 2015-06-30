@@ -50,10 +50,10 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
         encounterFeedWorker.setUrlPrefix("Prefix");
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
 
-        List<Orders> savedOrderses = orderRepository.findAll();
-        assertEquals(1, savedOrderses.size());
-        assertEquals("ac0819a9-11c1-4310-8f0a-feee71e5086b", savedOrderses.get(0).getOrderUuid());
-        assertEquals("Anaemia Panel", savedOrderses.get(0).getTestName());
-        assertEquals("4e167df9-80f5-4caa-9a82-ec97908cbd59", savedOrderses.get(0).getTestUuid());
+        List<Orders> savedOrders = orderRepository.findAll();
+        assertEquals(1, savedOrders.size());
+        assertEquals("ac0819a9-11c1-4310-8f0a-feee71e5086b", savedOrders.get(0).getOrderUuid());
+        assertEquals("Anaemia Panel", savedOrders.get(0).getTestName());
+        assertEquals("4e167df9-80f5-4caa-9a82-ec97908cbd59", savedOrders.get(0).getTestUuid());
     }
 }
