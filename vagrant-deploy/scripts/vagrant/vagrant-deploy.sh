@@ -12,6 +12,6 @@ SCRIPTS_DIR=$CWD/scripts/vagrant
 
 
 # Deploy pacs
-scp_to_vagrant $PROJECT_BASE/pacs-integration-webapp/target/pacs-integration-webapp-$VERSION.war $MODULE_DEPLOYMENT_FOLDER/pacs-integration.war
+scp_to_vagrant $PROJECT_BASE/pacs-integration-webapp/target/pacs-integration.war $MODULE_DEPLOYMENT_FOLDER/pacs-integration.war
 
 run_in_vagrant -f "$SCRIPTS_DIR/deploy_war.sh"
