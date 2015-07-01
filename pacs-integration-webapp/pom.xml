@@ -133,5 +133,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <finalName>${parent.artifactId}</finalName>
+    </build>
 
 </project>
