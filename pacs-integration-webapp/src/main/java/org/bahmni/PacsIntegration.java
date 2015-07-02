@@ -26,7 +26,7 @@ public class PacsIntegration extends SpringBootServletInitializer {
 
     @RequestMapping("/")
     String home() {
-        return "It worked!!!";
+        return "PACS Integration module is up and running.";
     }
 
     public static void main(String[] args) throws Exception {
