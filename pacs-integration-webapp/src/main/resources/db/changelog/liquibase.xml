@@ -134,4 +134,11 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="PACS-201507020914" author="Hemanth">
+        <comment>Adding schedulers for openmrs encounter</comment>
+        <sql>
+            insert into quartz_cron_scheduler (name, cron_statement, start_delay, enabled) values ('openMRSEncounterFeedJob', '0/15 * * * * ?', 0, true);
+            insert into quartz_cron_scheduler (name, cron_statement, start_delay, enabled) values ('openMRSEncounterFailedFeedJob', '0/15 * * * * ?', 0, true);
+        </sql>
+    </changeSet>
 </databaseChangeLog>
