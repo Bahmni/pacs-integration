@@ -10,6 +10,30 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>../scripts</directory>
+                            <includes>
+                                <include>datasetup/*.*</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                    <archiveClasses>false</archiveClasses>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix />
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
         <finalName>${parent.artifactId}</finalName>
     </build>
 
