@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "orders")
-public class Orders extends BaseModel {
+public class Order extends BaseModel {
 
     @Id
     @Column(name = "id", unique = true)
@@ -46,7 +46,7 @@ public class Orders extends BaseModel {
     @Column(name = "date_modified")
     private Date dateModified;
 
-    public Orders(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result) {
+    public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result) {
         this.id = id;
         this.orderType = orderType;
         this.orderUuid = orderUuid;
@@ -55,7 +55,7 @@ public class Orders extends BaseModel {
         this.result = result;
     }
 
-    public Orders() {
+    public Order() {
     }
 
     public Integer getId() {

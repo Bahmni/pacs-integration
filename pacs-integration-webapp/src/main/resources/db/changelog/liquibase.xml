@@ -141,4 +141,8 @@
             insert into quartz_cron_scheduler (name, cron_statement, start_delay, enabled) values ('openMRSEncounterFailedFeedJob', '0/15 * * * * ?', 0, true);
         </sql>
     </changeSet>
+
+    <changeSet id="PACS-201507061238" author="Sudhakar, Abishek">
+        <renameTable oldTableName="orders" newTableName="order"/>
+    </changeSet>
 </databaseChangeLog>

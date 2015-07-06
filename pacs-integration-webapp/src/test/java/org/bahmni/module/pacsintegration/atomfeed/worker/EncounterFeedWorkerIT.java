@@ -2,7 +2,7 @@ package org.bahmni.module.pacsintegration.atomfeed.worker;
 
 import org.bahmni.module.pacsintegration.atomfeed.BaseIntegrationTest;
 import org.bahmni.module.pacsintegration.atomfeed.OpenMRSMapperBaseTest;
-import org.bahmni.module.pacsintegration.model.Orders;
+import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.webclients.HttpClient;
 import org.ict4h.atomfeed.client.domain.Event;
@@ -50,7 +50,7 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
         encounterFeedWorker.setUrlPrefix("Prefix");
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
 
-        List<Orders> savedOrders = orderRepository.findAll();
+        List<Order> savedOrders = orderRepository.findAll();
         assertEquals(1, savedOrders.size());
         assertEquals("ac0819a9-11c1-4310-8f0a-feee71e5086b", savedOrders.get(0).getOrderUuid());
         assertEquals("Anaemia Panel", savedOrders.get(0).getTestName());

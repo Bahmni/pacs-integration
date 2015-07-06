@@ -9,7 +9,7 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConc
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConceptName;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
-import org.bahmni.module.pacsintegration.model.Orders;
+import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderType;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.junit.Before;
@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class OpenMRSEncounterToOrdersMapperTest {
+public class OpenMRSEncounterToOrderMapperTest {
     @Mock
     private OrderRepository orderRepository;
 
@@ -47,7 +47,7 @@ public class OpenMRSEncounterToOrdersMapperTest {
 
         when(orderRepository.findByOrderUuid("radiology order uuid")).thenReturn(null);
 
-        Collection<Orders> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
+        Collection<Order> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
 
         assertEquals(1, orderses.size());
         assertEquals("radiology order uuid", orderses.iterator().next().getOrderUuid());
@@ -64,10 +64,10 @@ public class OpenMRSEncounterToOrdersMapperTest {
         ArrayList<OrderType> acceptableOrderTypes = new ArrayList<OrderType>();
         acceptableOrderTypes.add(new OrderTypeBuilder().withName("Radiology Order").build());
 
-        when(orderRepository.findByOrderUuid("radiology order uuid1")).thenReturn(new Orders());
+        when(orderRepository.findByOrderUuid("radiology order uuid1")).thenReturn(new Order());
         when(orderRepository.findByOrderUuid("radiology order uuid2")).thenReturn(null);
 
-        Collection<Orders> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
+        Collection<Order> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
 
         assertEquals(1, orderses.size());
         assertEquals("radiology order uuid2", orderses.iterator().next().getOrderUuid());
@@ -88,7 +88,7 @@ public class OpenMRSEncounterToOrdersMapperTest {
         when(orderRepository.findByOrderUuid("radiology order uuid1")).thenReturn(null);
         when(orderRepository.findByOrderUuid("radiology order uuid2")).thenReturn(null);
 
-        Collection<Orders> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
+        Collection<Order> orderses = openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository);
 
         assertEquals(1, orderses.size());
         assertEquals("radiology order uuid1", orderses.iterator().next().getOrderUuid());

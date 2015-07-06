@@ -2,7 +2,7 @@ package org.bahmni.module.pacsintegration.atomfeed.services;
 
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
-import org.bahmni.module.pacsintegration.model.Orders;
+import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderType;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
@@ -43,7 +43,7 @@ public class OpenMRSEncounterServiceTest {
     @Test
     public void shouldMapOpenMRSEncounterIntoOrdersAndSave() throws Exception {
         OpenMRSEncounter openMRSEncounter = new OpenMRSEncounter();
-        ArrayList<Orders> listOfOrderses = new ArrayList<Orders>();
+        ArrayList<Order> listOfOrderses = new ArrayList<Order>();
         ArrayList<OrderType> acceptableOrderTypes = new ArrayList<OrderType>();
         when(openMRSEncounterToOrderMapper.map(openMRSEncounter, acceptableOrderTypes, orderRepository)).thenReturn(listOfOrderses);
 

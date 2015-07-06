@@ -3,7 +3,7 @@ package org.bahmni.module.pacsintegration.atomfeed.mappers;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.model.OrderType;
-import org.bahmni.module.pacsintegration.model.Orders;
+import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +14,14 @@ import java.util.List;
 
 @Component
 public class OpenMRSEncounterToOrderMapper {
-    public Collection<Orders> map(OpenMRSEncounter openMRSEncounter, List<OrderType> acceptableOrderTypes, OrderRepository orderRepository) {
-        Collection<Orders> orders = new ArrayList<Orders>();
+    public Collection<Order> map(OpenMRSEncounter openMRSEncounter, List<OrderType> acceptableOrderTypes, OrderRepository orderRepository) {
+        Collection<Order> orders = new ArrayList<Order>();
         String providerName = getProviderName(openMRSEncounter);
         for (OpenMRSOrder openMRSOrder : openMRSEncounter.getTestOrders()) {
             OrderType orderType = findOrderType(acceptableOrderTypes, openMRSOrder.getOrderType());
-            Orders existingOrders = orderRepository.findByOrderUuid(openMRSOrder.getUuid());
-            if (orderType != null && existingOrders == null && !openMRSOrder.isVoided()) {
-                Orders order = new Orders();
+            Order existingOrder = orderRepository.findByOrderUuid(openMRSOrder.getUuid());
+            if (orderType != null && existingOrder == null && !openMRSOrder.isVoided()) {
+                Order order = new Order();
                 order.setOrderUuid(openMRSOrder.getUuid());
                 order.setTestName(openMRSOrder.getConcept().getName().getName());
                 order.setTestUuid(openMRSOrder.getConcept().getUuid());
