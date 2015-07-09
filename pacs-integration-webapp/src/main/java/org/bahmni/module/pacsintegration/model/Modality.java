@@ -91,4 +91,16 @@ public class Modality extends BaseModel{
     public void setTimeout(Integer timeout) {
         this.timeout = timeout;
     }
+
+    @Override
+    public String toString() {
+        return "Modality{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", ip='" + ip + '\'' +
+                ", port=" + port +
+                ", timeout=" + timeout +
+                '}';
+    }
 }

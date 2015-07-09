@@ -2,11 +2,15 @@ package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSConcept {
     private String uuid;
     private OpenMRSConceptName name;
     private boolean set;
+    private List<OpenMRSConceptMapping> mappings;
+
 
     public OpenMRSConcept() {
     }
@@ -21,6 +25,15 @@ public class OpenMRSConcept {
     public void setSet(boolean set) {
         this.set = set;
     }
+
+    public List<OpenMRSConceptMapping> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(List<OpenMRSConceptMapping> mappings) {
+        this.mappings = mappings;
+    }
+
 
     public String getUuid() {
         return uuid;

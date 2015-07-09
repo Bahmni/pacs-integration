@@ -7,5 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface OrderTypeRepository extends JpaRepository<OrderType, Integer> {
+
     OrderType getByName(String name);
+
 }

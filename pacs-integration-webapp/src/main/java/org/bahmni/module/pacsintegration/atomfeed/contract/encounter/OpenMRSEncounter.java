@@ -1,5 +1,6 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
+import org.bahmni.module.pacsintegration.model.OrderType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.ArrayList;
@@ -35,6 +36,17 @@ public class OpenMRSEncounter {
         return testOrders;
     }
 
+    public List<OpenMRSOrder> getNonVoidedAcceptableTestOrders(List<OrderType> acceptableOrderTypes) {
+        List<OpenMRSOrder> acceptableNewOrders = new ArrayList<OpenMRSOrder>();
+        for(OpenMRSOrder openMRSOrder : testOrders) {
+            OrderType acceptableOrderType = findOrderType(acceptableOrderTypes, openMRSOrder.getOrderType());
+            if (acceptableOrderType != null && !openMRSOrder.isVoided()) {
+                acceptableNewOrders.add(openMRSOrder);
+            }
+        }
+        return acceptableNewOrders;
+    }
+
     public void setTestOrders(List<OpenMRSOrder> orders) {
         this.testOrders = orders;
     }
@@ -58,4 +70,14 @@ public class OpenMRSEncounter {
     public void addTestOrder(OpenMRSOrder order) {
         testOrders.add(order);
     }
+
+    private OrderType findOrderType(List<OrderType> acceptableOrderTypes, String orderType) {
+        for (OrderType acceptableOrderType : acceptableOrderTypes) {
+            if (acceptableOrderType.getName().equals(orderType)) {
+                return acceptableOrderType;
+            }
+        }
+        return null;
+    }
+
 }

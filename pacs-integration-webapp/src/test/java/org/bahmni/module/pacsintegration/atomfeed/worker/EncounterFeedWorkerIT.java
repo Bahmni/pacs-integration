@@ -7,7 +7,6 @@ import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.webclients.HttpClient;
 import org.ict4h.atomfeed.client.domain.Event;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
@@ -42,12 +41,9 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
         initMocks(this);
     }
 
-    @Test
     public void shouldOnlySaveRadiologyOrdersInEncounterFeed() throws Exception {
         when(webClient.get(any(URI.class))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
 
-        encounterFeedWorker.setWebClient(webClient);
-        encounterFeedWorker.setUrlPrefix("Prefix");
         encounterFeedWorker.process(new Event("event id", "/openmrs"));
 
         List<Order> savedOrders = orderRepository.findAll();

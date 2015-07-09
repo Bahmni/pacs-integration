@@ -16,6 +16,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1.1</version>
                 <configuration>
+                    <attachClasses>true</attachClasses>
                     <webResources>
                         <resource>
                             <directory>../scripts</directory>
@@ -41,6 +42,7 @@
 
     <properties>
         <atomfeed.version>1.6</atomfeed.version>
+        <hapi-base.version>2.2</hapi-base.version>
     </properties>
 
     <dependencies>
@@ -157,6 +159,28 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>4.1.5.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi</groupId>
+            <artifactId>hapi-base</artifactId>
+            <version>${hapi-base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi</groupId>
+            <artifactId>hapi-structures-v25</artifactId>
+            <version>${hapi-base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>1.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <version>1.5.4</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

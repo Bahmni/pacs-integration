@@ -33,4 +33,11 @@ public class OpenMRSOrderBuilder {
     public OpenMRSOrder build() {
         return openMRSOrder;
     }
+
+    public OpenMRSOrderBuilder withOrderNumber(String orderNumber) {
+        openMRSOrder.setOrderNumber(orderNumber);
+        return this;
+    }
+
+
 }

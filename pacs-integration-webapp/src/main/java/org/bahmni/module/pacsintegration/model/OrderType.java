@@ -16,6 +16,7 @@ public class OrderType extends BaseModel{
     private String name;
 
     @ManyToOne
+    @JoinColumn(name="modality_id")
     private Modality modality;
 
     public OrderType(int id, String name, Modality modality) {

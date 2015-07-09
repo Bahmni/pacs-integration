@@ -145,4 +145,8 @@
     <changeSet id="PACS-201507061238" author="Sudhakar, Abishek">
         <renameTable oldTableName="orders" newTableName="order"/>
     </changeSet>
+
+    <changeSet id="PACS-201507091128" author="Sudhakar, Vikash">
+        <renameTable oldTableName="order" newTableName="test_order"/>
+    </changeSet>
 </databaseChangeLog>

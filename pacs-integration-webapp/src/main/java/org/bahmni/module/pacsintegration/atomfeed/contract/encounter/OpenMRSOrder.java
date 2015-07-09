@@ -1,5 +1,6 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
+import org.bahmni.module.pacsintegration.atomfeed.client.Constants;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -8,6 +9,7 @@ public class OpenMRSOrder {
     private String orderType;
     private Boolean voided;
     private OpenMRSConcept concept;
+    private String orderNumber;
 
     public OpenMRSOrder() {
     }
@@ -57,7 +59,23 @@ public class OpenMRSOrder {
         return concept.getName().getName();
     }
 
-    public String getUUID() {
+    public String getConceptUUID() {
         return concept.getUuid();
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public OpenMRSConceptMapping getPacsConceptSource() {
+        for (OpenMRSConceptMapping mapping : concept.getMappings()){
+            if(mapping.getSource().equals(Constants.PACS_CONCEPT_SOURCE_NAME))
+                return mapping;
+        }
+        return null;
     }
 }

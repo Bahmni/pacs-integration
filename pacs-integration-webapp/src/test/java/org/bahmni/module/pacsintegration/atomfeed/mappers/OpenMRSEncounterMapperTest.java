@@ -42,7 +42,7 @@ public class OpenMRSEncounterMapperTest extends OpenMRSMapperBaseTest {
 
         OpenMRSConcept concept = openMRSOrder.getConcept();
         Assert.assertEquals(expectedTestOrPanelUUID, concept.getUuid());
-        Assert.assertEquals(expectedTestOrPanelUUID, openMRSOrder.getUUID());
+        Assert.assertEquals(expectedTestOrPanelUUID, openMRSOrder.getConceptUUID());
 
         OpenMRSConceptName conceptName = concept.getName();
         Assert.assertEquals(testOrPanelName, conceptName.getName());

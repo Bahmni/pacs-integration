@@ -23,6 +23,7 @@
         <dependency>
             <groupId>org.bahmni</groupId>
             <artifactId>pacs-integration-webapp</artifactId>
+            <classifier>classes</classifier>
             <version>0.74-SNAPSHOT</version>
         </dependency>
     </dependencies>

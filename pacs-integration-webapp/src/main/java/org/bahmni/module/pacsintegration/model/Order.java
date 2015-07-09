@@ -1,17 +1,11 @@
 package org.bahmni.module.pacsintegration.model;
 
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "test_order")
 public class Order extends BaseModel {
 
     @Id
@@ -20,6 +14,7 @@ public class Order extends BaseModel {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(name="order_type_id", nullable=false)
     private OrderType orderType;
 
     @Column(name = "order_uuid", unique = true, nullable = false)

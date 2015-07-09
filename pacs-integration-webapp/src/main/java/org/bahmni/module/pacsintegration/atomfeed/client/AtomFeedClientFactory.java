@@ -12,10 +12,8 @@ import org.ict4h.atomfeed.client.service.FeedClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 @Component
 public class AtomFeedClientFactory {
@@ -26,13 +24,8 @@ public class AtomFeedClientFactory {
     public FeedClient get(String feedName, EncounterFeedWorker encounterFeedWorker) {
         HttpClient authenticatedWebClient = WebClientFactory.getClient();
         org.bahmni.webclients.ConnectionDetails connectionDetails = ConnectionDetails.get();
-
         String authUri = connectionDetails.getAuthUrl();
-        String urlString = getURLPrefix(authUri);
-
         ClientCookies cookies = getCookies(authenticatedWebClient, authUri);
-        encounterFeedWorker.setWebClient(authenticatedWebClient);
-        encounterFeedWorker.setUrlPrefix(urlString);
 
         return getFeedClient(AtomFeedProperties.getInstance(),
                 feedName, encounterFeedWorker, cookies);
@@ -65,16 +58,6 @@ public class AtomFeedClientFactory {
         feedProperties.setFailedEventMaxRetry(Integer.parseInt(atomFeedProperties.getFailedEventMaxRetry()));
         feedProperties.setControlsEventProcessing(true);
         return feedProperties;
-    }
-
-    private String getURLPrefix(String authenticationURI) {
-        URL openMRSAuthURL;
-        try {
-            openMRSAuthURL = new URL(authenticationURI);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Is not a valid URI - " + authenticationURI);
-        }
-        return String.format("%s://%s", openMRSAuthURL.getProtocol(), openMRSAuthURL.getAuthority());
     }
 
     private ClientCookies getCookies(HttpClient authenticatedWebClient, String urlString) {
