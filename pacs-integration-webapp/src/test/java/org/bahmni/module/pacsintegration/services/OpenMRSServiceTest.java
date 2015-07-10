@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import junit.framework.Assert;
 import org.bahmni.module.pacsintegration.atomfeed.OpenMRSMapperBaseTest;

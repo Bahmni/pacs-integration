@@ -36,11 +36,11 @@ public class OpenMRSEncounter {
         return testOrders;
     }
 
-    public List<OpenMRSOrder> getNonVoidedAcceptableTestOrders(List<OrderType> acceptableOrderTypes) {
+    public List<OpenMRSOrder> getAcceptableTestOrders(List<OrderType> acceptableOrderTypes) {
         List<OpenMRSOrder> acceptableNewOrders = new ArrayList<OpenMRSOrder>();
         for(OpenMRSOrder openMRSOrder : testOrders) {
             OrderType acceptableOrderType = findOrderType(acceptableOrderTypes, openMRSOrder.getOrderType());
-            if (acceptableOrderType != null && !openMRSOrder.isVoided()) {
+            if (acceptableOrderType != null) {
                 acceptableNewOrders.add(openMRSOrder);
             }
         }

@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.exception;
+package org.bahmni.module.pacsintegration.exception;
 
 public class HL7MessageException extends RuntimeException {
 

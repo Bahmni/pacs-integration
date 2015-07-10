@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.exception;
+package org.bahmni.module.pacsintegration.exception;
 
 import org.bahmni.module.pacsintegration.model.Modality;
 

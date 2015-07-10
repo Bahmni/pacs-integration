@@ -1,11 +1,11 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.AcknowledgmentCode;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.v25.message.ACK;
-import org.bahmni.module.pacsintegration.atomfeed.exception.ModalityException;
+import org.bahmni.module.pacsintegration.exception.ModalityException;
 import org.bahmni.module.pacsintegration.model.Modality;
 import org.bahmni.module.pacsintegration.model.OrderType;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;

@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
@@ -43,7 +43,7 @@ public class PacsIntegrationService {
         OpenMRSPatient patient = openMRSService.getPatient(openMRSEncounter.getPatientUuid());
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
-        List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getNonVoidedAcceptableTestOrders(acceptableOrderTypes);
+        List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
                 AbstractMessage message = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());

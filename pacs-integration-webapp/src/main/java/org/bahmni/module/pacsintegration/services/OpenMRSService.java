@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import org.bahmni.module.pacsintegration.atomfeed.client.ConnectionDetails;
 import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;

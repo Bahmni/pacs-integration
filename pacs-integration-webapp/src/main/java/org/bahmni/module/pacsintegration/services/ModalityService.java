@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.AcknowledgmentCode;
 import ca.uhn.hl7v2.DefaultHapiContext;
@@ -11,7 +11,7 @@ import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.model.v25.message.ACK;
 import ca.uhn.hl7v2.parser.PipeParser;
-import org.bahmni.module.pacsintegration.atomfeed.exception.ModalityException;
+import org.bahmni.module.pacsintegration.exception.ModalityException;
 import org.bahmni.module.pacsintegration.model.Modality;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

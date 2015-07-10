@@ -2,8 +2,8 @@ package org.bahmni.module.pacsintegration.atomfeed.worker;
 
 import org.bahmni.module.pacsintegration.atomfeed.OpenMRSMapperBaseTest;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
-import org.bahmni.module.pacsintegration.atomfeed.services.OpenMRSService;
-import org.bahmni.module.pacsintegration.atomfeed.services.PacsIntegrationService;
+import org.bahmni.module.pacsintegration.services.OpenMRSService;
+import org.bahmni.module.pacsintegration.services.PacsIntegrationService;
 import org.ict4h.atomfeed.client.domain.Event;
 import org.junit.Before;
 import org.junit.Test;

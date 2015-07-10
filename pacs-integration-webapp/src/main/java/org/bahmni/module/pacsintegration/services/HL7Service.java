@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed.services;
+package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.DataTypeException;
@@ -9,7 +9,7 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConc
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSProvider;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
-import org.bahmni.module.pacsintegration.atomfeed.exception.HL7MessageException;
+import org.bahmni.module.pacsintegration.exception.HL7MessageException;
 import org.springframework.stereotype.Component;
 
 import java.text.DateFormat;
