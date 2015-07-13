@@ -48,7 +48,7 @@ public class HL7Service {
         // handle ORC component
         ORC orc = message.getORDER().getORC();
         orc.getPlacerOrderNumber().getEntityIdentifier().setValue(order.getUuid());
-        orc.getFillerOrderNumber().getEntityIdentifier().setValue(order.getUuid());
+//        orc.getFillerOrderNumber().getEntityIdentifier().setValue(order.getUuid());
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
         orc.getOrderControl().setValue(NEW_ORDER);
 

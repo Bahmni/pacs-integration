@@ -1,109 +1,54 @@
 {
-    "encounterUuid": "7820b07d-50e9-4fed-b991-c38692b3d4ec",
-    "patientUuid": "105059a8-5226-4b1f-b512-0d3ae685287d",
-    "testOrders": [
-        {
-            "uuid": "ac0819a9-11c1-4310-8f0a-feee71e5086b",
-            "orderTypeUuid": "519ab361-9bc6-11e3-927e-8840ab96f0f1",
-            "dateCreated": "2015-05-05T05:36:57.000+0000",
-            "orderType":"Radiology Order",
-            "concept": {
-                "uuid": "4e167df9-80f5-4caa-9a82-ec97908cbd59",
-                "conceptClass": "LabSet",
-                "units": null,
-                "shortName": null,
-                "dataType": "N/A",
-                "name": "Anaemia Panel",
-                "set": true
-              }
-        },
-        {
-            "uuid": "ce3eeba1-2176-48d0-9ff4-53b731121274",
-            "orderType": "Lab Order",
-            "concept": {
-                "uuid": "8c47a469-1b8f-47d9-9363-b97b45e3e740",
-                "display": "Routine Blood",
-                "set": true,
-                "resourceVersion": "1.9",
-                "name":"Routine Blood"
-            }
-        },
-        {
-            "uuid": "3508dbea-6844-4174-8787-40ab809f2522",
-            "orderType": "Lab Order",
-            "concept": {
-                "uuid": "15a9d9e5-edcb-4e64-85ad-551693aeed5c",
-                "display": "ESR",
-                "name": {
-                    "display": "ESR",
-                    "uuid": "bdb86f9d-e858-4a4c-a2cd-a5f16d20bce2",
-                    "name": "ESR",
-                    "locale": "en",
-                    "localePreferred": true,
-                    "conceptNameType": "FULLY_SPECIFIED",
-                    "links": [
-                        {
-                            "uri": "http://192.168.33.10/openmrs/ws/rest/v1/concept/15a9d9e5-edcb-4e64-85ad-551693aeed5c/name/bdb86f9d-e858-4a4c-a2cd-a5f16d20bce2",
-                            "rel": "self"
-                        },
-                        {
-                            "uri": "http://192.168.33.10/openmrs/ws/rest/v1/concept/15a9d9e5-edcb-4e64-85ad-551693aeed5c/name/bdb86f9d-e858-4a4c-a2cd-a5f16d20bce2?v=full",
-                            "rel": "full"
-                        }
-                    ],
-                    "resourceVersion": "1.9"
-                },
-                "datatype": {
-                    "uuid": "8d4a4488-c2cc-11de-8d13-0010c6dffd0f",
-                    "display": "Numeric",
-                    "links": [
-                        {
-                            "uri": "http://192.168.33.10/openmrs/ws/rest/v1/conceptdatatype/8d4a4488-c2cc-11de-8d13-0010c6dffd0f",
-                            "rel": "self"
-                        }
-                    ]
-                },
-                "conceptClass": {
-                    "uuid": "8d4907b2-c2cc-11de-8d13-0010c6dffd0f",
-                    "display": "Test",
-                    "links": [
-                        {
-                            "uri": "http://192.168.33.10/openmrs/ws/rest/v1/conceptclass/8d4907b2-c2cc-11de-8d13-0010c6dffd0f",
-                            "rel": "self"
-                        }
-                    ]
-                },
-                "set": false,
-                "version": null,
-                "retired": false,
-                "names": [
-                    {
-                        "uuid": "bdb86f9d-e858-4a4c-a2cd-a5f16d20bce2",
-                        "display": "ESR",
-                        "links": [
-                            {
-                                "uri": "http://192.168.33.10/openmrs/ws/rest/v1/concept/15a9d9e5-edcb-4e64-85ad-551693aeed5c/name/bdb86f9d-e858-4a4c-a2cd-a5f16d20bce2",
-                                "rel": "self"
-                            }
-                        ]
-                    }
-                ],
-                "descriptions": [],
-                "mappings": [],
-                "answers": [],
-                "setMembers": [],
-                "links": [
-                    {
-                        "uri": "http://192.168.33.10/openmrs/ws/rest/v1/concept/15a9d9e5-edcb-4e64-85ad-551693aeed5c",
-                        "rel": "self"
-                    },
-                    {
-                        "uri": "http://192.168.33.10/openmrs/ws/rest/v1/concept/15a9d9e5-edcb-4e64-85ad-551693aeed5c?v=full",
-                        "rel": "full"
-                    }
-                ],
-                "resourceVersion": "1.9"
-            }
-        }
-    ]
+  "encounterUuid": "7820b07d-50e9-4fed-b991-c38692b3d4ec",
+  "patientUuid": "105059a8-5226-4b1f-b512-0d3ae685287d",
+  "testOrders": [
+    {
+      "action": "NEW",
+      "uuid": "08d2dfa2-2274-44a1-a29e-30ea02df2798",
+      "concept": {
+        "shortName": "head skull ap",
+        "uuid": "c42e71d7-3f10-11e4-adec-0800271c1b75",
+        "units": null,
+        "dataType": "Text",
+        "conceptClass": "Radiology",
+        "name": "HEAD Skull AP",
+        "set": true,
+        "mappings": [
+          {
+            "source": "PACS Procedure Code",
+            "name": "HEAD Skull AP",
+            "code": "556"
+          }
+        ]
+      },
+      "orderType": "Radiology Order",
+      "orderNumber": "ORD-284",
+      "voided": false,
+      "autoExpireDate": null,
+      "commentToFulfiller": null,
+      "careSetting": null,
+      "dateCreated": "2015-07-09T12:50:59.000+0530",
+      "voidReason": null,
+      "instructions": null,
+      "dateChanged": null,
+      "previousOrderUuid": null
+    },
+    {
+      "uuid": "ce3eeba1-2176-48d0-9ff4-53b731121274",
+      "orderType": "Lab Order",
+      "concept": {
+        "uuid": "8c47a469-1b8f-47d9-9363-b97b45e3e740",
+        "display": "Routine Blood",
+        "set": true,
+        "resourceVersion": "1.9",
+        "name": "Routine Blood"
+      }
+    }
+  ],
+  "providers": [
+    {
+      "uuid": "c1c26908-3f10-11e4-adec-0800271c1b75",
+      "name": "Super Man"
+    }
+  ]
 }
