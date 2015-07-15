@@ -4,7 +4,7 @@ import ca.uhn.hl7v2.AcknowledgmentCode;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
-import ca.uhn.hl7v2.model.v25.message.ACK;
+import ca.uhn.hl7v2.model.v25.message.*;
 import org.bahmni.module.pacsintegration.exception.ModalityException;
 import org.bahmni.module.pacsintegration.model.Modality;
 import org.bahmni.module.pacsintegration.model.OrderType;
@@ -35,7 +35,7 @@ public class ModalityServiceTest {
     @Spy
     @InjectMocks
     public ModalityService modalityService = new ModalityService();
-    private ACK acknowledgement;
+    private ORR_O02 orderResponse;
     private String orderTypeName;
     private OrderType orderType;
 
@@ -44,14 +44,15 @@ public class ModalityServiceTest {
         orderTypeName = "Radiology";
         orderType = new OrderType();
         orderType.setModality(new Modality());
-        acknowledgement = new ACK();
+        orderResponse = new ORR_O02();
     }
 
     @Test
     public void shouldSendMessageSuccessfullyToModality() throws LLPException, IOException, HL7Exception {
-        acknowledgement.getMSA().getAcknowledgmentCode().setValue(AcknowledgmentCode.AA.toString());
+        orderResponse.getMSA().getAcknowledgmentCode().setValue(AcknowledgmentCode.AA.toString());
         when(orderTypeRepository.getByName(orderTypeName)).thenReturn(orderType);
-        doReturn(acknowledgement).when(modalityService).post(orderType.getModality(), requestMessage);
+        doReturn(orderResponse).when(modalityService).post(orderType.getModality(), requestMessage);
+        doReturn("orderResponseString").when(modalityService).parseResponse(orderResponse);
 
         try {
             modalityService.sendMessage(requestMessage, orderTypeName);
@@ -62,10 +63,10 @@ public class ModalityServiceTest {
 
     @Test(expected = ModalityException.class)
     public void shouldThrowExceptionIfTheModalityRejectsTheMessage() throws HL7Exception, LLPException, IOException {
-        acknowledgement.getMSA().getAcknowledgmentCode().setValue(AcknowledgmentCode.AR.toString());
+        orderResponse.getMSA().getAcknowledgmentCode().setValue(AcknowledgmentCode.AR.toString());
         when(orderTypeRepository.getByName(orderTypeName)).thenReturn(orderType);
-        doReturn(acknowledgement).when(modalityService).post(orderType.getModality(), requestMessage);
-        doReturn("Failure").when(modalityService).parseResponse(acknowledgement);
+        doReturn(orderResponse).when(modalityService).post(orderType.getModality(), requestMessage);
+        doReturn("Failure").when(modalityService).parseResponse(orderResponse);
 
         modalityService.sendMessage(requestMessage, orderTypeName);
     }

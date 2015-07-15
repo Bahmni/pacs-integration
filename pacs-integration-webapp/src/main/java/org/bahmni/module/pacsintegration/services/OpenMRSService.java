@@ -33,7 +33,7 @@ public class OpenMRSService {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
 
-        String patientJSON = webClient.get(URI.create(urlPrefix + patientRestUrl + patientUuid));
+        String patientJSON = webClient.get(URI.create(urlPrefix + patientRestUrl + patientUuid+"?v=full"));
         return new OpenMRSPatientMapper().map(patientJSON);
     }
 

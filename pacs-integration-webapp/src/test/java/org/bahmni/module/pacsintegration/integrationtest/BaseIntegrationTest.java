@@ -1,4 +1,4 @@
-package org.bahmni.module.pacsintegration.atomfeed;
+package org.bahmni.module.pacsintegration.integrationtest;
 
 import ca.uhn.hl7v2.DefaultHapiContext;
 import ca.uhn.hl7v2.HL7Exception;
@@ -18,7 +18,6 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -40,12 +39,7 @@ public abstract class BaseIntegrationTest {
             @Override
             public Message processMessage(Message message, Map<String, Object> map) throws ReceivingApplicationException, HL7Exception {
                 ORM_O01 ormMessage = (ORM_O01) message;
-                try {
-                    return ormMessage.generateACK();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
+                return HL7Utils.generateORRwithAccept(ormMessage.getMSH().getMessageControlID().getValue(), "BahmniEMR");
             }
 
             @Override

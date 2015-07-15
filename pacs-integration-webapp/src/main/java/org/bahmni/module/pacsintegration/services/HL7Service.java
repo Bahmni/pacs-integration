@@ -47,8 +47,8 @@ public class HL7Service {
 
         // handle ORC component
         ORC orc = message.getORDER().getORC();
-        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(order.getUuid());
-//        orc.getFillerOrderNumber().getEntityIdentifier().setValue(order.getUuid());
+        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(order.getOrderNumber());
+        orc.getFillerOrderNumber().getEntityIdentifier().setValue(order.getOrderNumber()); //accession number - should be of length 16 bytes
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
         orc.getOrderControl().setValue(NEW_ORDER);
 

@@ -1,7 +1,6 @@
 package org.bahmni.module.pacsintegration.integrationtest;
 
 import junit.framework.Assert;
-import org.bahmni.module.pacsintegration.atomfeed.BaseIntegrationTest;
 import org.bahmni.module.pacsintegration.atomfeed.OpenMRSMapperBaseTest;
 import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.worker.EncounterFeedWorker;
@@ -49,7 +48,7 @@ public class EncounterFeedWorkerIT extends BaseIntegrationTest {
 
         when(WebClientFactory.getClient()).thenReturn(webClient);
         when(webClient.get(new URI("http://localhost:8080/encounter/1"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
-        when(webClient.get(new URI("http://localhost:8080/openmrs/ws/rest/v1/patient/105059a8-5226-4b1f-b512-0d3ae685287d"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
+        when(webClient.get(new URI("http://localhost:8080/openmrs/ws/rest/v1/patient/105059a8-5226-4b1f-b512-0d3ae685287d?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
     }
 
     @Test
