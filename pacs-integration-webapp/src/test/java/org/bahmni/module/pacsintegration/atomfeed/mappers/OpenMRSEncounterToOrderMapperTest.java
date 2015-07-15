@@ -1,10 +1,7 @@
 package org.bahmni.module.pacsintegration.atomfeed.mappers;
 
 import org.bahmni.module.pacsintegration.atomfeed.builders.*;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConcept;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConceptName;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderType;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
@@ -32,22 +29,34 @@ public class OpenMRSEncounterToOrderMapperTest {
 
     @Test
     public void shouldMapOnlyRadiologyOpenMRSOrdersToOrders() throws Exception {
-        OpenMRSConceptName conceptName = new OpenMRSConceptNameBuilder().withName("Chest View").build();
-        OpenMRSConcept concept = new OpenMRSConceptBuilder().withUuid("concept uuid").withName(conceptName).build();
-        OpenMRSOrder radiologyOrder = new OpenMRSOrderBuilder().withOrderUuid("radiology order uuid").withOrderType("Radiology Order").withOrderNumber("ORD-001").withVoided(false).withConcept(concept).build();
+        String testName = "Chest View";
+        String orderNumber = "ORD-001";
+        String testUuid = "concept uuid";
+        String orderUuid = "radiology order uuid";
+        String providerName = "Aaditya Aaditya";
+        OpenMRSConceptName conceptName = new OpenMRSConceptNameBuilder().withName(testName).build();
+        OpenMRSConcept concept = new OpenMRSConceptBuilder().withUuid(testUuid).withName(conceptName).build();
+        OpenMRSOrder radiologyOrder = new OpenMRSOrderBuilder().withOrderUuid(orderUuid).withOrderType("Radiology Order").withOrderNumber(orderNumber).withVoided(false).withConcept(concept).build();
         OpenMRSOrder labOrder = new OpenMRSOrderBuilder().withOrderUuid("lab order uuid").withOrderType("Lab Order").withVoided(false).withConcept(concept).build();
-        OpenMRSEncounter openMRSEncounter = new OpenMRSEncounterBuilder().withEncounterUuid("encounter uuid").withPatientUuid("patient uuid").withTestOrder(radiologyOrder).withTestOrder(labOrder).build();
+        OpenMRSProvider openMRSProvider = new OpenMRSProvider("provider-uuid", providerName);
+        OpenMRSEncounter openMRSEncounter = new OpenMRSEncounterBuilder().withEncounterUuid("encounter uuid").withPatientUuid("patient uuid")
+                .withTestOrder(radiologyOrder).withTestOrder(labOrder).withProvider(openMRSProvider).build();
 
         ArrayList<OrderType> acceptableOrderTypes = new ArrayList<OrderType>();
         acceptableOrderTypes.add(new OrderTypeBuilder().withName("Radiology Order").build());
 
-        when(orderRepository.findByOrderUuid("radiology order uuid")).thenReturn(null);
+        when(orderRepository.findByOrderUuid(orderUuid)).thenReturn(null);
 
         Order order = openMRSEncounterToOrderMapper.map(radiologyOrder, openMRSEncounter, acceptableOrderTypes);
 
         assertNotNull(order);
-        assertEquals("radiology order uuid", order.getOrderUuid());
+        assertEquals(orderNumber, order.getOrderNumber());
+        assertEquals(orderUuid, order.getOrderUuid());
+        assertEquals(testName, order.getTestName());
+        assertEquals(testUuid, order.getTestUuid());
+        assertEquals(providerName, order.getCreator());
     }
+
 
 
 

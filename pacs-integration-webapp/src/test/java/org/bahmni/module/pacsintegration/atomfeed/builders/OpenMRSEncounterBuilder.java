@@ -1,7 +1,8 @@
 package org.bahmni.module.pacsintegration.atomfeed.builders;
 
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
+
+import java.util.*;
 
 public class OpenMRSEncounterBuilder {
     private OpenMRSEncounter openMRSEncounter;
@@ -25,6 +26,10 @@ public class OpenMRSEncounterBuilder {
         return this;
     }
 
+    public OpenMRSEncounterBuilder withProvider(OpenMRSProvider openMRSProvider){
+        openMRSEncounter.setProviders(Arrays.asList(openMRSProvider));
+        return this;
+    }
     public OpenMRSEncounter build() {
         return openMRSEncounter;
     }

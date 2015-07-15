@@ -149,4 +149,10 @@
     <changeSet id="PACS-201507091128" author="Sudhakar, Vikash">
         <renameTable oldTableName="order" newTableName="test_order"/>
     </changeSet>
+
+    <changeSet id="PACS-201507151233" author="Preethi, Sandeep">
+        <addColumn tableName="test_order" schemaName="public">
+            <column name="order_number" type="varchar(16)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

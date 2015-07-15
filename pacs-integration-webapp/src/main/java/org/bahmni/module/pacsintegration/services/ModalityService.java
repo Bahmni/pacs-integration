@@ -9,7 +9,7 @@ import ca.uhn.hl7v2.app.Initiator;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.Message;
-import ca.uhn.hl7v2.model.v25.message.ACK;
+import ca.uhn.hl7v2.model.v25.message.*;
 import ca.uhn.hl7v2.parser.PipeParser;
 import org.bahmni.module.pacsintegration.exception.ModalityException;
 import org.bahmni.module.pacsintegration.model.Modality;
@@ -28,13 +28,15 @@ public class ModalityService {
     public void sendMessage(AbstractMessage message, String orderType) throws HL7Exception, LLPException, IOException {
         Modality modality = orderTypeRepository.getByName(orderType).getModality();
         Message response = post(modality, message);
-        if (response instanceof ACK) {
-            ACK acknowledgement = (ACK) response;
+        String responseMessage = parseResponse(response);
+        if (response instanceof ORR_O02) {
+            ORR_O02 acknowledgement = (ORR_O02) response;
             String acknowledgmentCode = acknowledgement.getMSA().getAcknowledgmentCode().getValue();
             if (!AcknowledgmentCode.AA.toString().equals(acknowledgmentCode)) {
-                String responseMessage = parseResponse(response);
                 throw new ModalityException(responseMessage, modality);
             }
+        } else {
+            throw new ModalityException(responseMessage, modality);
         }
     }
 

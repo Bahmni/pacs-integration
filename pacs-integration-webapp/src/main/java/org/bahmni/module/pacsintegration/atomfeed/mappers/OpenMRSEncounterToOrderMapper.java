@@ -14,6 +14,7 @@ public class OpenMRSEncounterToOrderMapper {
     public Order map(OpenMRSOrder openMRSOrder, OpenMRSEncounter openMRSEncounter, List<OrderType> orderTypes) {
         String providerName = getProviderName(openMRSEncounter);
         Order order = new Order();
+        order.setOrderNumber(openMRSOrder.getOrderNumber());
         order.setOrderUuid(openMRSOrder.getUuid());
         order.setTestName(openMRSOrder.getConcept().getName().getName());
         order.setTestUuid(openMRSOrder.getConcept().getUuid());

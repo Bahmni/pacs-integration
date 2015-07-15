@@ -41,13 +41,17 @@ public class Order extends BaseModel {
     @Column(name = "date_modified")
     private Date dateModified;
 
-    public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result) {
+    @Column(name = "order_number")
+    private String orderNumber;
+
+    public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result, String orderNumber) {
         this.id = id;
         this.orderType = orderType;
         this.orderUuid = orderUuid;
         this.testName = testName;
         this.testUuid = testUuid;
         this.result = result;
+        this.orderNumber = orderNumber;
     }
 
     public Order() {
@@ -59,6 +63,14 @@ public class Order extends BaseModel {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public OrderType getOrderType() {
