@@ -16,10 +16,13 @@ public class EncounterFeedJob implements FeedJob {
     private static final String OPENMRS_ENCOUNTER_FEED_NAME = "openmrs.encounter.feed.uri";
     private final Logger logger = Logger.getLogger(this.getClass());
     private FeedClient atomFeedClient;
+    private EncounterFeedWorker encounterFeedWorker;
+    private AtomFeedClientFactory atomFeedClientFactory;
 
     @Autowired
     public EncounterFeedJob(EncounterFeedWorker encounterFeedWorker, AtomFeedClientFactory atomFeedClientFactory) {
-        atomFeedClient = atomFeedClientFactory.get(OPENMRS_ENCOUNTER_FEED_NAME, encounterFeedWorker);
+        this.encounterFeedWorker = encounterFeedWorker;
+        this.atomFeedClientFactory = atomFeedClientFactory;
     }
 
     public EncounterFeedJob() {
@@ -27,6 +30,9 @@ public class EncounterFeedJob implements FeedJob {
 
     @Override
     public void process() throws InterruptedException {
+        if(atomFeedClient == null){
+            atomFeedClient = atomFeedClientFactory.get(OPENMRS_ENCOUNTER_FEED_NAME, encounterFeedWorker);
+        }
         logger.info("Processing feed...");
         atomFeedClient.processEvents();
         logger.info("Completed processing feed...");
