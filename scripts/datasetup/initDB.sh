@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SCRIPTS_DIR=`dirname $0`
-DATABASE_NAME="pacsdb"
+DATABASE_NAME="bahmni_pacs"
 # set -e
 
 if [ "$(psql -Upostgres -lqt | cut -d \| -f 1 | grep -w $DATABASE_NAME | wc -l)" -eq 0 ]; then

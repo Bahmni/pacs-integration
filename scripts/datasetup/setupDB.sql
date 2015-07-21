@@ -1,3 +1,3 @@
 CREATE USER pacs WITH PASSWORD 'password';
-CREATE DATABASE pacsdb;
-GRANT ALL PRIVILEGES ON database pacsdb to pacs;
+CREATE DATABASE bahmni_pacs;
+GRANT ALL PRIVILEGES ON database bahmni_pacs to pacs;
