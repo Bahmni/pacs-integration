@@ -30,12 +30,22 @@ public class OpenMRSOrderBuilder {
         return this;
     }
 
+    public OpenMRSOrderBuilder withPreviousOrderUuid(String uuid) {
+        openMRSOrder.setPreviousOrderUuid(uuid);
+        return this;
+    }
+
     public OpenMRSOrder build() {
         return openMRSOrder;
     }
 
     public OpenMRSOrderBuilder withOrderNumber(String orderNumber) {
         openMRSOrder.setOrderNumber(orderNumber);
+        return this;
+    }
+
+    public OpenMRSOrderBuilder withDiscontinued(){
+        openMRSOrder.setAction(openMRSOrder.ACTION_DISCONTINUE);
         return this;
     }
 

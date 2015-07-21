@@ -5,20 +5,28 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSOrder {
+    public static final String ACTION_NEW = "NEW";
+    public static final String ACTION_DISCONTINUE = "DISCONTINUE";
+
+    private String action;
     private String uuid;
     private String orderType;
     private Boolean voided;
     private OpenMRSConcept concept;
     private String orderNumber;
+    private String previousOrderUuid;
 
     public OpenMRSOrder() {
+        this.action = ACTION_NEW;
     }
 
-    public OpenMRSOrder(String uuid, String orderType, OpenMRSConcept concept, Boolean voided) {
+    public OpenMRSOrder(String uuid, String orderType, OpenMRSConcept concept, Boolean voided, String action, String previousOrderUuid) {
         this.uuid = uuid;
         this.orderType = orderType;
         this.voided = voided;
         this.concept = concept;
+        this.action = action != null ? action : ACTION_NEW;
+        this.previousOrderUuid = previousOrderUuid;
     }
 
     public String getUuid() {
@@ -77,5 +85,29 @@ public class OpenMRSOrder {
                 return mapping;
         }
         return null;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getPreviousOrderUuid() {
+        return previousOrderUuid;
+    }
+
+    public void setPreviousOrderUuid(String previousOrderUuid) {
+        this.previousOrderUuid = previousOrderUuid;
+    }
+
+    public boolean isDiscontinued() {
+        return ACTION_DISCONTINUE.equals(this.action);
+    }
+
+    public boolean isNew() {
+        return ACTION_NEW.equals(this.action);
     }
 }

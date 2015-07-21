@@ -2,6 +2,7 @@ package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.DataTypeException;
+import ca.uhn.hl7v2.model.v25.message.ORM_O01;
 import junit.framework.Assert;
 import org.bahmni.module.pacsintegration.atomfeed.builders.OpenMRSConceptBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.builders.OpenMRSOrderBuilder;
@@ -12,13 +13,23 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrde
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSProvider;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.exception.HL7MessageException;
+import org.bahmni.module.pacsintegration.model.Order;
+import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 public class HL7ServiceTest {
 
+    @Mock
+    private OrderRepository orderRepository;
 
     @Test
     public void testGenerateMessageControlIDShouldBeLessThan20Characters() throws Exception {
@@ -53,9 +64,27 @@ public class HL7ServiceTest {
         List<OpenMRSProvider> providers = getProvidersData();
 
         HL7Service hl7Service = new HL7Service();
-        AbstractMessage hl7Message = hl7Service.createMessage(order, patient, providers);
+        ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         Assert.assertNotNull(hl7Message);
+        assertEquals("NW", hl7Message.getORDER().getORC().getOrderControl().getValue());
+    }
+
+    @Test
+    public void testShouldCreateCancelOrderMessageForDiscontinuedOrder() throws Exception {
+        initMocks(this);
+        Order previousOrder = new Order(111, null, "someOrderUuid", "someTestName", "someTestUuid", null, "ORD-111");
+        OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-222").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).withPreviousOrderUuid(previousOrder.getOrderUuid()).withDiscontinued().build();
+        OpenMRSPatient patient = new OpenMRSPatient();
+        List<OpenMRSProvider> providers = getProvidersData();
+        when(orderRepository.findByOrderUuid(order.getPreviousOrderUuid())).thenReturn(previousOrder);
+
+        HL7Service hl7Service = new HL7Service(orderRepository);
+        ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
+
+        Assert.assertNotNull(hl7Message);
+        assertEquals("CA", hl7Message.getORDER().getORC().getOrderControl().getValue());
+        assertEquals("ORD-111", hl7Message.getORDER().getORC().getFillerOrderNumber().getEntityIdentifier().getValue());
     }
 
     private OpenMRSConcept buildConceptWithSource(String conceptSourceName, String pacsCode) {

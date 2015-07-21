@@ -36,6 +36,23 @@
     {
       "uuid": "ce3eeba1-2176-48d0-9ff4-53b731121274",
       "orderType": "Lab Order",
+      "orderNumber": "ORD-285",
+      "action": "NEW",
+      "previousOrderUuid": null,
+      "concept": {
+        "uuid": "8c47a469-1b8f-47d9-9363-b97b45e3e740",
+        "display": "Routine Blood",
+        "set": true,
+        "resourceVersion": "1.9",
+        "name": "Routine Blood"
+      }
+    },
+    {
+      "uuid": "a8d6e5c8-2eda-11e5-bdc0-6b6ddd11ba75",
+      "orderType": "Lab Order",
+      "orderNumber": "ORD-286",
+      "action": "DISCONTINUE",
+      "previousOrderUuid": "ce3eeba1-2176-48d0-9ff4-53b731121274",
       "concept": {
         "uuid": "8c47a469-1b8f-47d9-9363-b97b45e3e740",
         "display": "Routine Blood",

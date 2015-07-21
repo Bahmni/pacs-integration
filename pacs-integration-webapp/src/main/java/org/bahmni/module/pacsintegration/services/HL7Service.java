@@ -10,6 +10,9 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrde
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSProvider;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.exception.HL7MessageException;
+import org.bahmni.module.pacsintegration.model.Order;
+import org.bahmni.module.pacsintegration.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.DateFormat;
@@ -20,30 +23,34 @@ import java.util.List;
 @Component
 public class HL7Service {
 
+    @Autowired
+    private OrderRepository orderRepository;
+
+
+    public HL7Service() {
+    }
+
+    public HL7Service(OrderRepository orderRepository) {
+        this.orderRepository = orderRepository;
+    }
+
     private final String NEW_ORDER = "NW";
+    private final String CANCEL_ORDER = "CA";
     private final String SENDER = "BahmniEMR";
 
     public AbstractMessage createMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws DataTypeException {
+        if(order.isDiscontinued()) {
+            return cancelOrderMessage(order, openMRSPatient, providers);
+        } else {
+            return createOrderMessage(order, openMRSPatient, providers);
+        }
+    }
+
+    private AbstractMessage createOrderMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws DataTypeException {
         ORM_O01 message = new ORM_O01();
-        MSH msh = message.getMSH();
-
-        msh.getMessageControlID().setValue(generateMessageControlID(order.getOrderNumber()));
-        populateMessageHeader(msh, new Date(), "ORM", "O01", SENDER);
-
-        // handle the patient PID component
-        ORM_O01_PATIENT patient = message.getPATIENT();
-        PID pid = patient.getPID();
-        pid.getPatientID().getIDNumber().setValue(openMRSPatient.getPatientId());
-        pid.getPatientIdentifierList(0).getIDNumber().setValue(openMRSPatient.getPatientId());
-        pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
-        pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getGivenName());
-        pid.getDateTimeOfBirth().getTime().setValue(openMRSPatient.getBirthDate());
-        pid.getAdministrativeSex().setValue(openMRSPatient.getGender());
-
-        OpenMRSProvider openMRSProvider = providers.get(0);
-        PV1 pv1 = message.getPATIENT().getPATIENT_VISIT().getPV1();
-        pv1.getReferringDoctor(0).getIDNumber().setValue(openMRSProvider.getUuid());
-        pv1.getReferringDoctor(0).getGivenName().setValue(openMRSProvider.getName());
+        addMessageHeader(order, message);
+        addPatientDetails(message, openMRSPatient);
+        addProviderDetails(providers, message);
 
         // handle ORC component
         ORC orc = message.getORDER().getORC();
@@ -52,6 +59,37 @@ public class HL7Service {
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
         orc.getOrderControl().setValue(NEW_ORDER);
 
+        addOBRComponent(order, message);
+        return message;
+    }
+
+    private AbstractMessage cancelOrderMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws DataTypeException {
+        Order previousOrder = orderRepository.findByOrderUuid(order.getPreviousOrderUuid());
+
+        ORM_O01 message = new ORM_O01();
+        addMessageHeader(order, message);
+        addPatientDetails(message, openMRSPatient);
+        addProviderDetails(providers, message);
+
+        // handle ORC component
+        ORC orc = message.getORDER().getORC();
+        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(previousOrder.getOrderNumber());
+        orc.getFillerOrderNumber().getEntityIdentifier().setValue(previousOrder.getOrderNumber()); //accession number - should be of length 16 bytes
+        orc.getEnteredBy(0).getGivenName().setValue(SENDER);
+        orc.getOrderControl().setValue(CANCEL_ORDER);
+
+        addOBRComponent(order, message);
+        return message;
+    }
+
+    private void addMessageHeader(OpenMRSOrder order, ORM_O01 message) throws DataTypeException {
+        MSH msh = message.getMSH();
+
+        msh.getMessageControlID().setValue(generateMessageControlID(order.getOrderNumber()));
+        populateMessageHeader(msh, new Date(), "ORM", "O01", SENDER);
+    }
+
+    private void addOBRComponent(OpenMRSOrder order, ORM_O01 message) throws DataTypeException {
         // handle OBR component
         OBR obr = message.getORDER().getORDER_DETAIL().getOBR();
 
@@ -61,10 +99,26 @@ public class HL7Service {
         }
         obr.getUniversalServiceIdentifier().getIdentifier().setValue(pacsConceptSource.getCode());
         obr.getUniversalServiceIdentifier().getText().setValue(pacsConceptSource.getName());
-
-        return message;
     }
 
+    private void addProviderDetails(List<OpenMRSProvider> providers, ORM_O01 message) throws DataTypeException {
+        OpenMRSProvider openMRSProvider = providers.get(0);
+        PV1 pv1 = message.getPATIENT().getPATIENT_VISIT().getPV1();
+        pv1.getReferringDoctor(0).getIDNumber().setValue(openMRSProvider.getUuid());
+        pv1.getReferringDoctor(0).getGivenName().setValue(openMRSProvider.getName());
+    }
+
+    private void addPatientDetails(ORM_O01 message, OpenMRSPatient openMRSPatient) throws DataTypeException {
+        // handle the patient PID component
+        ORM_O01_PATIENT patient = message.getPATIENT();
+        PID pid = patient.getPID();
+        pid.getPatientID().getIDNumber().setValue(openMRSPatient.getPatientId());
+        pid.getPatientIdentifierList(0).getIDNumber().setValue(openMRSPatient.getPatientId());
+        pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
+        pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getGivenName());
+        pid.getDateTimeOfBirth().getTime().setValue(openMRSPatient.getBirthDate());
+        pid.getAdministrativeSex().setValue(openMRSPatient.getGender());
+    }
 
     private static DateFormat getHl7DateFormat() {
         return new SimpleDateFormat("yyyyMMddHHmmss");

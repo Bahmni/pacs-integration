@@ -85,8 +85,8 @@ public class PacsIntegrationServiceTest {
     OpenMRSEncounter buildEncounter() {
         OpenMRSEncounter openMRSEncounter = new OpenMRSEncounter();
         openMRSEncounter.setPatientUuid(PATIENT_UUID);
-        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", null, false);
-        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", null, false);
+        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", null, false, null, null);
+        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", null, false, null, null);
         openMRSEncounter.setTestOrders(Arrays.asList(order1, order2));
         return openMRSEncounter;
     }
