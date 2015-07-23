@@ -14,10 +14,10 @@ public class OrderDetails {
     @JoinColumn(name="test_order_id", nullable=false)
     private Order order;
 
-    @Column(name = "hl7_request", nullable = false)
+    @Column(name = "hl7_request", nullable = false, length = 65535)
     private String hl7Request;
 
-    @Column(name = "hl7_response", nullable = false)
+    @Column(name = "hl7_response", nullable = false, length = 65535)
     private String hl7Response;
 
     public OrderDetails() {

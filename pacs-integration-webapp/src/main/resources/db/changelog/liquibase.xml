@@ -165,10 +165,10 @@
             <column name="test_order_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="hl7_request" type="varchar(255)">
+            <column name="hl7_request" type="VARCHAR(65535)">
                 <constraints nullable="false"/>
             </column>
-            <column name="hl7_response" type="varchar(255)">
+            <column name="hl7_response" type="VARCHAR(65535)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
