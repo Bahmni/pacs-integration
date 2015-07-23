@@ -99,20 +99,20 @@ public class HL7Service {
         }
         obr.getUniversalServiceIdentifier().getIdentifier().setValue(pacsConceptSource.getCode());
         obr.getUniversalServiceIdentifier().getText().setValue(pacsConceptSource.getName());
+       // obr.getReasonForStudy(0).getText().setValue(order.getInstructions()); //Notes - should not exceed 256 bits
     }
 
     private void addProviderDetails(List<OpenMRSProvider> providers, ORM_O01 message) throws DataTypeException {
         OpenMRSProvider openMRSProvider = providers.get(0);
-        PV1 pv1 = message.getPATIENT().getPATIENT_VISIT().getPV1();
-        pv1.getReferringDoctor(0).getIDNumber().setValue(openMRSProvider.getUuid());
-        pv1.getReferringDoctor(0).getGivenName().setValue(openMRSProvider.getName());
+        ORC orc = message.getORDER().getORC();
+        orc.getOrderingProvider(0).getGivenName().setValue(openMRSProvider.getName());
+        orc.getOrderingProvider(0).getIDNumber().setValue(openMRSProvider.getUuid());
     }
 
     private void addPatientDetails(ORM_O01 message, OpenMRSPatient openMRSPatient) throws DataTypeException {
         // handle the patient PID component
         ORM_O01_PATIENT patient = message.getPATIENT();
         PID pid = patient.getPID();
-        pid.getPatientID().getIDNumber().setValue(openMRSPatient.getPatientId());
         pid.getPatientIdentifierList(0).getIDNumber().setValue(openMRSPatient.getPatientId());
         pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
         pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getGivenName());
@@ -121,7 +121,7 @@ public class HL7Service {
     }
 
     private static DateFormat getHl7DateFormat() {
-        return new SimpleDateFormat("yyyyMMddHHmmss");
+        return new SimpleDateFormat("yyyyMMddHH");
     }
 
     private MSH populateMessageHeader(MSH msh, Date dateTime, String messageType, String triggerEvent, String sendingFacility) throws DataTypeException {
