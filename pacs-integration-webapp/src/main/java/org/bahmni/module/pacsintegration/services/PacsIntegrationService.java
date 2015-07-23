@@ -8,7 +8,9 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrde
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
+import org.bahmni.module.pacsintegration.model.OrderDetails;
 import org.bahmni.module.pacsintegration.model.OrderType;
+import org.bahmni.module.pacsintegration.repository.OrderDetailsRepository;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class PacsIntegrationService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderDetailsRepository orderDetailsRepository;
+
+    @Autowired
     private ModalityService modalityService;
 
     public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, ParseException, HL7Exception, LLPException {
@@ -46,10 +51,12 @@ public class PacsIntegrationService {
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                AbstractMessage message = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
-                modalityService.sendMessage(message, openMRSOrder.getOrderType());
+                AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
+                String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
                 Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
+
                 orderRepository.save(order);
+                orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
             }
         }
     }

@@ -155,4 +155,25 @@
             <column name="order_number" type="varchar(16)"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="PACS-201507220554" author="JP, Hemanth">
+        <comment>Creating order details table</comment>
+        <createTable tableName="order_details">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="test_order_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hl7_request" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hl7_response" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="order_details" baseColumnNames="test_order_id" constraintName="fk_od_test_order_id"
+                                 referencedTableName="test_order"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>

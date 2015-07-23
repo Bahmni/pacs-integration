@@ -2,12 +2,15 @@ package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
+import ca.uhn.hl7v2.model.v25.message.ADR_A19;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
+import org.bahmni.module.pacsintegration.model.OrderDetails;
 import org.bahmni.module.pacsintegration.model.OrderType;
+import org.bahmni.module.pacsintegration.repository.OrderDetailsRepository;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
 import org.junit.Before;
@@ -36,6 +39,9 @@ public class PacsIntegrationServiceTest {
     OrderRepository orderRepository;
 
     @Mock
+    OrderDetailsRepository orderDetailsRepository;
+
+    @Mock
     OpenMRSEncounterToOrderMapper openMRSEncounterToOrderMapper;
 
     @InjectMocks
@@ -46,6 +52,8 @@ public class PacsIntegrationServiceTest {
 
     @Mock
     private HL7Service hl7Service;
+
+    @Mock ADR_A19 adr_a19;
 
     @Mock
     private ModalityService modalityService;
@@ -64,10 +72,13 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
+        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(adr_a19.encode()).thenReturn("Request message");
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(2)).save(any(Order.class));
+        verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
     }
 
     @Test
@@ -76,10 +87,13 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null).thenReturn(new Order());
+        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(adr_a19.encode()).thenReturn("Request message");
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(1)).save(any(Order.class));
+        verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
     }
 
     OpenMRSEncounter buildEncounter() {
@@ -97,6 +111,5 @@ public class PacsIntegrationServiceTest {
         acceptableOrderTypes.add(new OrderType(2, "type2", null));
         return acceptableOrderTypes;
     }
-
 
 }

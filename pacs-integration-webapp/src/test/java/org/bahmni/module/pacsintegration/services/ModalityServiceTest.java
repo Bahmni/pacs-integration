@@ -20,6 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +56,8 @@ public class ModalityServiceTest {
         doReturn("orderResponseString").when(modalityService).parseResponse(orderResponse);
 
         try {
-            modalityService.sendMessage(requestMessage, orderTypeName);
+            String responseString = modalityService.sendMessage(requestMessage, orderTypeName);
+            assertEquals("orderResponseString", responseString);
         } catch (Exception e) {
             Assert.fail("Should not throw exception");
         }

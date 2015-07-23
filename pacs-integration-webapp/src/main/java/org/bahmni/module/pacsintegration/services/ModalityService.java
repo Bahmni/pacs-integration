@@ -25,7 +25,7 @@ public class ModalityService {
     @Autowired
     private OrderTypeRepository orderTypeRepository;
 
-    public void sendMessage(AbstractMessage message, String orderType) throws HL7Exception, LLPException, IOException {
+    public String sendMessage(AbstractMessage message, String orderType) throws HL7Exception, LLPException, IOException {
         Modality modality = orderTypeRepository.getByName(orderType).getModality();
         Message response = post(modality, message);
         String responseMessage = parseResponse(response);
@@ -38,6 +38,7 @@ public class ModalityService {
         } else {
             throw new ModalityException(responseMessage, modality);
         }
+        return responseMessage;
     }
 
     Message post(Modality modality, Message requestMessage) throws LLPException, IOException, HL7Exception {
