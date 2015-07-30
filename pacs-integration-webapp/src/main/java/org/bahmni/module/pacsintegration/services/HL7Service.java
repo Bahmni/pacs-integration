@@ -54,13 +54,21 @@ public class HL7Service {
 
         // handle ORC component
         ORC orc = message.getORDER().getORC();
-        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(order.getOrderNumber());
-        orc.getFillerOrderNumber().getEntityIdentifier().setValue(order.getOrderNumber()); //accession number - should be of length 16 bytes
+        String orderNumber = order.getOrderNumber();
+        if(isSizeExceedingLimit(orderNumber)) {
+            throw new HL7MessageException("Unable to create HL7 message. Order Number size exceeds limit " + orderNumber);
+        }
+        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(orderNumber);
+        orc.getFillerOrderNumber().getEntityIdentifier().setValue(orderNumber); //accession number - should be of length 16 bytes
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
         orc.getOrderControl().setValue(NEW_ORDER);
 
         addOBRComponent(order, message);
         return message;
+    }
+
+    private boolean isSizeExceedingLimit(String orderNumber) {
+        return orderNumber.getBytes().length > 16;
     }
 
     private AbstractMessage cancelOrderMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws DataTypeException {
@@ -73,8 +81,12 @@ public class HL7Service {
 
         // handle ORC component
         ORC orc = message.getORDER().getORC();
-        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(previousOrder.getOrderNumber());
-        orc.getFillerOrderNumber().getEntityIdentifier().setValue(previousOrder.getOrderNumber()); //accession number - should be of length 16 bytes
+        String orderNumber = previousOrder.getOrderNumber();
+        if(isSizeExceedingLimit(order.getOrderNumber())) {
+            throw new HL7MessageException("Unable to create HL7 message. Order Number size exceeds limit" + orderNumber);
+        }
+        orc.getPlacerOrderNumber().getEntityIdentifier().setValue(orderNumber);
+        orc.getFillerOrderNumber().getEntityIdentifier().setValue(orderNumber); //accession number - should be of length 16 bytes
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
         orc.getOrderControl().setValue(CANCEL_ORDER);
 

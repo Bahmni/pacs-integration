@@ -1,6 +1,5 @@
 package org.bahmni.module.pacsintegration.services;
 
-import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.DataTypeException;
 import ca.uhn.hl7v2.model.v25.message.ORM_O01;
 import junit.framework.Assert;
@@ -17,7 +16,6 @@ import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +84,18 @@ public class HL7ServiceTest {
         assertEquals("CA", hl7Message.getORDER().getORC().getOrderControl().getValue());
         assertEquals("ORD-111", hl7Message.getORDER().getORC().getFillerOrderNumber().getEntityIdentifier().getValue());
     }
+
+    @Test(expected = HL7MessageException.class)
+    public void testShouldThrowExceptionForOrderNumberWithSizeExceedingLimit() throws Exception {
+
+        OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-11189067898900").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
+        OpenMRSPatient patient = new OpenMRSPatient();
+        List<OpenMRSProvider> providers = getProvidersData();
+
+        HL7Service hl7Service = new HL7Service();
+        hl7Service.createMessage(order, patient, providers);
+    }
+
 
     private OpenMRSConcept buildConceptWithSource(String conceptSourceName, String pacsCode) {
         final OpenMRSConceptMapping mapping = new OpenMRSConceptMapping();

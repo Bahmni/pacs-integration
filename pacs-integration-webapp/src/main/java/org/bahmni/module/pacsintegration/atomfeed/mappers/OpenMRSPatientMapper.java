@@ -22,8 +22,8 @@ public class OpenMRSPatientMapper {
         JsonNode jsonNode = objectMapper.readTree(patientJSON);
 
         patient.setPatientId(jsonNode.path("identifiers").get(0).path("identifier").asText());
-        patient.setGivenName(jsonNode.path("person").path("preferredName").path("givenName").asText());
-        patient.setFamilyName(jsonNode.path("person").path("preferredName").path("familyName").asText());
+        patient.setGivenName(jsonNode.path("person").path("preferredName").path("givenName").asText().replaceAll("[\\W&&[^-]]", " "));
+        patient.setFamilyName(jsonNode.path("person").path("preferredName").path("familyName").asText().replaceAll("[\\W&&[^-]]", " "));
         patient.setGender(jsonNode.path("person").path("gender").asText());
         patient.setBirthDate(dateOfBirthFormat.parse(jsonNode.path("person").path("birthdate").asText()));
 
