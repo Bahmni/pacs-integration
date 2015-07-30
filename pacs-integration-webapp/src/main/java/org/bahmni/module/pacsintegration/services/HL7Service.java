@@ -111,7 +111,7 @@ public class HL7Service {
         }
         obr.getUniversalServiceIdentifier().getIdentifier().setValue(pacsConceptSource.getCode());
         obr.getUniversalServiceIdentifier().getText().setValue(pacsConceptSource.getName());
-       // obr.getReasonForStudy(0).getText().setValue(order.getInstructions()); //Notes - should not exceed 256 bits
+        obr.getReasonForStudy(0).getText().setValue(order.getCommentToFulfiller());
     }
 
     private void addProviderDetails(List<OpenMRSProvider> providers, ORM_O01 message) throws DataTypeException {

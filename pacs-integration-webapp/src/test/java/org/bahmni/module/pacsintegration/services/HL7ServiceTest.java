@@ -71,7 +71,7 @@ public class HL7ServiceTest {
     @Test
     public void testShouldCreateCancelOrderMessageForDiscontinuedOrder() throws Exception {
         initMocks(this);
-        Order previousOrder = new Order(111, null, "someOrderUuid", "someTestName", "someTestUuid", null, "ORD-111");
+        Order previousOrder = new Order(111, null, "someOrderUuid", "someTestName", "someTestUuid", null, "ORD-111", "Comment");
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-222").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).withPreviousOrderUuid(previousOrder.getOrderUuid()).withDiscontinued().build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();

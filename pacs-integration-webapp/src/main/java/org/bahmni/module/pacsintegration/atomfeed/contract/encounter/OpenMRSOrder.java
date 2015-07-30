@@ -15,6 +15,7 @@ public class OpenMRSOrder {
     private OpenMRSConcept concept;
     private String orderNumber;
     private String previousOrderUuid;
+    private String commentToFulfiller;
 
     public OpenMRSOrder() {
         this.action = ACTION_NEW;
@@ -110,4 +111,13 @@ public class OpenMRSOrder {
     public boolean isNew() {
         return ACTION_NEW.equals(this.action);
     }
+
+    public String getCommentToFulfiller() {
+        return commentToFulfiller;
+    }
+
+    public void setCommentToFulfiller(String commentToFulfiller) {
+        this.commentToFulfiller = commentToFulfiller;
+    }
+
 }

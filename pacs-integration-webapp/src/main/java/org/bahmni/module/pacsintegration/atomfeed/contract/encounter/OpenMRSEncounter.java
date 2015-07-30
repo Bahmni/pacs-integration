@@ -10,16 +10,16 @@ import java.util.List;
 public class OpenMRSEncounter {
     private String encounterUuid;
     private String patientUuid;
-    private List<OpenMRSOrder> testOrders = new ArrayList<OpenMRSOrder>();
+    private List<OpenMRSOrder> orders = new ArrayList<OpenMRSOrder>();
     private List<OpenMRSProvider> providers = new ArrayList<OpenMRSProvider>();
 
     public OpenMRSEncounter() {
     }
 
-    public OpenMRSEncounter(String encounterUuid, String patientUuid, List<OpenMRSOrder> testOrders, List<OpenMRSProvider> providers) {
+    public OpenMRSEncounter(String encounterUuid, String patientUuid, List<OpenMRSOrder> orders, List<OpenMRSProvider> providers) {
 
         this.encounterUuid = encounterUuid;
-        this.testOrders = testOrders;
+        this.orders = orders;
         this.patientUuid = patientUuid;
         this.providers = providers;
     }
@@ -32,13 +32,13 @@ public class OpenMRSEncounter {
         return encounterUuid;
     }
 
-    public List<OpenMRSOrder> getTestOrders() {
-        return testOrders;
+    public List<OpenMRSOrder> getOrders() {
+        return orders;
     }
 
     public List<OpenMRSOrder> getAcceptableTestOrders(List<OrderType> acceptableOrderTypes) {
         List<OpenMRSOrder> acceptableNewOrders = new ArrayList<OpenMRSOrder>();
-        for(OpenMRSOrder openMRSOrder : testOrders) {
+        for(OpenMRSOrder openMRSOrder : this.orders) {
             OrderType acceptableOrderType = findOrderType(acceptableOrderTypes, openMRSOrder.getOrderType());
             if (acceptableOrderType != null) {
                 acceptableNewOrders.add(openMRSOrder);
@@ -47,8 +47,8 @@ public class OpenMRSEncounter {
         return acceptableNewOrders;
     }
 
-    public void setTestOrders(List<OpenMRSOrder> orders) {
-        this.testOrders = orders;
+    public void setOrders(List<OpenMRSOrder> orders) {
+        this.orders = orders;
     }
 
     public String getPatientUuid() {
@@ -68,7 +68,7 @@ public class OpenMRSEncounter {
     }
 
     public void addTestOrder(OpenMRSOrder order) {
-        testOrders.add(order);
+        orders.add(order);
     }
 
     private OrderType findOrderType(List<OrderType> acceptableOrderTypes, String orderType) {

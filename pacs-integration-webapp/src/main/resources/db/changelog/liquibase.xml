@@ -176,4 +176,10 @@
                                  referencedTableName="test_order"
                                  referencedColumnNames="id"/>
     </changeSet>
+    <changeSet id="PACS-201507292000" author="Hemanth">
+        <comment>Adding comment column to order table.</comment>
+        <addColumn tableName="test_order" schemaName="public">
+            <column name="comment" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

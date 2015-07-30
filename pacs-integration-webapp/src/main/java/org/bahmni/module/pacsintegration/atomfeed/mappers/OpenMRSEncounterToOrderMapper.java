@@ -21,6 +21,7 @@ public class OpenMRSEncounterToOrderMapper {
         order.setOrderType(findOrderType(orderTypes, openMRSOrder.getOrderType()));
         order.setDateCreated(new Date());
         order.setCreator(providerName);
+        order.setComment(openMRSOrder.getCommentToFulfiller());
         return order;
     }
 

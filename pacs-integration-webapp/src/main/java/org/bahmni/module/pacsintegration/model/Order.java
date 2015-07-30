@@ -44,7 +44,10 @@ public class Order extends BaseModel {
     @Column(name = "order_number")
     private String orderNumber;
 
-    public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result, String orderNumber) {
+    @Column(name = "comment")
+    private String comment;
+
+    public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result, String orderNumber, String comment) {
         this.id = id;
         this.orderType = orderType;
         this.orderUuid = orderUuid;
@@ -52,6 +55,7 @@ public class Order extends BaseModel {
         this.testUuid = testUuid;
         this.result = result;
         this.orderNumber = orderNumber;
+        this.comment = comment;
     }
 
     public Order() {
@@ -143,5 +147,13 @@ public class Order extends BaseModel {
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
