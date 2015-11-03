@@ -126,8 +126,8 @@ public class HL7Service {
         ORM_O01_PATIENT patient = message.getPATIENT();
         PID pid = patient.getPID();
         pid.getPatientIdentifierList(0).getIDNumber().setValue(openMRSPatient.getPatientId());
-        pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
-        pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getGivenName());
+//        pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
+        pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getPatientId());
         pid.getDateTimeOfBirth().getTime().setValue(openMRSPatient.getBirthDate());
         pid.getAdministrativeSex().setValue(openMRSPatient.getGender());
     }
