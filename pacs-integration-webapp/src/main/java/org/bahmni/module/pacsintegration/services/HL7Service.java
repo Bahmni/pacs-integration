@@ -73,7 +73,9 @@ public class HL7Service {
 
     private AbstractMessage cancelOrderMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws DataTypeException {
         Order previousOrder = orderRepository.findByOrderUuid(order.getPreviousOrderUuid());
-
+        if(previousOrder == null) {
+            throw  new HL7MessageException("Unable to Cancel the Order. Previous order is not found" + order.getOrderNumber());
+        }
         ORM_O01 message = new ORM_O01();
         addMessageHeader(order, message);
         addPatientDetails(message, openMRSPatient);
@@ -112,6 +114,7 @@ public class HL7Service {
         obr.getUniversalServiceIdentifier().getIdentifier().setValue(pacsConceptSource.getCode());
         obr.getUniversalServiceIdentifier().getText().setValue(pacsConceptSource.getName());
         obr.getReasonForStudy(0).getText().setValue(order.getCommentToFulfiller());
+        obr.getCollectorSComment(1).getText().setValue(order.getConcept().getName().getName());
     }
 
     private void addProviderDetails(List<OpenMRSProvider> providers, ORM_O01 message) throws DataTypeException {
@@ -126,10 +129,12 @@ public class HL7Service {
         ORM_O01_PATIENT patient = message.getPATIENT();
         PID pid = patient.getPID();
         pid.getPatientIdentifierList(0).getIDNumber().setValue(openMRSPatient.getPatientId());
-//        pid.getPatientName(0).getFamilyName().getSurname().setValue(openMRSPatient.getFamilyName());
         pid.getPatientName(0).getGivenName().setValue(openMRSPatient.getPatientId());
         pid.getDateTimeOfBirth().getTime().setValue(openMRSPatient.getBirthDate());
         pid.getAdministrativeSex().setValue(openMRSPatient.getGender());
+
+        message.getORDER().getORDER_DETAIL().getOBR().getCollectorSComment(0).getText().setValue(openMRSPatient.getGivenName()+","+openMRSPatient.getFamilyName());
+
     }
 
     private static DateFormat getHl7DateFormat() {

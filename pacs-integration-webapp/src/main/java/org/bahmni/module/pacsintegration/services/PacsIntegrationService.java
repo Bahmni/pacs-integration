@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -49,6 +50,7 @@ public class PacsIntegrationService {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
+        Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
                 AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
