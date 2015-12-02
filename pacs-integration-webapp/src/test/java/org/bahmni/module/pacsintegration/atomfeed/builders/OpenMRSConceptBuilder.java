@@ -40,4 +40,9 @@ public class OpenMRSConceptBuilder {
     public OpenMRSConcept build() {
         return openMRSConcept;
     }
+
+    public OpenMRSConceptBuilder addConceptName(String pacsCode) {
+        openMRSConcept.setName(new OpenMRSConceptName(pacsCode));
+        return this;
+    }
 }

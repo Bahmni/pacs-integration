@@ -100,8 +100,9 @@ public class HL7ServiceTest {
     private OpenMRSConcept buildConceptWithSource(String conceptSourceName, String pacsCode) {
         final OpenMRSConceptMapping mapping = new OpenMRSConceptMapping();
         mapping.setCode(pacsCode);
+        mapping.setName(pacsCode);
         mapping.setSource(conceptSourceName);
-        return new OpenMRSConceptBuilder().addConceptMapping(mapping).build();
+        return new OpenMRSConceptBuilder().addConceptMapping(mapping).addConceptName(pacsCode).build();
     }
 
     private List<OpenMRSProvider> getProvidersData() {

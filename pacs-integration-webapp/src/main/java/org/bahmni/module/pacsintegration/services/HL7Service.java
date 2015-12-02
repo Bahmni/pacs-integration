@@ -114,7 +114,7 @@ public class HL7Service {
         obr.getUniversalServiceIdentifier().getIdentifier().setValue(pacsConceptSource.getCode());
         obr.getUniversalServiceIdentifier().getText().setValue(pacsConceptSource.getName());
         obr.getReasonForStudy(0).getText().setValue(order.getCommentToFulfiller());
-        obr.getCollectorSComment(1).getText().setValue(order.getConcept().getName().getName());
+        obr.getCollectorSComment(0).getText().setValue(order.getConcept().getName().getName());
     }
 
     private void addProviderDetails(List<OpenMRSProvider> providers, ORM_O01 message) throws DataTypeException {
@@ -133,7 +133,7 @@ public class HL7Service {
         pid.getDateTimeOfBirth().getTime().setValue(openMRSPatient.getBirthDate());
         pid.getAdministrativeSex().setValue(openMRSPatient.getGender());
 
-        message.getORDER().getORDER_DETAIL().getOBR().getCollectorSComment(0).getText().setValue(openMRSPatient.getGivenName()+","+openMRSPatient.getFamilyName());
+        message.getORDER().getORDER_DETAIL().getOBR().getPlannedPatientTransportComment(0).getText().setValue(openMRSPatient.getGivenName()+","+openMRSPatient.getFamilyName());
 
     }
 
