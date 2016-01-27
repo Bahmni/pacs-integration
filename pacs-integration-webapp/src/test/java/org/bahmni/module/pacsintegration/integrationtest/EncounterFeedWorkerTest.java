@@ -65,7 +65,7 @@ public class EncounterFeedWorkerTest extends BaseIntegrationTest {
 
     @Test
     public void shouldAddToFailedEventsWhenModalityIsNotAvailable() throws Exception {
-        modalityStubServer.stop();
+        modalityStubServer.stopAndWait();
         try {
             encounterFeedWorker.process(new Event("event id", "/encounter/1"));
             Assert.fail("Should be throwing a exception since modality is down");
