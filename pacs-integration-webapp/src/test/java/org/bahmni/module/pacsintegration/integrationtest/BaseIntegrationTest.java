@@ -33,7 +33,7 @@ public abstract class BaseIntegrationTest {
     @Before
     public void startModalityStubServer() throws InterruptedException, UnknownHostException {
         HapiContext hapiContext = new DefaultHapiContext();
-        int port = 6001;
+        int port = 1911;
         modalityStubServer = hapiContext.newServer(port, false);
         modalityStubServer.registerApplication("ORM", "O01", new ReceivingApplication() {
             @Override
