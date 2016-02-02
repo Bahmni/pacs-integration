@@ -49,7 +49,7 @@
     <artifactId>pacs-integration-webapp</artifactId>
 
     <properties>
-        <atomfeed.version>1.6</atomfeed.version>
+        <atomfeed.version>1.9.1</atomfeed.version>
         <hapi-base.version>2.2</hapi-base.version>
     </properties>
 
