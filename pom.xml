@@ -20,6 +20,14 @@
         <module>pacs-integration-webapp</module>
     </modules>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>bahmni-artifactory</id>
+            <name>bahmni-artifactory-snapshots</name>
+            <url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>sonatype-nexus-snapshots</id>
