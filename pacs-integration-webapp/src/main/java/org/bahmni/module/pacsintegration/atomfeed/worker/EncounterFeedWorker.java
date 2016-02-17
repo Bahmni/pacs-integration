@@ -30,7 +30,9 @@ public class EncounterFeedWorker implements EventWorker {
             logger.info("Getting encounter data...");
             String encounterUri = event.getContent();
             OpenMRSEncounter encounter = openMRSService.getEncounter(encounterUri);
-            pacsIntegrationService.processEncounter(encounter);
+            if(encounter.hasOrders()) {
+                pacsIntegrationService.processEncounter(encounter);
+            }
         } catch (Exception e) {
             logger.error("Failed send order to modality", e);
             throw new RuntimeException("Failed send order to modality", e);

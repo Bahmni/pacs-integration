@@ -80,4 +80,7 @@ public class OpenMRSEncounter {
         return null;
     }
 
+    public boolean hasOrders() {
+        return getOrders().size() > 0;
+    }
 }
