@@ -31,7 +31,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 })
 @PrepareForTest(WebClientFactory.class)
-public class EncounterFeedWorkerTest extends BaseIntegrationTest {
+public class EncounterFeedWorkerIT extends BaseIntegrationTest {
     @Mock
     private HttpClient webClient;
 

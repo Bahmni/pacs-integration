@@ -4,7 +4,8 @@ import ca.uhn.hl7v2.AcknowledgmentCode;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
-import ca.uhn.hl7v2.model.v25.message.*;
+import ca.uhn.hl7v2.model.v25.message.ACK;
+import ca.uhn.hl7v2.model.v25.message.ORR_O02;
 import org.bahmni.module.pacsintegration.exception.ModalityException;
 import org.bahmni.module.pacsintegration.model.Modality;
 import org.bahmni.module.pacsintegration.model.OrderType;
@@ -54,6 +55,22 @@ public class ModalityServiceTest {
         when(orderTypeRepository.getByName(orderTypeName)).thenReturn(orderType);
         doReturn(orderResponse).when(modalityService).post(orderType.getModality(), requestMessage);
         doReturn("orderResponseString").when(modalityService).parseResponse(orderResponse);
+
+        try {
+            String responseString = modalityService.sendMessage(requestMessage, orderTypeName);
+            assertEquals("orderResponseString", responseString);
+        } catch (Exception e) {
+            Assert.fail("Should not throw exception");
+        }
+    }
+
+    @Test
+    public void shouldAcceptACKMessageTypeAsResponseFromModality() throws HL7Exception, LLPException, IOException {
+        ACK ack = new ACK();
+        ack.getMSA().getAcknowledgmentCode().setValue(AcknowledgmentCode.AA.toString());
+        when(orderTypeRepository.getByName(orderTypeName)).thenReturn(orderType);
+        doReturn(ack).when(modalityService).post(orderType.getModality(), requestMessage);
+        doReturn("orderResponseString").when(modalityService).parseResponse(ack);
 
         try {
             String responseString = modalityService.sendMessage(requestMessage, orderTypeName);

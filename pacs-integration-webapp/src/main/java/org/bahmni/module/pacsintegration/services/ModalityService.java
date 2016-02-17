@@ -32,10 +32,14 @@ public class ModalityService {
         if (response instanceof ORR_O02) {
             ORR_O02 acknowledgement = (ORR_O02) response;
             String acknowledgmentCode = acknowledgement.getMSA().getAcknowledgmentCode().getValue();
-            if (!AcknowledgmentCode.AA.toString().equals(acknowledgmentCode)) {
-                throw new ModalityException(responseMessage, modality);
-            }
-        } else {
+            processAcknowledgement(modality, responseMessage, acknowledgmentCode);
+        }
+        else if (response instanceof ACK) {
+            ACK acknowledgement = (ACK) response;
+            String acknowledgmentCode = acknowledgement.getMSA().getAcknowledgmentCode().getValue();
+            processAcknowledgement(modality, responseMessage, acknowledgmentCode);
+        }
+        else {
             throw new ModalityException(responseMessage, modality);
         }
         return responseMessage;
@@ -59,4 +63,9 @@ public class ModalityService {
         return new PipeParser().encode(response);
     }
 
+    private void processAcknowledgement(Modality modality, String responseMessage, String acknowledgmentCode) {
+        if (!AcknowledgmentCode.AA.toString().equals(acknowledgmentCode)) {
+            throw new ModalityException(responseMessage, modality);
+        }
+    }
 }
