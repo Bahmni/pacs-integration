@@ -41,7 +41,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
     public void ShouldGetEncounter() throws Exception{
         PowerMockito.mockStatic(WebClientFactory.class);
         when(WebClientFactory.getClient()).thenReturn(webClient);
-        when(webClient.get(new URI("http://localhost:8080/encounter/1"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
+        when(webClient.get(new URI("http://localhost:8050/encounter/1"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
 
         when(webClient.get(any(URI.class))).thenReturn(deserialize("/sampleOpenMRSEncounter.json"));
         when(connectionDetails.getAuthUrl()).thenReturn("urlPrefix");
@@ -57,7 +57,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         when(WebClientFactory.getClient()).thenReturn(webClient);
         String patientUuid = "105059a8-5226-4b1f-b512-0d3ae685287d";
         String identifier = "GAN200053";
-        when(webClient.get(new URI("http://localhost:8080/openmrs/ws/rest/v1/patient/" + patientUuid+"?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
+        when(webClient.get(new URI("http://localhost:8050/openmrs/ws/rest/v1/patient/" + patientUuid+"?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
 
         when(connectionDetails.getAuthUrl()).thenReturn("urlPrefix");
 
