@@ -63,4 +63,16 @@ public class EncounterFeedWorkerTest extends OpenMRSMapperBaseTest {
 
         encounterFeedWorker.process(new Event("event id", content));
     }
+
+    @Test
+    public void shouldFilterOutBedAssignmentEventsBeforeProcessing() throws Exception {
+        String content = "/openmrs/encounter/uuid1";
+        OpenMRSOrder order = new OpenMRSOrder();
+        OpenMRSEncounter openMRSEncounter = new OpenMRSEncounter();
+        openMRSEncounter.addTestOrder(order);
+
+        encounterFeedWorker.process(new Event("event id", content, "Bed-Assignment"));
+
+        verify(pacsIntegrationService, times(0)).processEncounter(openMRSEncounter);
+    }
 }
