@@ -1,10 +1,11 @@
 package org.bahmni.module.pacsintegration.atomfeed;
 
-import org.apache.log4j.Logger;
 import org.bahmni.module.pacsintegration.atomfeed.jobs.FeedJob;
 import org.bahmni.module.pacsintegration.model.QuartzCronScheduler;
 import org.bahmni.module.pacsintegration.repository.CronJobRepository;
 import org.quartz.CronExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,7 @@ public class ScheduledTasks implements SchedulingConfigurer {
 
     private Map<String, FeedJob> jobs = new HashMap<String, FeedJob>();
 
-    private static Logger logger = Logger.getLogger(ScheduledTasks.class);
+    private static Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
     @Bean(destroyMethod = "shutdown")
     public Executor taskExecutor() {

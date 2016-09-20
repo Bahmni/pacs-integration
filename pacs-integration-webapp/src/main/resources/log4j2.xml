@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="INFO">
+    <appenders>
+        <RollingFile name="MyRollingFile"
+                     fileName="/var/log/pacs-integration/pacs-integration.log"
+                     filePattern="/var/log/pacs-integration/pacs-integration.log.%i">
+            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <root level="WARN">
+            <appenderref ref="MyRollingFile"/>
+        </root>
+    </loggers>
+</configuration>

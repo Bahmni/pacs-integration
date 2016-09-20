@@ -8,13 +8,14 @@ import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.model.v25.message.ORM_O01;
 import ca.uhn.hl7v2.protocol.ReceivingApplication;
 import ca.uhn.hl7v2.protocol.ReceivingApplicationException;
-import org.apache.log4j.Logger;
 import org.bahmni.module.PacsIntegration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -28,7 +29,7 @@ import java.util.Map;
 public abstract class BaseIntegrationTest {
 
     public static HL7Service modalityStubServer;
-    private static final org.apache.log4j.Logger log = Logger.getLogger(BaseIntegrationTest.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseIntegrationTest.class);
 
     @Before
     public void startModalityStubServer() throws InterruptedException, UnknownHostException {

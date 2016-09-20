@@ -1,19 +1,20 @@
 
 package org.bahmni.module.pacsintegration.atomfeed.worker;
 
-import org.apache.log4j.Logger;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.services.OpenMRSService;
 import org.bahmni.module.pacsintegration.services.PacsIntegrationService;
 import org.ict4h.atomfeed.client.domain.Event;
 import org.ict4h.atomfeed.client.service.EventWorker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EncounterFeedWorker implements EventWorker {
 
-    private static final Logger logger = Logger.getLogger(EncounterFeedWorker.class);
+    private static final Logger logger = LoggerFactory.getLogger(EncounterFeedWorker.class);
 
     @Autowired
     private PacsIntegrationService pacsIntegrationService;

@@ -1,10 +1,11 @@
 package org.bahmni.module.pacsintegration.atomfeed.jobs;
 
-import org.apache.log4j.Logger;
 import org.bahmni.module.pacsintegration.atomfeed.client.AtomFeedClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.worker.EncounterFeedWorker;
 import org.ict4h.atomfeed.client.service.FeedClient;
 import org.quartz.DisallowConcurrentExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnExpression("'${enable.scheduling}'=='true'")
 public class EncounterFeedJob implements FeedJob {
     private static final String OPENMRS_ENCOUNTER_FEED_NAME = "openmrs.encounter.feed.uri";
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(EncounterFeedJob.class);
     private FeedClient atomFeedClient;
     private EncounterFeedWorker encounterFeedWorker;
     private AtomFeedClientFactory atomFeedClientFactory;
