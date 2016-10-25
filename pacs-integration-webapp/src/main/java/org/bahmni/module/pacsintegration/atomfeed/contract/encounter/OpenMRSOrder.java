@@ -16,6 +16,15 @@ public class OpenMRSOrder {
     private String orderNumber;
     private String previousOrderUuid;
     private String commentToFulfiller;
+    private String urgency;
+
+    public String getUrgency() {
+        return urgency;
+    }
+
+    public void setUrgency(String urgency) {
+        this.urgency = urgency;
+    }
 
     public OpenMRSOrder() {
         this.action = ACTION_NEW;

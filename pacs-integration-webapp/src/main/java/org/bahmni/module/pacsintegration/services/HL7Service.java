@@ -58,6 +58,7 @@ public class HL7Service {
         if(isSizeExceedingLimit(orderNumber)) {
             throw new HL7MessageException("Unable to create HL7 message. Order Number size exceeds limit " + orderNumber);
         }
+        orc.getQuantityTiming(0).getPriority().setValue(order.getUrgency());
         orc.getPlacerOrderNumber().getEntityIdentifier().setValue(orderNumber);
         orc.getFillerOrderNumber().getEntityIdentifier().setValue(orderNumber); //accession number - should be of length 16 bytes
         orc.getEnteredBy(0).getGivenName().setValue(SENDER);
