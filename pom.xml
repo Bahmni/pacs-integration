@@ -22,9 +22,9 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>bahmni-artifactory</id>
+            <id>repo.mybahmni.org</id>
             <name>bahmni-artifactory-snapshots</name>
-            <url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
+            <url>s3://repo.mybahmni.org/snapshot</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -97,9 +97,9 @@
             </releases>
         </repository>
         <repository>
-            <id>bahmni-artifactory</id>
+            <id>repo.mybahmni.org</id>
             <name>bahmni-artifactory-snapshots</name>
-            <url>http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local</url>
+            <url>s3://repo.mybahmni.org/snapshot</url>
             <snapshots>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
