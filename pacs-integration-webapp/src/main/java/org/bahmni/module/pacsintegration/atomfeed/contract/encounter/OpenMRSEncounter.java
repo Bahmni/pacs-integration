@@ -12,7 +12,6 @@ public class OpenMRSEncounter {
     private String patientUuid;
     private List<OpenMRSOrder> orders = new ArrayList<OpenMRSOrder>();
     private List<OpenMRSProvider> providers = new ArrayList<OpenMRSProvider>();
-    private List<OpenMRSOrder> ordersWithUrgency = new ArrayList<OpenMRSOrder>();
 
     public OpenMRSEncounter() {
     }
@@ -83,13 +82,5 @@ public class OpenMRSEncounter {
 
     public boolean hasOrders() {
         return getOrders().size() > 0;
-    }
-
-    public List<OpenMRSOrder> getOrdersWithUrgency() {
-        return ordersWithUrgency;
-    }
-
-    public void setOrdersWithUrgency(List<OpenMRSOrder> ordersWithUrgency) {
-        this.ordersWithUrgency = ordersWithUrgency;
     }
 }

@@ -53,7 +53,6 @@ public class PacsIntegrationService {
         Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                openMRSOrder.setUrgency(getUrgency(openMRSEncounter.getOrdersWithUrgency(), openMRSOrder.getUuid()));
                 AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
                 String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
                 Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
@@ -62,15 +61,6 @@ public class PacsIntegrationService {
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
             }
         }
-    }
-
-    private String getUrgency(List<OpenMRSOrder> ordersWithUrgency, String orderUuid) {
-        for (OpenMRSOrder openMRSOrder : ordersWithUrgency) {
-            if (openMRSOrder.getUuid().equals(orderUuid)) {
-                return openMRSOrder.getUrgency();
-            }
-        }
-        return null;
     }
 
 }
