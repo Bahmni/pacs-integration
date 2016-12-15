@@ -6,7 +6,7 @@
 
     <groupId>org.bahmni</groupId>
     <artifactId>pacs-integration</artifactId>
-    <version>0.87-SNAPSHOT</version>
+    <version>0.88-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
