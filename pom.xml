@@ -108,7 +108,7 @@
         <repository>
             <id>repo.mybahmni.org</id>
             <name>bahmni-artifactory-snapshots</name>
-            <url>s3://repo.mybahmni.org/artifactory/snapshot</url>
+            <url>http://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot</url>
             <snapshots>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
