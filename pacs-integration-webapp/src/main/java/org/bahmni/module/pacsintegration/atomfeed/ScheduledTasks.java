@@ -46,9 +46,9 @@ public class ScheduledTasks implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        final List<QuartzCronScheduler> crobJobs = cronJobRepository.findAll();
+        final List<QuartzCronScheduler> cronJobs = cronJobRepository.findAll();
 
-        for (final QuartzCronScheduler quartzCronScheduler : crobJobs) {
+        for (final QuartzCronScheduler quartzCronScheduler : cronJobs) {
             jobs.put(quartzCronScheduler.getName(), ((FeedJob) applicationContext.getBean(quartzCronScheduler.getName())));
 
             try {
