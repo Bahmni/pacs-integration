@@ -19,10 +19,23 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class PacsIntegrationService {
+
+    static final Comparator<OpenMRSOrder> ORDER_COMP = 
+                                        new Comparator<OpenMRSOrder>() {
+            public int compare(OpenMRSOrder o1, OpenMRSOrder o2) {
+                String s1 = o1.getOrderNumber();
+                String s2 = o2.getOrderNumber();
+                if (s1 == null && s2 == null) return 0;
+                if (s1 == null) return -1;
+                if (s2 == null) return 1;
+                return o1.getOrderNumber().compareTo(o2.getOrderNumber());
+            }
+    };
 
     @Autowired
     private OpenMRSEncounterToOrderMapper openMRSEncounterToOrderMapper;
@@ -50,6 +63,7 @@ public class PacsIntegrationService {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
+        Collections.sort(newAcceptableTestOrders, ORDER_COMP);
         Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
