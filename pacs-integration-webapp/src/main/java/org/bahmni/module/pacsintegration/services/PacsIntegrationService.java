@@ -64,15 +64,18 @@ public class PacsIntegrationService {
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         Collections.sort(newAcceptableTestOrders, ORDER_COMP);
-        Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
-            if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
-                String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
-                Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
+            try {
+                if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
+                    AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
+                    String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
+                    Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
 
-                orderRepository.save(order);
-                orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                    orderRepository.save(order);
+                    orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                }
+            } catch( HL7Exception e) {
+                logger.warn("Failed to process order " + openMRSOrder.getOrderNumber() + " : " + e.getMessage());
             }
         }
     }
