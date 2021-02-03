@@ -1,7 +1,7 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
 import org.bahmni.module.pacsintegration.model.OrderType;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.ArrayList;
 import java.util.List;

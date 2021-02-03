@@ -1,6 +1,6 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 

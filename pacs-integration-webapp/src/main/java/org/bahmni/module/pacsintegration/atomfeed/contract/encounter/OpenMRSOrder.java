@@ -1,7 +1,7 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
 import org.bahmni.module.pacsintegration.atomfeed.client.Constants;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSOrder {
