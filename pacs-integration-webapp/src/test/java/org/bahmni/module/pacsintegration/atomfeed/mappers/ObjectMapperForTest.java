@@ -16,7 +16,7 @@
 
 package org.bahmni.module.pacsintegration.atomfeed.mappers;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Ignore;
 
 @Ignore

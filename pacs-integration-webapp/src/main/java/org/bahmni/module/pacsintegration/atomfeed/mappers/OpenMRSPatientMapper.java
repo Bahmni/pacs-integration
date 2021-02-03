@@ -2,8 +2,8 @@ package org.bahmni.module.pacsintegration.atomfeed.mappers;
 
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.webclients.ObjectMapperRepository;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.text.ParseException;
