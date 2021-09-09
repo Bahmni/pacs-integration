@@ -1,12 +1,18 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.patient;
 
 import java.util.Date;
+import java.util.List;
 
 public class OpenMRSPatient {
     private String patientId;
     private String givenName;
     private String middleName;
     private String familyName;
+    private String gender;
+    private String healthId;
+    private String patientReferenceNumber;
+    private List<CareContext> careContexts;
+    private String phoneNumber;
     private Date birthDate;
 
     public String getGender() {
@@ -57,6 +63,35 @@ public class OpenMRSPatient {
         this.patientId = patientId;
     }
 
-    private String gender;
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getHealthId() {
+        return healthId;
+    }
+
+    public void setHealthId(String healthId) {
+        this.healthId = healthId;
+    }
+
+    public String getPatientReferenceNumber() {
+        return patientReferenceNumber;
+    }
+
+    public void setPatientReferenceNumber(String patientReferenceNumber) {
+        this.patientReferenceNumber = patientReferenceNumber;
+    }
+
+    public List<CareContext> getCareContexts() {
+        return careContexts;
+    }
+
+    public void setCareContexts(List<CareContext> careContexts) {
+        this.careContexts = careContexts;
+    }
 }

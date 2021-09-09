@@ -20,6 +20,7 @@ import java.text.ParseException;
 public class OpenMRSService {
 
     String patientRestUrl = "/openmrs/ws/rest/v1/patient/";
+    String newCareContextUrl = "/openmrs/ws/rest/v1/hip/careContext/new?patientUuid=";
 
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
@@ -36,7 +37,13 @@ public class OpenMRSService {
         String patientJSON = webClient.get(URI.create(urlPrefix + patientRestUrl + patientUuid+"?v=full"));
         return new OpenMRSPatientMapper().map(patientJSON);
     }
+    public OpenMRSPatient getCareContext(String patientUuid) throws IOException, ParseException {
+        HttpClient webClient = WebClientFactory.getClient();
+        String urlPrefix = getURLPrefix();
 
+        String patientJSON = webClient.get(URI.create(urlPrefix + newCareContextUrl + patientUuid));
+        return new OpenMRSPatientMapper().mapCareContext(patientJSON);
+    }
     private String getURLPrefix() {
         org.bahmni.webclients.ConnectionDetails connectionDetails = ConnectionDetails.get();
         String authenticationURI = connectionDetails.getAuthUrl();

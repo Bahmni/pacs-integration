@@ -30,12 +30,10 @@ public class EncounterFeedWorker implements EventWorker {
         String bedAssignment = "Bed-Assignment";
         try {
             if(event.getTitle() == null || !event.getTitle().equals(bedAssignment)) {
-                logger.info("Getting encounter data...");
+                logger.warn("Getting encounter data...");
                 String encounterUri = event.getContent();
                 OpenMRSEncounter encounter = openMRSService.getEncounter(encounterUri);
-                if(encounter.hasOrders()) {
-                    pacsIntegrationService.processEncounter(encounter);
-                }
+                pacsIntegrationService.processEncounter(encounter);
             }
         } catch (Exception e) {
             logger.error("Failed send order to modality", e);
