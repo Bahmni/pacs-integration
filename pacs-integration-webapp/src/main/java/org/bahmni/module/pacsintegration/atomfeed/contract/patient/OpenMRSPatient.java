@@ -43,6 +43,10 @@ public class OpenMRSPatient {
         return givenName;
     }
 
+    public String getCareContextInfo(){
+        return careContexts.get(0).getDisplay() + " record";
+    }
+
     public void setGivenName(String givenName) {
         this.givenName = givenName;
     }

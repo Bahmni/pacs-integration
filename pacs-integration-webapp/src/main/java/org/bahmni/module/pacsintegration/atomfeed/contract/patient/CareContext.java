@@ -1,32 +1,32 @@
 package org.bahmni.module.pacsintegration.atomfeed.contract.patient;
 
 public class CareContext {
-    private String careContextType;
-    private String careContextName;
-    private Integer careContextReference;
+    private String Type;
+    private String Display;
+    private Integer ReferenceNumber;
 
-    public Integer getCareContextReference() {
-        return careContextReference;
+    public Integer getReferenceNumber() {
+        return ReferenceNumber;
     }
 
-    public void setCareContextReference(Integer careContextReference) {
-        this.careContextReference = careContextReference;
+    public void setReferenceNumber(Integer referenceNumber) {
+        this.ReferenceNumber = referenceNumber;
     }
 
-    public String getCareContextType() {
-        return careContextType;
+    public String getType() {
+        return Type;
     }
 
-    public void setCareContextType(String careContextType) {
-        this.careContextType = careContextType;
+    public void setType(String type) {
+        this.Type = type;
     }
 
-    public String getCareContextName() {
-        return careContextName;
+    public String getDisplay() {
+        return Display;
     }
 
-    public void setCareContextName(String careContextName) {
-        this.careContextName = careContextName;
+    public void setDisplay(String display) {
+        this.Display = display;
     }
 
 

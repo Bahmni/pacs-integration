@@ -49,17 +49,17 @@ public class OpenMRSPatientMapper {
         OpenMRSPatient patient = new OpenMRSPatient();
         JsonNode jsonNode = objectMapper.readTree(patientJSON);
 
-        patient.setHealthId(jsonNode.path("healthId").asText().replaceAll("[\\W&&[^-]]", " "));
+        patient.setHealthId(jsonNode.path("healthId").asText());
         patient.setPatientReferenceNumber(jsonNode.path("patientReferenceNumber").asText().replaceAll("[\\W&&[^-]]", " "));
 
         List<CareContext> careContexts = new ArrayList<CareContext>();
         JsonNode patientCareContexts = jsonNode.path("careContexts");
         for(JsonNode patientCareContext : patientCareContexts){
             CareContext careContext = new CareContext();
-            careContext.setCareContextName(patientCareContext.path("careContextName").asText().replaceAll("[\\W&&[^-]]", " "));
-            careContext.setCareContextType(patientCareContext.path("careContextType").asText().replaceAll("[\\W&&[^-]]", " "));
-            careContext.setCareContextReference(patientCareContext.path("careContextReference").asInt());
-            logger.warn("careContext" + careContext.getCareContextName() + careContext.getCareContextType() + careContext.getCareContextReference());
+            careContext.setDisplay(patientCareContext.path("careContextName").asText().replaceAll("[\\W&&[^-]]", " "));
+            careContext.setType(patientCareContext.path("careContextType").asText().replaceAll("[\\W&&[^-]]", " "));
+            careContext.setReferenceNumber(patientCareContext.path("careContextReference").asInt());
+            logger.warn("careContext" + careContext.getDisplay() + careContext.getType() + careContext.getReferenceNumber());
             careContexts.add(careContext);
         }
         patient.setCareContexts(careContexts);

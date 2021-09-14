@@ -29,15 +29,15 @@ public class EncounterFeedWorker implements EventWorker {
     public void process(Event event) {
         String bedAssignment = "Bed-Assignment";
         try {
-            if(event.getTitle() == null || !event.getTitle().equals(bedAssignment)) {
+            if (event.getTitle() == null || !event.getTitle().equals(bedAssignment)) {
                 logger.warn("Getting encounter data...");
                 String encounterUri = event.getContent();
                 OpenMRSEncounter encounter = openMRSService.getEncounter(encounterUri);
                 pacsIntegrationService.processEncounter(encounter);
             }
         } catch (Exception e) {
-            logger.error("Failed send order to modality", e);
-            throw new RuntimeException("Failed send order to modality", e);
+            logger.error("Failed to process encounter", e);
+            throw new RuntimeException("Failed to process encounter", e);
         }
     }
 
