@@ -49,8 +49,10 @@
     <artifactId>pacs-integration-webapp</artifactId>
 
     <properties>
-        <atomfeed.version>1.9.4</atomfeed.version>
+        <atomfeed.version>1.10.1</atomfeed.version>
         <hapi-base.version>2.2</hapi-base.version>
+        <web-clients.version>0.94.2-SNAPSHOT</web-clients.version>
+        <log4j.version>2.17.1</log4j.version>
     </properties>
 
     <dependencies>
@@ -107,7 +109,7 @@
         <dependency>
             <groupId>org.bahmni.module</groupId>
             <artifactId>web-clients</artifactId>
-            <version>0.94-SNAPSHOT</version>
+            <version>${web-clients.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ict4h</groupId>
@@ -212,6 +214,19 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.19</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
