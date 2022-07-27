@@ -1,0 +1,14 @@
+spring.datasource.url=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+spring.datasource.username=${DB_USERNAME}
+spring.datasource.password=${DB_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.generate-ddl=false
+spring.jpa.database-platform=org.hibernate.dialect.ProgressDialect
+spring.jpa.show-sql=false
+spring.jpa.hibernate.ddl-auto=none
+server.port=9081
+
+liquibase.change-log=classpath:db/changelog/liquibase.xml
+
+enable.scheduling=true
