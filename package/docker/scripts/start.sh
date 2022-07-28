@@ -12,4 +12,4 @@ echo "Waiting for ${OPENMRS_HOST}.."
 sh wait-for.sh -t 300 "${OPENMRS_HOST}":"${OPENMRS_PORT}"
 
 echo "[INFO] Starting Application"
-java -jar "$SERVER_OPTS" "$DEBUG_OPTS" /opt/pacs-integration/lib/pacs-integration.jar
+java -jar $SERVER_OPTS $DEBUG_OPTS /opt/pacs-integration/lib/pacs-integration.jar
