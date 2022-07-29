@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - BAH-2055
     paths-ignore:
       - "**.md"
   repository_dispatch:
