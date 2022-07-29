@@ -1,4 +1,4 @@
-name: Build and Publish
+name: Validate PR
 on:
   pull_request:
     branches:
@@ -7,8 +7,8 @@ on:
       - "**.md"
 
 jobs:
-  docker-build-publish:
-    name: Docker Build & Publish
+  build:
+    name: Test & Package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
