@@ -1,0 +1,16 @@
+#Server properties
+feed.author=PACS
+
+#Client Properties
+feed.connectionTimeoutInMilliseconds=10000
+feed.replyTimeoutInMilliseconds=20000
+feed.maxFailedEvents=10000
+feed.failedEventMaxRetry=10
+
+#OpenMRS data specific properties
+openmrs.auth.uri=http://${OPENMRS_HOST}:${OPENMRS_PORT}/openmrs/ws/rest/v1/session
+openmrs.encounter.feed.uri=http://${OPENMRS_HOST}:${OPENMRS_PORT}/openmrs/ws/atomfeed/encounter/recent
+openmrs.user=${OPENMRS_ATOMFEED_USER}
+openmrs.password=${OPENMRS_ATOMFEED_PASSWORD}
+openmrs.connectionTimeoutInMilliseconds=10000
+openmrs.replyTimeoutInMilliseconds=20000
