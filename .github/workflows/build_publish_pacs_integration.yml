@@ -5,8 +5,8 @@ on:
       - master
       - 'release-*'
       - BAH-2332
-      tags:
-        - '[0-9]+.[0-9]+.[0-9]+'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
 
     paths-ignore:
       - 'package/docker/dcm4chee/**'
