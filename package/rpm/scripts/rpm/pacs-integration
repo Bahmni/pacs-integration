@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# pacs-integration start/stop/status script
+#
+# chkconfig: 2345 65 35
+# description: pacs-integration server
+# pidfile: /var/run/pacs-integration/pacs-integration.pid
+### BEGIN INIT INFO
+# Description: pacs-integration init script
+### END INIT INFO
+
+export PACS_SERVER_USER=bahmni
+export PACS_SERVER_RUN=/opt/pacs-integration/bin/start.sh
+export PACS_SERVER_DEBUG=/opt/pacs-integration/bin/debug.sh
+export CUR_USER=`/usr/bin/whoami`
+
+. /opt/pacs-integration/etc/pacs-integration.conf
+
+create_dirs() {
+    if [[ ! -e /var/run/pacs-integration ]]; then
+        ln -s /opt/pacs-integration/run /var/run/pacs-integration
+    fi
+
+    if [[ ! -e /var/run/pacs-integration/pacs-integration ]]; then
+        ln -s /opt/pacs-integration/pacs-integration /var/run/pacs-integration/pacs-integration
+    fi
+}
+
+pacs-integration_pid() {
+    echo `ps -fe | grep 'pacs-integration.jar' | grep -v grep | tr -s " "|cut -d" " -f2`
+}
+
+start() {
+    pid=$(pacs-integration_pid)
+    if [ -n "$pid" ]
+    then
+        echo -e "\e[00;31mService pacs-integration is already running (pid: $pid)\e[00m"
+    else
+        create_dirs
+        echo -e "\e[00;32mStarting pacs-integration \e[00m"
+        sh $PACS_SERVER_RUN
+  fi
+  exit 0
+}
+
+debug() {
+    pid=$(pacs-integration_pid)
+    if [ -n "$pid" ]
+    then
+        echo -e "\e[00;31mService pacs-integration is already running (pid: $pid)\e[00m"
+    else
+        create_dirs
+        echo -e "\e[00;32mStarting pacs-integration\e[00m"
+        if [ `user_exists $PACS_SERVER_USER` = "1" ]  && [ "$CUR_USER" != "$PACS_SERVER_USER" ] ;
+        then
+            runuser -u $PACS_SERVER_USER $PACS_SERVER_DEBUG
+        else
+            sh $PACS_SERVER_DEBUG
+        fi
+    fi
+  exit 0
+}
+
+status() {
+    pid=$(pacs-integration_pid)
+    if [ -n "$pid" ];
+    then
+        echo -e "\e[00;32mService pacs-integration is running with pid: $pid\e[00m"
+    exit 0
+    else
+        echo -e "\e[00;31mService pacs-integration is not running\e[00m"
+    exit 3
+    fi
+}
+
+stop() {
+	echo -e "\e[00;31mTerminating pacs-integration\e[00m"
+	kill -9 $(pacs-integration_pid)
+	rm -f /var/run/pacs-integration/pacs-integration.pid
+    return
+}
+user_exists(){
+    if id -u $1 >/dev/null 2>&1; then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
+case $1 in
+	start)
+	  start
+	;;
+    debug)
+	  debug
+	;;
+	stop)
+	  stop
+	;;
+	restart)
+	  stop
+	  start
+	;;
+	status)
+		status
+	;;
+	kill)
+		stop
+	;;
+	*)
+
+	;;
+esac
+exit 0

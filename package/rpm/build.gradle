@@ -1,0 +1,214 @@
+plugins {
+    id "nebula.ospackage" version "3.4.0"
+    id "de.undercouch.download" version "2.1.0"
+}
+
+import de.undercouch.gradle.tasks.download.Download
+
+version project.version
+
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'http://mavenrepo.openmrs.org/nexus/content/repositories/public'
+    }
+    maven {
+        url 'https://oss.sonatype.org/content/repositories'
+    }
+    mavenLocal()
+}
+
+task extractWar(type: Copy) {
+    from zipTree(file("${projectDir}/../resources/pacs-integration/pacs-integration.war"))
+    into file("${buildDir}/pacs-integration")
+}
+
+task normalizeJarName(type: Copy) {
+    from "${projectDir}/../resources/"
+    into "${buildDir}" + "/libs/"
+    include('core-1.0-SNAPSHOT.jar')
+    rename('core-1.0-SNAPSHOT.jar', 'pacs-integration.jar')
+}
+task downloadDCM4CHEE(type: Download) {
+    src 'http://repo.mybahmni.org.s3.amazonaws.com/packages/build/dcm4chee-2.18.1-psql.zip'
+    dest buildDir
+}
+
+downloadDCM4CHEE.onlyIf {
+    !(new File("${buildDir}/dcm4chee-2.18.1-psql.zip").exists())
+}
+
+task extractDCM4CHEE(dependsOn: ["downloadDCM4CHEE"], type: Copy) {
+    from zipTree("${buildDir}/dcm4chee-2.18.1-psql.zip")
+    into file(buildDir)
+}
+
+task downloadJBoss(type: Download) {
+    src 'http://repo.mybahmni.org.s3.amazonaws.com/packages/servers/jboss-4.2.3.GA-jdk6.zip'
+    dest buildDir
+}
+
+downloadJBoss.onlyIf {
+    !(new File("${buildDir}/jboss-4.2.3.GA-jdk6.zip").exists())
+}
+
+task extractJBoss(dependsOn: ["downloadJBoss"], type: Copy) {
+    from zipTree("${buildDir}/jboss-4.2.3.GA-jdk6.zip")
+    into file(buildDir)
+}
+
+task downloadOviyam2(type: Download) {
+    src 'https://webwerks.dl.sourceforge.net/project/dcm4che/Oviyam/2.8.1/Oviyam-2.8.1-bin.zip'
+    dest buildDir
+}
+
+downloadOviyam2.onlyIf {
+    !(new File("${buildDir}/Oviyam-2.8.1-bin.zip").exists())
+}
+
+task extractOviyam2Zip(dependsOn: ["downloadOviyam2"], type: Copy) {
+    from zipTree("${buildDir}/Oviyam-2.8.1-bin.zip")
+    into file("${buildDir}")
+}
+
+task extractOviyam2War(dependsOn: ["extractOviyam2Zip"], type: Copy) {
+    from zipTree("${buildDir}/Oviyam-2.8.1-bin/Oviyam-2.8.1-bin/oviyam2.war")
+    into file("${projectDir}/../resources/dcm4chee/oviyam2.war/")
+}
+
+task dist(type: Rpm) {
+    dependsOn 'build', 'normalizeJarName', 'extractWar'
+
+    packageName = 'pacs-integration'
+    version = project.version
+    release = project.hasProperty('release') ? project.release : ""
+
+    arch = NOARCH
+    os  = LINUX
+    user = 'root'
+
+    into '/opt/pacs-integration'
+
+    requires('postgresql96')
+
+    preInstall file("${projectDir}/scripts/pacs-integration/preinstall.sh")
+    postInstall file("${projectDir}/scripts/pacs-integration/postinstall.sh")
+    preUninstall file("${projectDir}/scripts/pacs-integration/preuninstall.sh")
+
+    from("${projectDir}/scripts/rpm/") {
+        fileMode = 0744
+        createDirectoryEntry = true
+        into 'bin'
+        exclude('dcm4chee')
+    }
+
+    from("${projectDir}/scripts/pacs-integration.service") {
+        fileMode = 0744
+        user 'root'
+        into '/usr/lib/systemd/system/'
+    }
+
+    from("${projectDir}/../resources/pacs-integration/pacs-integration.conf") {
+        fileMode = 0644
+        createDirectoryEntry = true
+        into 'etc'
+    }
+
+    from("${buildDir}/libs/pacs-integration.jar") {
+        fileMode = 0644
+        createDirectoryEntry = true
+        into 'lib'
+    }
+
+    from("${buildDir}/pacs-integration") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into 'pacs-integration'
+    }
+}
+
+task dist_dcm4chee(type: Rpm) {
+    dependsOn 'extractDCM4CHEE', 'extractJBoss', 'extractOviyam2Zip', 'extractOviyam2War'
+
+    packageName = 'dcm4chee'
+    version = project.version
+    release = project.hasProperty('release') ? project.release : ""
+    arch = NOARCH
+    os = LINUX
+    user = 'root'
+
+    into '/opt/dcm4chee'
+
+    requires('postgresql96')
+
+    preInstall file("${projectDir}/scripts/dcm4chee/preinstall.sh")
+    postInstall file("${projectDir}/scripts/dcm4chee/postinstall.sh")
+    preUninstall file("${projectDir}/scripts/dcm4chee/preuninstall.sh")
+
+    from("${projectDir}/scripts/rpm/") {
+        fileMode = 0744
+        createDirectoryEntry = true
+        into 'bin'
+        include('dcm4chee')
+    }
+
+    from("${buildDir}/dcm4chee-2.18.1-psql") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into '/var/lib/bahmni/dcm4chee-2.18.1-psql'
+    }
+
+    from("${buildDir}/dcm4che-2.0.28-bin") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into '/var/lib/bahmni/dcm4che-2.0.28-bin'
+    }
+
+    from("${buildDir}/jboss-4.2.3.GA") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into '/usr/share/jboss-4.2.3.GA'
+    }
+
+    from("${projectDir}/../resources/dcm4chee") {
+        fileMode = 0644
+        createDirectoryEntry = true
+        into 'etc'
+        exclude('initDCM4CHEE-DB.sh')
+        exclude('oviyam2.war')
+    }
+
+    from("${projectDir}/../resources/dcm4chee") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into 'etc'
+        include("oviyam2.war/")
+    }
+
+    from("${projectDir}/../resources/dcm4chee/initDCM4CHEE-DB.sh") {
+        fileMode = 0744
+        user 'bahmni'
+        into 'etc'
+    }
+
+    from("${projectDir}/../resources/") {
+        fileMode = 0755
+        into 'etc'
+        include('dcm4chee_ssl.conf')
+    }
+}
+
+
+jar {
+    manifest {
+        attributes 'Main-Class': "org.bahmni.deployment.launch.Main"
+    }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
