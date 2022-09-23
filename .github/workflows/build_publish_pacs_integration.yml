@@ -4,11 +4,13 @@ on:
     branches:
       - master
       - 'release-*'
-      - BAH-2287
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
     paths-ignore:
       - "**.md"
+      - 'package/docker/dcm4chee/**'
+      - 'package/resources/dcm4chee/**'
+      - '.github/workflows/build_publish_dcm4chee.yml'
 
 jobs:
   docker-build-publish:
