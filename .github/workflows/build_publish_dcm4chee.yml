@@ -1,0 +1,37 @@
+name: Build and Publish DCM4CHEE
+on:
+  push:
+    branches:
+      - master
+      - 'release-*'
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+    paths:
+      - 'package/docker/dcm4chee/**'
+      - 'package/resources/dcm4chee/**'
+      - '.github/workflows/build_publish_dcm4chee.yml'
+
+jobs:
+  build-publish-docker:
+    name: Build & Publish Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set env.ARTIFACT_VERSION
+        run: |
+          wget -q https://raw.githubusercontent.com/Bahmni/bahmni-infra-utils/main/setArtifactVersion.sh && chmod +x setArtifactVersion.sh
+          ./setArtifactVersion.sh
+          rm setArtifactVersion.sh
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Docker Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: package/docker/dcm4chee/Dockerfile
+          no-cache: true
+          push: true
+          tags: bahmni/dcm4chee:${{env.ARTIFACT_VERSION}},bahmni/dcm4chee:latest
