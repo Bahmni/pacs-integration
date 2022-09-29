@@ -12,8 +12,8 @@ on:
       - '.github/workflows/build_publish_dcm4chee.yml'
 
 jobs:
-  build-publish-docker-helm:
-    name: Build & Publish Docker Image & Helm Chart
+  build-publish-docker:
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

@@ -13,12 +13,12 @@ on:
       - '.github/workflows/build_publish_dcm4chee.yml'
 
 jobs:
-  docker-build-publish:
-    name: Docker Build & Publish
+  build-publish-docker:
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set artifact version
+      - name: Set env.ARTIFACT_VERSION
         run: |
           wget -q https://raw.githubusercontent.com/Bahmni/bahmni-infra-utils/main/setArtifactVersion.sh && chmod +x setArtifactVersion.sh
           ./setArtifactVersion.sh
