@@ -1,4 +1,4 @@
-FROM openjdk:8-alpine
+FROM amazoncorretto:8
 
 ENV DCM4CHEE_VERSION=dcm4chee-2.18.1-psql
 ENV JBOSS_VERSION=jboss-4.2.3.GA
@@ -13,7 +13,7 @@ RUN mkdir -p ${DCM4CHEE_PATH}
 RUN mkdir -p ${JBOSS_PATH}
 RUN mkdir -p ${DOWNLOAD_PATH}
 
-RUN apk add curl gettext postgresql-client
+RUN yum install -y gettext postgresql unzip nc
 
 RUN curl -L -o ${DOWNLOAD_PATH}/dcm4chee.zip "http://repo.mybahmni.org.s3.amazonaws.com/packages/build/${DCM4CHEE_VERSION}.zip"
 RUN unzip -d ${DOWNLOAD_PATH} ${DOWNLOAD_PATH}/dcm4chee.zip

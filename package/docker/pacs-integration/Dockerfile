@@ -1,4 +1,4 @@
-FROM openjdk:8-alpine
+FROM amazoncorretto:8
 
 ENV SERVER_PORT=8054
 ENV BASE_DIR=/var/run/pacs-integration
@@ -8,7 +8,7 @@ ENV SERVER_OPTS="-Xms512m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m"
 ENV DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
 
 # Used by envsubst command for replacing environment values at runtime
-RUN apk add gettext curl
+RUN yum install -y gettext nc
 
 ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-8.0.42.jar /opt/pacs-integration/lib/pacs-integration.jar
 COPY pacs-integration-webapp/target/pacs-integration.war /etc/pacs-integration/pacs-integration.war
