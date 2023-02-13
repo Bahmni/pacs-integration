@@ -51,7 +51,7 @@
     <properties>
         <atomfeed.version>1.10.1</atomfeed.version>
         <hapi-base.version>2.2</hapi-base.version>
-        <web-clients.version>0.94.3-SNAPSHOT</web-clients.version>
+        <web-clients.version>0.94.3</web-clients.version>
         <log4j.version>2.17.1</log4j.version>
     </properties>
 
