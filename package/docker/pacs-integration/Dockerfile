@@ -9,6 +9,7 @@ ENV DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend
 
 # Used by envsubst command for replacing environment values at runtime
 RUN yum install -y gettext nc
+RUN yum install -y postgresql
 
 ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-8.0.42.jar /opt/pacs-integration/lib/pacs-integration.jar
 COPY pacs-integration-webapp/target/pacs-integration.war /etc/pacs-integration/pacs-integration.war
@@ -19,6 +20,9 @@ RUN cd ${WAR_DIRECTORY} && jar xvf /etc/pacs-integration/pacs-integration.war
 COPY package/docker/pacs-integration/templates/atomfeed.properties.template /etc/atomfeed.properties.template
 COPY package/docker/pacs-integration/templates/application.properties.template /etc/application.properties.template
 RUN curl -o wait-for.sh 'https://raw.githubusercontent.com/eficode/wait-for/v2.2.3/wait-for'
+
+COPY package/docker/pacs-integration/scripts/update_openmrs_host_port.sh update_openmrs_host_port.sh
+RUN chmod +x update_openmrs_host_port.sh
 
 COPY package/docker/pacs-integration/scripts/start.sh start.sh
 RUN chmod +x start.sh
