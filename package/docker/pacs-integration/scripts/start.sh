@@ -8,6 +8,8 @@ envsubst < /etc/application.properties.template > "${WAR_DIRECTORY}"/WEB-INF/cla
 echo "Waiting for ${DB_HOST}.."
 sh wait-for.sh -t 300 "${DB_HOST}":"${DB_PORT}"
 
+./update_openmrs_host_port.sh
+
 echo "Waiting for ${OPENMRS_HOST}.."
 sh wait-for.sh -t 300 "${OPENMRS_HOST}":"${OPENMRS_PORT}"
 
