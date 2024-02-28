@@ -19,10 +19,23 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class PacsIntegrationService {
+
+    static final Comparator<OpenMRSOrder> ORDER_COMP = 
+                                        new Comparator<OpenMRSOrder>() {
+            public int compare(OpenMRSOrder o1, OpenMRSOrder o2) {
+                String s1 = o1.getOrderNumber();
+                String s2 = o2.getOrderNumber();
+                if (s1 == null && s2 == null) return 0;
+                if (s1 == null) return -1;
+                if (s2 == null) return 1;
+                return o1.getOrderNumber().compareTo(o2.getOrderNumber());
+            }
+    };
 
     @Autowired
     private OpenMRSEncounterToOrderMapper openMRSEncounterToOrderMapper;
@@ -50,15 +63,19 @@ public class PacsIntegrationService {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
-        Collections.reverse(newAcceptableTestOrders);
+        Collections.sort(newAcceptableTestOrders, ORDER_COMP);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
-            if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
-                String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
-                Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
+            try {
+                if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
+                    AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
+                    String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
+                    Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
 
-                orderRepository.save(order);
-                orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                    orderRepository.save(order);
+                    orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                }
+            } catch( HL7Exception e) {
+                logger.warn("Failed to process order " + openMRSOrder.getOrderNumber() + " : " + e.getMessage());
             }
         }
     }
