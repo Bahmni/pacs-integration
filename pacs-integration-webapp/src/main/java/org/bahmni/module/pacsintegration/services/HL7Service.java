@@ -154,6 +154,8 @@ public class HL7Service {
         //  TODO: do we need to send Message Control ID?
         msh.getProcessingID().getProcessingID().setValue("P");  // stands for production (?)
         msh.getVersionID().getVersionID().setValue("2.5");
+        // Supported dcm4che encoding for accent letters
+        msh.getCharacterSet(0).setValue("8859/1");
         return msh;
     }
 

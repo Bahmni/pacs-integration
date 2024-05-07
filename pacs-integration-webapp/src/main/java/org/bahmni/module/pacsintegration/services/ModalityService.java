@@ -7,6 +7,7 @@ import ca.uhn.hl7v2.HapiContext;
 import ca.uhn.hl7v2.app.Connection;
 import ca.uhn.hl7v2.app.Initiator;
 import ca.uhn.hl7v2.llp.LLPException;
+import ca.uhn.hl7v2.llp.MinLowerLayerProtocol;
 import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.model.v25.message.*;
@@ -49,6 +50,7 @@ public class ModalityService {
         Connection newClientConnection = null;
         try {
             HapiContext hapiContext = new DefaultHapiContext();
+            hapiContext.setLowerLayerProtocol(new MinLowerLayerProtocol(true));
             newClientConnection = hapiContext.newClient(modality.getIp(), modality.getPort(), false);
             Initiator initiator = newClientConnection.getInitiator();
             return initiator.sendAndReceive(requestMessage);
