@@ -23,11 +23,11 @@ jobs:
           wget -q https://raw.githubusercontent.com/Bahmni/bahmni-infra-utils/main/setArtifactVersion.sh && chmod +x setArtifactVersion.sh
           ./setArtifactVersion.sh
           rm setArtifactVersion.sh
-      - name: Setup Java 8
+      - name: Setup Java 17
         uses: actions/setup-java@v3
         with:
           distribution: "corretto"
-          java-version: "8"
+          java-version: "17"
       - name: Run Unit Tests
         run: ./mvnw --no-transfer-progress clean test
       - name: Package

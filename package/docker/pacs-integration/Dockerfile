@@ -1,17 +1,17 @@
-FROM amazoncorretto:8
+FROM amazoncorretto:17
 
 ENV SERVER_PORT=8054
 ENV BASE_DIR=/var/run/pacs-integration
 ENV CONTEXT_PATH=/pacs-integration
 ENV WAR_DIRECTORY=/var/run/pacs-integration/pacs-integration
-ENV SERVER_OPTS="-Xms512m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m"
+ENV SERVER_OPTS="-Xms512m -Xmx1024m"
 ENV DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n"
 
 # Used by envsubst command for replacing environment values at runtime
 RUN yum install -y gettext nc
 RUN yum install -y postgresql
 
-ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-8.0.42.jar /opt/pacs-integration/lib/pacs-integration.jar
+ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-10-1.0-SNAPSHOT.jar /opt/pacs-integration/lib/pacs-integration.jar
 COPY pacs-integration-webapp/target/pacs-integration.war /etc/pacs-integration/pacs-integration.war
 
 RUN mkdir -p ${WAR_DIRECTORY}

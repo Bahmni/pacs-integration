@@ -1,27 +1,27 @@
 package org.bahmni.module.pacsintegration.services;
 
-import junit.framework.Assert;
-import org.bahmni.module.pacsintegration.atomfeed.*;
-import org.bahmni.module.pacsintegration.atomfeed.client.*;
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
-import org.bahmni.module.pacsintegration.atomfeed.contract.patient.*;
-import org.bahmni.webclients.*;
-import org.junit.*;
+import org.bahmni.module.pacsintegration.atomfeed.OpenMRSMapperBaseTest;
+import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;
+import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
+import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
+import org.bahmni.webclients.HttpClient;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.*;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.*;
-import org.powermock.core.classloader.annotations.*;
-import org.powermock.modules.junit4.*;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.*;
-import java.net.*;
-import java.text.*;
+import java.net.URI;
 
-import static junit.framework.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.*;
+import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+@PowerMockIgnore("jdk.internal.reflect.*")
 @PrepareForTest(WebClientFactory.class)
 @RunWith(PowerMockRunner.class)
 public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
@@ -38,7 +38,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
     }
 
     @Test
-    public void ShouldGetEncounter() throws Exception{
+    public void ShouldGetEncounter() throws Exception {
         PowerMockito.mockStatic(WebClientFactory.class);
         when(WebClientFactory.getClient()).thenReturn(webClient);
         when(webClient.get(new URI("http://localhost:8050/encounter/1"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
@@ -57,7 +57,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         when(WebClientFactory.getClient()).thenReturn(webClient);
         String patientUuid = "105059a8-5226-4b1f-b512-0d3ae685287d";
         String identifier = "GAN200053";
-        when(webClient.get(new URI("http://localhost:8050/openmrs/ws/rest/v1/patient/" + patientUuid+"?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
+        when(webClient.get(new URI("http://localhost:8050/openmrs/ws/rest/v1/patient/" + patientUuid + "?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
 
         when(connectionDetails.getAuthUrl()).thenReturn("urlPrefix");
 
