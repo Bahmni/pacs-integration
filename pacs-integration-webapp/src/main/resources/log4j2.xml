@@ -10,10 +10,15 @@
             </Policies>
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss} [%-5p] %c{1} - %m%n"/>
+        </Console>
     </appenders>
     <loggers>
         <root level="WARN">
             <appenderref ref="MyRollingFile"/>
+            <appenderref ref="Console"/>
         </root>
     </loggers>
 </configuration>
