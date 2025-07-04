@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @SpringBootApplication
-@ComponentScan(basePackages = "org.bahmni.module.*")
+//@ComponentScan(basePackages = "org.bahmni.module.*")
 @EnableTransactionManagement
 public class PacsIntegration extends SpringBootServletInitializer {
 
@@ -31,8 +31,8 @@ public class PacsIntegration extends SpringBootServletInitializer {
         SpringApplication.run(PacsIntegration.class, args);
     }
 
-    @Bean
-    public SessionFactory sessionFactory(HibernateEntityManagerFactory hemf) {
-        return hemf.getSessionFactory();
-    }
+//    @Bean
+//    public SessionFactory sessionFactory(HibernateEntityManagerFactory hemf) {
+//        return hemf.getSessionFactory();
+//    }
 }

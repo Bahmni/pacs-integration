@@ -11,11 +11,12 @@ ENV DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend
 RUN yum install -y gettext nc
 RUN yum install -y postgresql
 
-ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-10-1.0-SNAPSHOT.jar /opt/pacs-integration/lib/pacs-integration.jar
-COPY pacs-integration-webapp/target/pacs-integration.war /etc/pacs-integration/pacs-integration.war
+#ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-10-1.0-SNAPSHOT.jar /opt/pacs-integration/lib/pacs-integration.jar
 
-RUN mkdir -p ${WAR_DIRECTORY}
-RUN cd ${WAR_DIRECTORY} && jar xvf /etc/pacs-integration/pacs-integration.war
+COPY pacs-integration-webapp/target/pacs-integration.jar /opt/pacs-integration/lib/pacs-integration.jar
+
+#RUN mkdir -p ${WAR_DIRECTORY}
+#RUN cd ${WAR_DIRECTORY} && jar xvf /etc/pacs-integration/pacs-integration.war
 
 COPY package/docker/pacs-integration/templates/atomfeed.properties.template /etc/atomfeed.properties.template
 COPY package/docker/pacs-integration/templates/application.properties.template /etc/application.properties.template
