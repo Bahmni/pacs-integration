@@ -8,7 +8,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.18</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>org.bahmni</groupId>
@@ -21,12 +21,10 @@
         <atomfeed.version>1.10.1</atomfeed.version>
         <hapi-base.version>2.2</hapi-base.version>
         <web-clients.version>0.94.3</web-clients.version>
-        <!-- Pinned PowerMock version for legacy tests -->
         <powermock.version>1.6.2</powermock.version>
     </properties>
 
     <dependencies>
-        <!-- Core Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -47,22 +45,16 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Add Log4j2 Starter for logging -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-        <!--
-           This is a bridge to route legacy Log4j 1.x API calls to the new Log4j2 implementation.
-           It's a safe-guard to prevent needing code changes if your application uses the old logger.
-        -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
         </dependency>
 
-        <!-- Database & Migrations (Versions are managed by Spring Boot Parent) -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
@@ -83,7 +75,6 @@
             <artifactId>quartz</artifactId>
         </dependency>
 
-        <!-- Application Specific Dependencies -->
         <dependency>
             <groupId>org.ict4h</groupId>
             <artifactId>atomfeed-client</artifactId>
@@ -111,7 +102,6 @@
             <version>${hapi-base.version}</version>
         </dependency>
 
-        <!-- Common Utility Libraries (Versions managed by Spring Boot Parent) -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -126,9 +116,6 @@
             <artifactId>httpclient</artifactId>
         </dependency>
 
-        <!-- ============== -->
-        <!-- TEST Libraries -->
-        <!-- ============== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -176,5 +163,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
