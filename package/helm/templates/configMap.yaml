@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+data:
+  TZ: "{{ .Values.global.TZ }}"
+  DB_HOST: "{{ .Values.config.PACS_DB_HOST }}"
+  DB_PORT: "{{ .Values.config.PACS_DB_PORT }}"
+  DB_NAME: "{{ .Values.config.PACS_INTEGRATION_DB_NAME }}"
+  OPENMRS_HOST: "{{ .Values.config.OPENMRS_HOST }}"
+  OPENMRS_PORT: "{{ .Values.config.OPENMRS_PORT }}"
+      
+  

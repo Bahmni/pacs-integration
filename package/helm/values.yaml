@@ -1,0 +1,38 @@
+global:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: {}
+
+replicaCount: 1
+
+metadata:
+  labels:
+    environment: dev
+
+image:
+  repository: bahmni
+  name: pacs-integratio
+  tag: latest
+
+
+config:
+  TZ: ""
+  PACS_DB_HOST: ""
+  PACS_DB_PORT: ""
+  PACS_INTEGRATION_DB_NAME: ""
+  OPENMRS_HOST: ""
+  OPENMRS_PORT: ""
+    
+secrets:
+  DB_USERNAME: ""
+  PACS_INTEGRATION_DB_PASSWORD: ""
+  OPENMRS_ATOMFEED_USER: ""
+  OPENMRS_ATOMFEED_PASSWORD: ""
+
+
+autoscaling:
+  enabled: false
+
+nodeSelector: {}
+affinity: {}
+tolerations: {}
