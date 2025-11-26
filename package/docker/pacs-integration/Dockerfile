@@ -9,7 +9,7 @@ ENV DEBUG_OPTS="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend
 
 # Used by envsubst command for replacing environment values at runtime
 RUN yum install -y gettext nc
-RUN yum install -y postgresql
+RUN amazon-linux-extras install -y postgresql14
 
 ADD https://repo.mybahmni.org/packages/build/bahmni-embedded-tomcat-8.0.42.jar /opt/pacs-integration/lib/pacs-integration.jar
 COPY pacs-integration-webapp/target/pacs-integration.war /etc/pacs-integration/pacs-integration.war
