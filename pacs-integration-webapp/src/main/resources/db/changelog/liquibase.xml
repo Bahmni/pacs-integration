@@ -122,11 +122,11 @@
             </column>
             <column name="creator" type="varchar(255)">
             </column>
-            <column name="date_created" type="datetime">
+            <column name="date_created" type="timestamp">
             </column>
             <column name="modifier" type="varchar(255)">
             </column>
-            <column name="date_modified" type="datetime">
+            <column name="date_modified" type="timestamp">
             </column>
         </createTable>
         <addForeignKeyConstraint baseTableName="orders" baseColumnNames="order_type_id" constraintName="fk_os_order_type"

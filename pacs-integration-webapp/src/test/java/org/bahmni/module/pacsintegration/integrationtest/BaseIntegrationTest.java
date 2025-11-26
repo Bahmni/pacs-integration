@@ -16,7 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.net.Inet4Address;
@@ -25,7 +25,7 @@ import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = PacsIntegration.class)
+@SpringBootTest(classes = PacsIntegration.class)
 public abstract class BaseIntegrationTest {
 
     public static HL7Service modalityStubServer;
