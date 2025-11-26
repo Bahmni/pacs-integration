@@ -49,5 +49,13 @@ public class OpenMRSOrderBuilder {
         return this;
     }
 
+    public OpenMRSOrderBuilder withUrgency(String urgency) {
+        openMRSOrder.setUrgency(urgency);
+        return this;
+    }
 
+    public OpenMRSOrderBuilder withCommentToFulfiller(String comment) {
+        openMRSOrder.setCommentToFulfiller(comment);
+        return this;
+    }
 }
