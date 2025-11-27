@@ -33,4 +33,21 @@ public class StudyInstanceUIDGeneratorImplTest {
         assertNotNull(result);
         assertEquals(expectedUid, result);
     }
+
+    @Test
+    public void shouldGenerateDifferentStudyInstanceUIDsForDifferentOrderNumbers() {
+        String orderNumber1 = "ORD-123";
+        String orderNumber2 = "ORD-456";
+        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber1);
+        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber2);
+        assertNotSame(uid1, uid2);
+    }
+
+    @Test
+    public void shouldGenerateSameStudyInstanceUIDForSameOrderNumber() {
+        String orderNumber = "ORD-123";
+        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
+        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
+        assertEquals(uid1, uid2);
+    }
 }
