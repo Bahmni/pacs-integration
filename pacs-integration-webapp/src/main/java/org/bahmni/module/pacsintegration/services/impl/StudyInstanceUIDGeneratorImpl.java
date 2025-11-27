@@ -1,6 +1,5 @@
 package org.bahmni.module.pacsintegration.services.impl;
 
-import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.services.StudyInstanceUIDGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
