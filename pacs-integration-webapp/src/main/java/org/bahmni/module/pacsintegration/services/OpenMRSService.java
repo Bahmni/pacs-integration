@@ -37,6 +37,14 @@ public class OpenMRSService {
         return new OpenMRSPatientMapper().map(patientJSON);
     }
 
+    public void createFhirImagingStudy(String payload) throws IOException {
+        HttpClient webClient = WebClientFactory.getClient();
+        String urlPrefix = getURLPrefix();
+        String url = urlPrefix + "/openmrs/ws/fhir2/R4/ImagingStudy";
+//        TODO
+//        webClient.post(URI.create(url), payload);
+    }
+
     private String getURLPrefix() {
         org.bahmni.webclients.ConnectionDetails connectionDetails = ConnectionDetails.get();
         String authenticationURI = connectionDetails.getAuthUrl();

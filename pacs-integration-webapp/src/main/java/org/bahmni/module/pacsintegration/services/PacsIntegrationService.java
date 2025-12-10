@@ -34,6 +34,9 @@ public class PacsIntegrationService {
     private HL7Service hl7Service;
 
     @Autowired
+    private StudyInstanceUIDGenerator studyInstanceUIDGenerator;
+
+    @Autowired
     private OrderTypeRepository orderTypeRepository;
 
     @Autowired
@@ -44,6 +47,9 @@ public class PacsIntegrationService {
 
     @Autowired
     private ModalityService modalityService;
+
+    @Autowired
+    private ImagingStudyService imagingStudyService;
 
     public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, ParseException, HL7Exception, LLPException {
         OpenMRSPatient patient = openMRSService.getPatient(openMRSEncounter.getPatientUuid());
@@ -59,6 +65,16 @@ public class PacsIntegrationService {
 
                 orderRepository.save(order);
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                String locationUuid = "7672b695-1872-40de-9ae8-a2bb38038208";
+                String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(openMRSOrder.getOrderNumber());
+
+                imagingStudyService.createImagingStudy(
+                    openMRSOrder.getUuid(),
+                    openMRSEncounter.getPatientUuid(),
+                        locationUuid,
+                    studyInstanceUID,
+                    "Imaging Study for " + openMRSOrder.getTestName()
+                );
             }
         }
     }
