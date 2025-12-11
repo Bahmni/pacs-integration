@@ -6,6 +6,7 @@ import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderQueryBuilder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocation;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterMapper;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSPatientMapper;
@@ -24,6 +25,8 @@ public class OpenMRSService {
 
     String patientRestUrl = "/openmrs/ws/rest/v1/patient/";
     String orderRestUrl = "/openmrs/ws/rest/v1/order/";
+    String visitLocationRestUrl = "/openmrs/ws/rest/v1/bahmnicore/visitLocation/";
+    String locationRestUrl = "/openmrs/ws/rest/v1/location/";
 
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
@@ -55,6 +58,40 @@ public class OpenMRSService {
         } catch (IOException e) {
             throw new IOException("Failed to fetch order details for UUID: " + orderUuid + ". " + e.getMessage(), e);
         }
+    }
+
+    public String getVisitLocation(String locationUuid) throws IOException {
+        if (StringUtils.isBlank(locationUuid)) {
+            throw new IllegalArgumentException("Location UUID cannot be null or empty");
+        }
+
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + visitLocationRestUrl + locationUuid;
+
+            String response = webClient.get(URI.create(url));
+            if (response == null || "null".equals(response.trim()) || response.trim().isEmpty()) {
+                return null;
+            }
+
+            java.util.Map<String, Object> responseMap = ObjectMapperRepository.objectMapper.readValue(response, java.util.Map.class);
+            return (String) responseMap.get("uuid");
+        } catch (IOException e) {
+            throw new IOException("Failed to fetch visit location for UUID: " + locationUuid + ". " + e.getMessage(), e);
+        }
+    }
+
+    public OrderLocation getLocation(String locationUuid) throws IOException {
+        if (StringUtils.isBlank(locationUuid)) {
+            throw new IllegalArgumentException("Location UUID cannot be null or empty");
+        }
+
+        HttpClient webClient = WebClientFactory.getClient();
+        String urlPrefix = getURLPrefix();
+        String url = urlPrefix + locationRestUrl + locationUuid + "?v=custom:(uuid,display,name,tags:(display))";
+
+        return webClient.get(url, OrderLocation.class);
     }
 
     private String getURLPrefix() {

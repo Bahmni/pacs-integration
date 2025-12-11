@@ -5,6 +5,7 @@ import org.bahmni.module.pacsintegration.atomfeed.*;
 import org.bahmni.module.pacsintegration.atomfeed.client.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocation;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.*;
 import org.bahmni.webclients.*;
 import org.junit.*;
@@ -41,7 +42,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
     }
 
     @Test
-    public void ShouldGetEncounter() throws Exception{
+    public void ShouldGetEncounter() throws Exception {
         PowerMockito.mockStatic(WebClientFactory.class);
         when(WebClientFactory.getClient()).thenReturn(webClient);
         when(webClient.get(new URI("http://localhost:8050/encounter/1"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/sampleOpenMRSEncounter.json"));
@@ -60,7 +61,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         when(WebClientFactory.getClient()).thenReturn(webClient);
         String patientUuid = "105059a8-5226-4b1f-b512-0d3ae685287d";
         String identifier = "GAN200053";
-        when(webClient.get(new URI("http://localhost:8050/openmrs/ws/rest/v1/patient/" + patientUuid+"?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
+        when(webClient.get(new URI("http://localhost:8050/openmrs/ws/rest/v1/patient/" + patientUuid + "?v=full"))).thenReturn(new OpenMRSMapperBaseTest().deserialize("/samplePatient.json"));
 
         when(connectionDetails.getAuthUrl()).thenReturn("urlPrefix");
 
@@ -117,5 +118,117 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
                 .thenThrow(new IOException("Network error"));
 
         new OpenMRSService().getOrderDetails(orderUuid);
+    }
+
+    @Test
+    public void shouldGetVisitLocationUuid() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String locationUuid = "enc-location-uuid";
+        String visitLocationUuid = "visit-location-uuid";
+
+        when(webClient.get(any(URI.class))).thenReturn("{\"uuid\":\"" + visitLocationUuid + "\"}");
+
+        String result = new OpenMRSService().getVisitLocation(locationUuid);
+
+        assertNotNull(result);
+        assertEquals(visitLocationUuid, result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenVisitLocationAPIReturnsNull() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String locationUuid = "enc-location-uuid";
+        when(webClient.get(any(URI.class))).thenReturn("null");
+
+        String result = new OpenMRSService().getVisitLocation(locationUuid);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenVisitLocationAPIReturnsEmpty() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String locationUuid = "enc-location-uuid";
+        when(webClient.get(any(URI.class))).thenReturn("");
+
+        String result = new OpenMRSService().getVisitLocation(locationUuid);
+
+        assertNull(result);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetVisitLocationUuidIsNull() throws Exception {
+        new OpenMRSService().getVisitLocation(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetVisitLocationUuidIsEmpty() throws Exception {
+        new OpenMRSService().getVisitLocation("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetVisitLocationUuidIsBlank() throws Exception {
+        new OpenMRSService().getVisitLocation("   ");
+    }
+
+    @Test
+    public void shouldGetLocation() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String locationUuid = "location-uuid";
+        OrderLocation mockLocation = new OrderLocation();
+        mockLocation.setUuid(locationUuid);
+        mockLocation.setName("OPD");
+        mockLocation.setDisplay("OPD - Main Hospital");
+
+        when(webClient.get(anyString(), eq(OrderLocation.class))).thenReturn(mockLocation);
+
+        OrderLocation result = new OpenMRSService().getLocation(locationUuid);
+
+        assertNotNull(result);
+        assertEquals(locationUuid, result.getUuid());
+        assertEquals("OPD", result.getName());
+        assertEquals("OPD - Main Hospital", result.getDisplay());
+        verify(webClient).get(anyString(), eq(OrderLocation.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetLocationUuidIsNull() throws Exception {
+        new OpenMRSService().getLocation(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetLocationUuidIsEmpty() throws Exception {
+        new OpenMRSService().getLocation("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenGetLocationUuidIsBlank() throws Exception {
+        new OpenMRSService().getLocation("   ");
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowIOExceptionWhenGetLocationFails() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String locationUuid = "location-uuid";
+        when(webClient.get(anyString(), eq(OrderLocation.class)))
+                .thenThrow(new IOException("Network error"));
+
+        new OpenMRSService().getLocation(locationUuid);
+
     }
 }
