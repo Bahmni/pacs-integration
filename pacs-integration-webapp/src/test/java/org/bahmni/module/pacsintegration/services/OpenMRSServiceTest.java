@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import org.bahmni.module.pacsintegration.atomfeed.*;
 import org.bahmni.module.pacsintegration.atomfeed.client.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.*;
 import org.bahmni.webclients.*;
 import org.junit.*;
@@ -19,6 +20,8 @@ import java.net.*;
 import java.text.*;
 
 import static junit.framework.Assert.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.*;
 
@@ -65,5 +68,54 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         assertEquals(identifier, patient.getPatientId());
 
+    }
+
+    @Test
+    public void shouldGetOrderDetails() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String orderUuid = "c661277e-1e40-4a47-96b2-bb9987d7f296";
+        OpenMRSOrderDetails mockOrderDetails = new OpenMRSOrderDetails();
+        mockOrderDetails.setUuid(orderUuid);
+
+        when(webClient.get(anyString(), eq(OpenMRSOrderDetails.class))).thenReturn(mockOrderDetails);
+
+        OpenMRSOrderDetails orderDetails = new OpenMRSService().getOrderDetails(orderUuid);
+
+        assertNotNull(orderDetails);
+        assertEquals(orderUuid, orderDetails.getUuid());
+        verify(webClient).get(anyString(), eq(OpenMRSOrderDetails.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenOrderUuidIsNull() throws Exception {
+        new OpenMRSService().getOrderDetails(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenOrderUuidIsEmpty() throws Exception {
+        new OpenMRSService().getOrderDetails("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenOrderUuidIsBlank() throws Exception {
+        new OpenMRSService().getOrderDetails("   ");
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowIOExceptionWhenWebClientFails() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String orderUuid = "c661277e-1e40-4a47-96b2-bb9987d7f296";
+        when(webClient.get(anyString(), eq(OpenMRSOrderDetails.class)))
+                .thenThrow(new IOException("Network error"));
+
+        new OpenMRSService().getOrderDetails(orderUuid);
     }
 }

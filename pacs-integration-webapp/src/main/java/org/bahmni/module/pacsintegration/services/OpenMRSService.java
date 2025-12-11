@@ -1,8 +1,11 @@
 package org.bahmni.module.pacsintegration.services;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bahmni.module.pacsintegration.atomfeed.client.ConnectionDetails;
 import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderQueryBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterMapper;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSPatientMapper;
@@ -20,6 +23,7 @@ import java.text.ParseException;
 public class OpenMRSService {
 
     String patientRestUrl = "/openmrs/ws/rest/v1/patient/";
+    String orderRestUrl = "/openmrs/ws/rest/v1/order/";
 
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
@@ -35,6 +39,22 @@ public class OpenMRSService {
 
         String patientJSON = webClient.get(URI.create(urlPrefix + patientRestUrl + patientUuid+"?v=full"));
         return new OpenMRSPatientMapper().map(patientJSON);
+    }
+
+    public OpenMRSOrderDetails getOrderDetails(String orderUuid) throws IOException {
+        if (StringUtils.isBlank(orderUuid)) {
+            throw new IllegalArgumentException("Order UUID cannot be null or empty");
+        }
+
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + orderRestUrl + orderUuid + "?" + OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM;
+
+            return webClient.get(url, OpenMRSOrderDetails.class);
+        } catch (IOException e) {
+            throw new IOException("Failed to fetch order details for UUID: " + orderUuid + ". " + e.getMessage(), e);
+        }
     }
 
     private String getURLPrefix() {
