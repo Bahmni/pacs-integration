@@ -3,6 +3,8 @@ package org.bahmni.module.pacsintegration.services;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.v25.message.ADR_A19;
+import org.bahmni.module.pacsintegration.atomfeed.builders.OpenMRSConceptBuilder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConcept;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
@@ -58,6 +60,12 @@ public class PacsIntegrationServiceTest {
     @Mock
     private ModalityService modalityService;
 
+    @Mock
+    private ImagingStudyService imagingStudyService;
+
+    @Mock
+    private StudyInstanceUIDGenerator studyInstanceUIDGenerator;
+
     private String PATIENT_UUID = "patient1";
 
 
@@ -74,6 +82,7 @@ public class PacsIntegrationServiceTest {
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
         when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
 
         pacsIntegrationService.processEncounter(encounter);
 
@@ -89,6 +98,7 @@ public class PacsIntegrationServiceTest {
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null).thenReturn(new Order());
         when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
 
         pacsIntegrationService.processEncounter(encounter);
 
@@ -99,8 +109,19 @@ public class PacsIntegrationServiceTest {
     OpenMRSEncounter buildEncounter() {
         OpenMRSEncounter openMRSEncounter = new OpenMRSEncounter();
         openMRSEncounter.setPatientUuid(PATIENT_UUID);
-        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", null, false, null, null);
-        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", null, false, null, null);
+
+        OpenMRSConcept concept1 = new OpenMRSConceptBuilder()
+                .addConceptName("Test Order 1")
+                .build();
+        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", concept1, false, null, null);
+        order1.setOrderNumber("ORD-1");
+
+        OpenMRSConcept concept2 = new OpenMRSConceptBuilder()
+                .addConceptName("Test Order 2")
+                .build();
+        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", concept2, false, null, null);
+        order2.setOrderNumber("ORD-2");
+        
         openMRSEncounter.setOrders(Arrays.asList(order1, order2));
         return openMRSEncounter;
     }

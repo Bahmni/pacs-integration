@@ -3,6 +3,7 @@ package org.bahmni.module.pacsintegration.services;
 import org.bahmni.module.pacsintegration.atomfeed.client.ConnectionDetails;
 import org.bahmni.module.pacsintegration.atomfeed.client.WebClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
+import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterMapper;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSPatientMapper;
@@ -21,6 +22,8 @@ public class OpenMRSService {
 
     String patientRestUrl = "/openmrs/ws/rest/v1/patient/";
 
+    String createImagingStudyRestUrl = "/openmrs/ws/fhir2/R4/ImagingStudy";
+
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
@@ -37,12 +40,11 @@ public class OpenMRSService {
         return new OpenMRSPatientMapper().map(patientJSON);
     }
 
-    public void createFhirImagingStudy(String payload) throws IOException {
+    public void createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
-        String url = urlPrefix + "/openmrs/ws/fhir2/R4/ImagingStudy";
-//        TODO
-//        webClient.post(URI.create(url), payload);
+        String url = urlPrefix + createImagingStudyRestUrl;
+        webClient.post(url, payload, Object.class);
     }
 
     private String getURLPrefix() {

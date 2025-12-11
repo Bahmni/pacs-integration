@@ -65,6 +65,7 @@ public class PacsIntegrationService {
 
                 orderRepository.save(order);
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+                //TODO: add test for this
                 String locationUuid = "7672b695-1872-40de-9ae8-a2bb38038208";
                 String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(openMRSOrder.getOrderNumber());
 
