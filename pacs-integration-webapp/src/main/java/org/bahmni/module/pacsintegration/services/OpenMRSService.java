@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Map;
 
 @Component
 public class OpenMRSService {
@@ -70,13 +71,8 @@ public class OpenMRSService {
             String urlPrefix = getURLPrefix();
             String url = urlPrefix + visitLocationRestUrl + locationUuid;
 
-            String response = webClient.get(URI.create(url));
-            if (response == null || "null".equals(response.trim()) || response.trim().isEmpty()) {
-                return null;
-            }
-
-            java.util.Map<String, Object> responseMap = ObjectMapperRepository.objectMapper.readValue(response, java.util.Map.class);
-            return (String) responseMap.get("uuid");
+            Map<String, Object> response = webClient.get(url, Map.class);
+            return (String) response.get("uuid");
         } catch (IOException e) {
             throw new IOException("Failed to fetch visit location for UUID: " + locationUuid + ". " + e.getMessage(), e);
         }

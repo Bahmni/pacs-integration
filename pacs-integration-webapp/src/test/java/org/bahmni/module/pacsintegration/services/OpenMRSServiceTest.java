@@ -1,10 +1,10 @@
 package org.bahmni.module.pacsintegration.services;
 
-import junit.framework.Assert;
 import org.bahmni.module.pacsintegration.atomfeed.*;
 import org.bahmni.module.pacsintegration.atomfeed.client.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderQueryBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocation;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.*;
 import org.bahmni.webclients.*;
@@ -18,7 +18,8 @@ import org.powermock.modules.junit4.*;
 
 import java.io.*;
 import java.net.*;
-import java.text.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.Assert.*;
 import static org.mockito.Matchers.anyString;
@@ -82,7 +83,9 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         OpenMRSOrderDetails mockOrderDetails = new OpenMRSOrderDetails();
         mockOrderDetails.setUuid(orderUuid);
 
-        when(webClient.get(anyString(), eq(OpenMRSOrderDetails.class))).thenReturn(mockOrderDetails);
+        String requestURL = String.format("http://localhost:8050/openmrs/rest/v1/order/%s?%s", orderUuid, OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM);
+
+        when(webClient.get(requestURL, OpenMRSOrderDetails.class)).thenReturn(mockOrderDetails);
 
         OpenMRSOrderDetails orderDetails = new OpenMRSService().getOrderDetails(orderUuid);
 
@@ -128,41 +131,15 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         String locationUuid = "enc-location-uuid";
         String visitLocationUuid = "visit-location-uuid";
+        Map<String, Object> response = new HashMap<>();
+        response.put("uuid", visitLocationUuid);
 
-        when(webClient.get(any(URI.class))).thenReturn("{\"uuid\":\"" + visitLocationUuid + "\"}");
+        when(webClient.get("http://localhost:8050/openmrs/ws/rest/v1/bahmnicore/visitLocation/" + locationUuid, Map.class)).thenReturn(response);
 
         String result = new OpenMRSService().getVisitLocation(locationUuid);
 
         assertNotNull(result);
         assertEquals(visitLocationUuid, result);
-    }
-
-    @Test
-    public void shouldReturnNullWhenVisitLocationAPIReturnsNull() throws Exception {
-        PowerMockito.mockStatic(WebClientFactory.class);
-        when(WebClientFactory.getClient()).thenReturn(webClient);
-        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
-
-        String locationUuid = "enc-location-uuid";
-        when(webClient.get(any(URI.class))).thenReturn("null");
-
-        String result = new OpenMRSService().getVisitLocation(locationUuid);
-
-        assertNull(result);
-    }
-
-    @Test
-    public void shouldReturnNullWhenVisitLocationAPIReturnsEmpty() throws Exception {
-        PowerMockito.mockStatic(WebClientFactory.class);
-        when(WebClientFactory.getClient()).thenReturn(webClient);
-        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
-
-        String locationUuid = "enc-location-uuid";
-        when(webClient.get(any(URI.class))).thenReturn("");
-
-        String result = new OpenMRSService().getVisitLocation(locationUuid);
-
-        assertNull(result);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -192,7 +169,9 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         mockLocation.setName("OPD");
         mockLocation.setDisplay("OPD - Main Hospital");
 
-        when(webClient.get(anyString(), eq(OrderLocation.class))).thenReturn(mockLocation);
+        String requestURL = String.format("http://localhost:8050/openmrs/ws/rest/v1/location/%s?v=custom:(uuid,display,name,tags:(display))", locationUuid);
+
+        when(webClient.get(requestURL, OrderLocation.class)).thenReturn(mockLocation);
 
         OrderLocation result = new OpenMRSService().getLocation(locationUuid);
 
