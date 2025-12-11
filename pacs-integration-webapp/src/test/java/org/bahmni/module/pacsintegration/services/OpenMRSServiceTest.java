@@ -83,7 +83,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         OpenMRSOrderDetails mockOrderDetails = new OpenMRSOrderDetails();
         mockOrderDetails.setUuid(orderUuid);
 
-        String requestURL = String.format("http://localhost:8050/openmrs/rest/v1/order/%s?%s", orderUuid, OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM);
+        String requestURL = String.format("http://localhost:8050/openmrs/ws/rest/v1/order/%s?%s", orderUuid, OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM);
 
         when(webClient.get(requestURL, OpenMRSOrderDetails.class)).thenReturn(mockOrderDetails);
 
@@ -91,7 +91,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         assertNotNull(orderDetails);
         assertEquals(orderUuid, orderDetails.getUuid());
-        verify(webClient).get(anyString(), eq(OpenMRSOrderDetails.class));
+        verify(webClient).get(requestURL, OpenMRSOrderDetails.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
