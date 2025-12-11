@@ -37,13 +37,9 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldResolveConceptCodeFromFirstPrioritySource() {
-        // Given: Concept with LOINC mapping (first in priority)
         OrderConcept concept = buildConceptWithMapping("LOINC", "12345-6", "Glucose", "LN");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then
         assertNotNull(result);
         assertEquals("12345-6", result.getIdentifier());
         assertEquals("Glucose", result.getText());
@@ -52,13 +48,10 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldSkipFirstSourceAndUseSecondWhenFirstNotAvailable() {
-        // Given: Concept with only SNOMED-CT mapping (second in priority)
         OrderConcept concept = buildConceptWithMapping("SNOMED-CT", "888888", "Test Procedure", "SCT");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then
+
         assertNotNull(result);
         assertEquals("888888", result.getIdentifier());
         assertEquals("Test Procedure", result.getText());
@@ -67,13 +60,10 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldUseThirdPrioritySourceWhenFirstTwoNotAvailable() {
-        // Given: Concept with only PACS Procedure Code mapping (third in priority)
         OrderConcept concept = buildConceptWithMapping("PACS Procedure Code", "CT-001", "CT Scan", "PACS");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then
+
         assertNotNull(result);
         assertEquals("CT-001", result.getIdentifier());
         assertEquals("CT Scan", result.getText());
@@ -82,7 +72,6 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldSkipNonSameAsTypeMappings() {
-        // Given: Concept with NARROWER-THAN mapping (should skip)
         ConceptSource source = new ConceptSource("uuid", "LOINC", "LN");
         ConceptReferenceTerm term = new ConceptReferenceTerm("Test", "12345", false, source);
         ConceptMapType mapType = new ConceptMapType("NARROWER-THAN");
@@ -90,8 +79,6 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test Concept", "Test Concept", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping));
-
-        // When/Then: Should throw exception as no SAME-AS found
         try {
             resolver.resolveConceptCode(concept);
             fail("Should throw ConceptCodeResolutionException");
@@ -102,7 +89,7 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldSkipMappingsWithNullCode() {
-        // Given: First mapping has null code, second has valid code
+
         ConceptSource source1 = new ConceptSource("uuid1", "LOINC", "LN");
         ConceptReferenceTerm term1 = new ConceptReferenceTerm("Test", null, false, source1);
         ConceptMapType mapType1 = new ConceptMapType("SAME-AS");
@@ -115,11 +102,8 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use second mapping with valid code
         assertNotNull(result);
         assertEquals("12345", result.getIdentifier());
         assertEquals("Valid Test", result.getText());
@@ -127,7 +111,7 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldSkipMappingsWithBlankCode() {
-        // Given: First mapping has blank code, second has valid code
+
         ConceptSource source1 = new ConceptSource("uuid1", "LOINC", "LN");
         ConceptReferenceTerm term1 = new ConceptReferenceTerm("Test", "   ", false, source1);
         ConceptMapType mapType1 = new ConceptMapType("SAME-AS");
@@ -140,18 +124,14 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use second mapping with valid code
         assertNotNull(result);
         assertEquals("67890", result.getIdentifier());
     }
 
     @Test
     public void shouldSkipRetiredConceptReferenceTerms() {
-        // Given: First mapping is retired, second is active
         ConceptSource source1 = new ConceptSource("uuid1", "LOINC", "LN");
         ConceptReferenceTerm term1 = new ConceptReferenceTerm("Retired Test", "11111", true, source1);
         ConceptMapType mapType1 = new ConceptMapType("SAME-AS");
@@ -164,11 +144,8 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use non-retired mapping
         assertNotNull(result);
         assertEquals("22222", result.getIdentifier());
         assertEquals("Active Test", result.getText());
@@ -176,7 +153,7 @@ public class ConceptCodeResolverImplTest {
 
     @Test
     public void shouldUseFirstMatchWhenMultipleSameAsMappingsExistForSameSource() {
-        // Given: Multiple LOINC SAME-AS mappings
+
         ConceptSource source = new ConceptSource("uuid", "LOINC", "LN");
         ConceptReferenceTerm term1 = new ConceptReferenceTerm("First Test", "FIRST-CODE", false, source);
         ConceptReferenceTerm term2 = new ConceptReferenceTerm("Second Test", "SECOND-CODE", false, source);
@@ -187,11 +164,8 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use first match
         assertEquals("FIRST-CODE", result.getIdentifier());
         assertEquals("First Test", result.getText());
     }
@@ -200,11 +174,8 @@ public class ConceptCodeResolverImplTest {
     public void shouldUseConceptReferenceTermNameWhenPresent() {
         // Given: Mapping with term name present
         OrderConcept concept = buildConceptWithMapping("LOINC", "12345", "Term Name Here", "LN");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use term name
         assertEquals("Term Name Here", result.getText());
     }
 
@@ -219,11 +190,8 @@ public class ConceptCodeResolverImplTest {
         OrderConceptName fullySpecifiedName = new OrderConceptName("uuid1", "Fully Specified Name", "Fully Specified Name", "en", true, "FULLY_SPECIFIED");
         OrderConceptName shortName = new OrderConceptName("uuid2", "Short Name", "Short Name", "en", false, "SHORT");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(fullySpecifiedName, shortName), Arrays.asList(mapping));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use fully specified name
         assertEquals("Fully Specified Name", result.getText());
     }
 
@@ -238,11 +206,8 @@ public class ConceptCodeResolverImplTest {
         OrderConceptName shortName = new OrderConceptName("uuid1", "English Short Name", "English Short Name", "en", false, "SHORT");
         OrderConceptName frenchName = new OrderConceptName("uuid2", "Nom Français", "Nom Français", "fr", false, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(frenchName, shortName), Arrays.asList(mapping));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use any English name
         assertEquals("English Short Name", result.getText());
     }
 
@@ -257,11 +222,8 @@ public class ConceptCodeResolverImplTest {
         OrderConceptName frenchName = new OrderConceptName("uuid1", "Nom Français", "Nom Français", "fr", true, "FULLY_SPECIFIED");
         OrderConceptName spanishName = new OrderConceptName("uuid2", "Nombre Español", "Nombre Español", "es", false, "SHORT");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(frenchName, spanishName), Arrays.asList(mapping));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use first name
         assertEquals("Nom Français", result.getText());
     }
 
@@ -269,11 +231,8 @@ public class ConceptCodeResolverImplTest {
     public void shouldUseHl7CodeWhenPresent() {
         // Given: Source has hl7Code
         OrderConcept concept = buildConceptWithMapping("LOINC", "12345", "Test", "LN");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use hl7Code
         assertEquals("LN", result.getNameOfCodingSystem());
     }
 
@@ -287,11 +246,8 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should use source name
         assertEquals("LOINC", result.getNameOfCodingSystem());
     }
 
@@ -326,8 +282,6 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping));
-
-        // When/Then
         try {
             resolver.resolveConceptCode(concept);
             fail("Should throw ConceptCodeResolutionException");
@@ -346,8 +300,6 @@ public class ConceptCodeResolverImplTest {
         OrderConceptMapping mapping = new OrderConceptMapping(mapType, term);
 
         OrderConcept concept = new OrderConcept("test-uuid", null, Arrays.asList(mapping));
-
-        // When/Then
         resolver.resolveConceptCode(concept);
     }
 
@@ -358,11 +310,8 @@ public class ConceptCodeResolverImplTest {
         ReflectionTestUtils.invokeMethod(resolver, "initializePrioritySources");
 
         OrderConcept concept = buildConceptWithMapping("SNOMED-CT", "12345", "Test", "SCT");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should successfully resolve
         assertNotNull(result);
         assertEquals("12345", result.getIdentifier());
     }
@@ -374,11 +323,8 @@ public class ConceptCodeResolverImplTest {
         ReflectionTestUtils.invokeMethod(resolver, "initializePrioritySources");
 
         OrderConcept concept = buildConceptWithMapping("SNOMED-CT", "12345", "Test", "SCT");
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should successfully resolve
         assertNotNull(result);
         assertEquals("12345", result.getIdentifier());
     }
@@ -395,11 +341,8 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should skip first and use second
         assertNotNull(result);
         assertEquals("12345", result.getIdentifier());
     }
@@ -417,16 +360,12 @@ public class ConceptCodeResolverImplTest {
 
         OrderConceptName conceptName = new OrderConceptName("uuid", "Test", "Test", "en", true, "FULLY_SPECIFIED");
         OrderConcept concept = new OrderConcept("test-uuid", Arrays.asList(conceptName), Arrays.asList(mapping1, mapping2));
-
-        // When
         HL7CodedElement result = resolver.resolveConceptCode(concept);
 
-        // Then: Should skip first and use second
         assertNotNull(result);
         assertEquals("12345", result.getIdentifier());
     }
 
-    // Helper method to build test concepts
     private OrderConcept buildConceptWithMapping(String sourceName, String code, String termName, String hl7Code) {
         ConceptSource source = new ConceptSource("source-uuid", sourceName, hl7Code);
         ConceptReferenceTerm term = new ConceptReferenceTerm(termName, code, false, source);
