@@ -5,6 +5,8 @@ import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocationInfo;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
@@ -13,7 +15,10 @@ import org.bahmni.module.pacsintegration.model.OrderType;
 import org.bahmni.module.pacsintegration.repository.OrderDetailsRepository;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -23,6 +28,10 @@ import java.util.List;
 
 @Component
 public class PacsIntegrationService {
+    private static final Logger logger = LoggerFactory.getLogger(PacsIntegrationService.class);
+
+    @Value("${create.imagingstudy.enabled}")
+    private boolean imagingStudyEnabled;
 
     @Autowired
     private OpenMRSEncounterToOrderMapper openMRSEncounterToOrderMapper;
@@ -51,6 +60,9 @@ public class PacsIntegrationService {
     @Autowired
     private ImagingStudyService imagingStudyService;
 
+    @Autowired
+    private LocationResolver locationResolver;
+
     public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, ParseException, HL7Exception, LLPException {
         OpenMRSPatient patient = openMRSService.getPatient(openMRSEncounter.getPatientUuid());
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
@@ -65,17 +77,24 @@ public class PacsIntegrationService {
 
                 orderRepository.save(order);
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
-                //TODO: add test for this
-                String locationUuid = "7672b695-1872-40de-9ae8-a2bb38038208";
-                String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(openMRSOrder.getOrderNumber());
 
-                imagingStudyService.createImagingStudy(
-                    openMRSOrder.getUuid(),
-                    openMRSEncounter.getPatientUuid(),
-                        locationUuid,
-                    studyInstanceUID,
-                    "Imaging Study for " + openMRSOrder.getTestName()
-                );
+                logger.info("Imagining study creation enabled: {}", imagingStudyEnabled);
+
+                if (imagingStudyEnabled) {
+                    OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+                    OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
+                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(openMRSOrder.getOrderNumber());
+
+                    logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}", openMRSOrder.getUuid(), studyInstanceUID);
+                    imagingStudyService.createImagingStudy(
+                            openMRSOrder.getUuid(),
+                            openMRSEncounter.getPatientUuid(),
+                            orderLocationInfo.getSourceLocation().getUuid(),
+                            studyInstanceUID,
+                            "Imaging Study for " + openMRSOrder.getTestName()
+                    );
+                }
+
             }
         }
     }

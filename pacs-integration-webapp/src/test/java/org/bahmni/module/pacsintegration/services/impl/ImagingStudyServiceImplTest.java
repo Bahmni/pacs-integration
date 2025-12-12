@@ -3,14 +3,11 @@ package org.bahmni.module.pacsintegration.services.impl;
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.ImagingStudyMapper;
 import org.bahmni.module.pacsintegration.services.OpenMRSService;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
@@ -32,13 +29,8 @@ public class ImagingStudyServiceImplTest {
     private static final String STUDY_INSTANCE_UID = "1.2.826.0.1.3680043.8.498.12345";
     private static final String DESCRIPTION = "Chest X-Ray";
 
-    @Before
-    public void setUp() {
-        ReflectionTestUtils.setField(imagingStudyService, "imagingStudyEnabled", true);
-    }
-
     @Test
-    public void shouldCreateImagingStudyWhenEnabledAndValidStudyInstanceUID() throws Exception {
+    public void shouldCreateImagingStudyWhenValidStudyInstanceUID() throws Exception {
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
@@ -50,18 +42,24 @@ public class ImagingStudyServiceImplTest {
     }
 
     @Test
-    public void shouldNotCreateImagingStudyWhenDisabled() throws Exception {
-        ReflectionTestUtils.setField(imagingStudyService, "imagingStudyEnabled", false);
-
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+    public void shouldNotCreateImagingStudyWhenStudyInstanceUIDIsNull() throws Exception {
+        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, null, DESCRIPTION);
 
         verify(imagingStudyMapper, never()).buildFhirPayload(anyString(), anyString(), anyString(), anyString(), anyString());
         verify(openMRSService, never()).createFhirImagingStudy(any(FhirImagingStudy.class));
     }
 
     @Test
-    public void shouldNotCreateImagingStudyWhenStudyInstanceUIDIsNull() throws Exception {
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, null, DESCRIPTION);
+    public void shouldNotCreateImagingStudyWhenStudyInstanceUIDIsEmpty() throws Exception {
+        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, "", DESCRIPTION);
+
+        verify(imagingStudyMapper, never()).buildFhirPayload(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(openMRSService, never()).createFhirImagingStudy(any(FhirImagingStudy.class));
+    }
+
+    @Test
+    public void shouldNotCreateImagingStudyWhenStudyInstanceUIDIsWhitespace() throws Exception {
+        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, "   ", DESCRIPTION);
 
         verify(imagingStudyMapper, never()).buildFhirPayload(anyString(), anyString(), anyString(), anyString(), anyString());
         verify(openMRSService, never()).createFhirImagingStudy(any(FhirImagingStudy.class));

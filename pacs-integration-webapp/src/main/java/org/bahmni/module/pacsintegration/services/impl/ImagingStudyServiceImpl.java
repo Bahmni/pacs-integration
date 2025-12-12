@@ -7,17 +7,13 @@ import org.bahmni.module.pacsintegration.services.OpenMRSService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ImagingStudyServiceImpl implements ImagingStudyService {
     
     private static final Logger logger = LoggerFactory.getLogger(ImagingStudyServiceImpl.class);
-    
-    @Value("${create.imagingstudy.enabled:false}")
-    private boolean imagingStudyEnabled;
-    
+
     @Autowired
     private OpenMRSService openMRSService;
     
@@ -31,11 +27,6 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
             String locationUuid, 
             String studyInstanceUID,
             String description) {
-        
-        if (!imagingStudyEnabled) {
-            logger.debug("ImagingStudy creation is disabled. Skipping for order: {}", orderUuid);
-            return;
-        }
         
         if (studyInstanceUID == null || studyInstanceUID.trim().isEmpty()) {
             logger.warn("Cannot create ImagingStudy for order {} - StudyInstanceUID is null or empty", orderUuid);
