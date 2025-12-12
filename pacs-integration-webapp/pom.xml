@@ -16,7 +16,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
-                    <argLine>-Xmx512m -XX:MaxPermSize=512m</argLine>
+                    <argLine>-Xmx512m -XX:MaxMetaspaceSize=512m</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -42,6 +42,14 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
         </plugins>
         <finalName>${project.parent.artifactId}</finalName>
     </build>
@@ -49,6 +57,9 @@
     <artifactId>pacs-integration-webapp</artifactId>
 
     <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <atomfeed.version>1.10.1</atomfeed.version>
         <hapi-base.version>2.2</hapi-base.version>
         <web-clients.version>1.0.0</web-clients.version>
@@ -225,6 +236,12 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
