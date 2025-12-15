@@ -51,7 +51,7 @@ public class PacsIntegrationServiceTest {
     private OpenMRSService openMRSService;
 
     @Mock
-    private HL7Service hl7Service;
+    private HL7MessageCreator hl7MessageCreator;
 
     @Mock ADR_A19 adr_a19;
 
@@ -72,7 +72,7 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
 
         pacsIntegrationService.processEncounter(encounter);
@@ -87,7 +87,7 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null).thenReturn(new Order());
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
 
         pacsIntegrationService.processEncounter(encounter);

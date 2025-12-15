@@ -5,7 +5,7 @@ import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractMessage;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
-import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderDetails;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,9 +30,6 @@ public class PacsIntegrationService {
     private OpenMRSService openMRSService;
 
     @Autowired
-    private HL7Service hl7Service;
-
-    @Autowired
     private OrderTypeRepository orderTypeRepository;
 
     @Autowired
@@ -45,15 +41,18 @@ public class PacsIntegrationService {
     @Autowired
     private ModalityService modalityService;
 
-    public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, ParseException, HL7Exception, LLPException {
-        OpenMRSPatient patient = openMRSService.getPatient(openMRSEncounter.getPatientUuid());
+    @Autowired
+    private HL7MessageCreator hl7MessageCreator;
+
+    public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, HL7Exception, LLPException {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
+                OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+                AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
                 String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
                 Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
 
