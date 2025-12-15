@@ -58,6 +58,7 @@ public class HL7Service {
     private final String HL7_CANCELLED_STATUS_CODE = "CA";
     private final String PATIENT_IDENTIFIER_AUTHORITY = "Bahmni EMR";
 
+    @Deprecated
     public AbstractMessage createMessage(OpenMRSOrder order, OpenMRSPatient openMRSPatient, List<OpenMRSProvider> providers) throws HL7Exception {
         if (order.isDiscontinued()) {
             return cancelOrderMessage(order, openMRSPatient, providers);
@@ -86,7 +87,7 @@ public class HL7Service {
         orc.getOrderStatus().setValue(HL7_SCHEDULED_STATUS_CODE);
 
         addOBRComponent(order, message);
-        addZDSSegment(orderNumber, message);
+        addZDSSegment(orderNumber, order.getDateCreated(), message);
         return message;
     }
 
@@ -117,7 +118,7 @@ public class HL7Service {
         orc.getOrderStatus().setValue(HL7_CANCELLED_STATUS_CODE);
 
         addOBRComponent(order, message);
-        addZDSSegment(orderNumber, message);
+        addZDSSegment(orderNumber, order.getDateCreated(), message);
         return message;
     }
 
@@ -196,9 +197,9 @@ public class HL7Service {
      * Add ZDS segment for DICOM Study Instance UID (required by DCM4CHEE 5)
      * This method stores the StudyInstanceUID that will be added to the message during encoding
      */
-    private void addZDSSegment(String orderNumber, ORM_O01 message) {
+    private void addZDSSegment(String orderNumber, Date dateCreated, ORM_O01 message) {
         try {
-            String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
+            String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber, dateCreated);
             message.addNonstandardSegment("ZDS");
             Terser terser = new Terser(message);
             terser.set("ZDS-1", studyInstanceUID);

@@ -7,7 +7,6 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEnco
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocationInfo;
-import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderDetails;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,20 +56,23 @@ public class PacsIntegrationService {
     private ModalityService modalityService;
 
     @Autowired
+    private HL7MessageCreator hl7MessageCreator;
+
+    @Autowired
     private ImagingStudyService imagingStudyService;
 
     @Autowired
     private LocationResolver locationResolver;
 
-    public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, ParseException, HL7Exception, LLPException {
-        OpenMRSPatient patient = openMRSService.getPatient(openMRSEncounter.getPatientUuid());
+    public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, HL7Exception, LLPException {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                AbstractMessage request = hl7Service.createMessage(openMRSOrder, patient, openMRSEncounter.getProviders());
+                OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+                AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
                 String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
                 Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
 
@@ -81,11 +82,12 @@ public class PacsIntegrationService {
                 logger.info("Imagining study creation enabled: {}", imagingStudyEnabled);
 
                 if (imagingStudyEnabled) {
-                    OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
                     OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
-                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(openMRSOrder.getOrderNumber());
+                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
+                            openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
 
-                    logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}", openMRSOrder.getUuid(), studyInstanceUID);
+                    logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}",
+                            openMRSOrder.getUuid(), studyInstanceUID);
                     imagingStudyService.createImagingStudy(
                             openMRSOrder.getUuid(),
                             openMRSEncounter.getPatientUuid(),

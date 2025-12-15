@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,6 +56,7 @@ public class HL7ServiceTest {
         ReflectionTestUtils.setField(hl7Service, "receivingApplication", "Test PACS");
         ReflectionTestUtils.setField(hl7Service, "receivingFacility", "Test Facility");
         ReflectionTestUtils.setField(hl7Service, "patientIdentifierTypeCode", "MR");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(anyString(), any())).thenReturn("1.2.3.4.5");
     }
 
     @Test
@@ -76,7 +79,7 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber(), new Date())).thenReturn("1.2.3.4.5");
 
         hl7Service.createMessage(order, patient, providers);
     }
@@ -86,8 +89,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -116,8 +117,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         hl7Service.createMessage(order, patient, providers);
     }
 
@@ -126,8 +125,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -143,8 +140,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = createPatient("PAT-001", "John", "Doe", "M");
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -162,8 +157,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         ORC orc = hl7Message.getORDER().getORC();
@@ -175,8 +168,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -194,8 +185,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         OBR obr = hl7Message.getORDER().getORDER_DETAIL().getOBR();
@@ -211,8 +200,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         OBR obr = hl7Message.getORDER().getORDER_DETAIL().getOBR();
@@ -224,8 +211,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = createPatient("PAT-001", "John", "Doe", "M");
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -240,7 +225,7 @@ public class HL7ServiceTest {
         List<OpenMRSProvider> providers = getProvidersData();
 
         String expectedStudyInstanceUID = "1.2.826.0.1.3680043.8.498.12345.67890";
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn(expectedStudyInstanceUID);
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber(),order.getDateCreated())).thenReturn(expectedStudyInstanceUID);
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -255,8 +240,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = createPatient("PAT-001", "John", "Doe", "M");
         patient.setBirthDate(new Date());
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -275,8 +258,6 @@ public class HL7ServiceTest {
         List<OpenMRSProvider> providers = new ArrayList<OpenMRSProvider>();
         providers.add(new OpenMRSProvider("provider-uuid-123", "Dr. Smith"));
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         ORC orc = hl7Message.getORDER().getORC();
@@ -292,8 +273,6 @@ public class HL7ServiceTest {
                 .build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
@@ -314,8 +293,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
         when(orderRepository.findByOrderUuid(order.getPreviousOrderUuid())).thenReturn(previousOrder);
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(previousOrder.getOrderNumber())).thenReturn("1.2.3.4.5");
 
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
@@ -336,8 +313,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         MSH msh = hl7Message.getMSH();
@@ -353,8 +328,6 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
-
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 
         ORC orc = hl7Message.getORDER().getORC();
@@ -369,7 +342,7 @@ public class HL7ServiceTest {
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
 
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenThrow(new RuntimeException("UID generation failed"));
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber(), order.getDateCreated())).thenThrow(new RuntimeException("UID generation failed"));
 
         hl7Service.createMessage(order, patient, providers);
     }
@@ -394,8 +367,6 @@ public class HL7ServiceTest {
         OpenMRSOrder order = new OpenMRSOrderBuilder().withOrderNumber("ORD-111").withConcept(buildConceptWithSource(Constants.PACS_CONCEPT_SOURCE_NAME, "123")).build();
         OpenMRSPatient patient = new OpenMRSPatient();
         List<OpenMRSProvider> providers = getProvidersData();
-
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(order.getOrderNumber())).thenReturn("1.2.3.4.5");
 
         ORM_O01 hl7Message = (ORM_O01) hl7Service.createMessage(order, patient, providers);
 

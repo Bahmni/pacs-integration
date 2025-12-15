@@ -2,6 +2,7 @@ package org.bahmni.module.pacsintegration.services;
 
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
+import ca.uhn.hl7v2.model.AbstractMessage;
 import ca.uhn.hl7v2.model.v25.message.ADR_A19;
 import org.bahmni.module.pacsintegration.atomfeed.builders.OpenMRSConceptBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConcept;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -56,7 +58,7 @@ public class PacsIntegrationServiceTest {
     private OpenMRSService openMRSService;
 
     @Mock
-    private HL7Service hl7Service;
+    private HL7MessageCreator hl7MessageCreator;
 
     @Mock ADR_A19 adr_a19;
 
@@ -87,9 +89,12 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+        when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
+        when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
+                .thenReturn(new Order());
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
 
@@ -106,9 +111,12 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null).thenReturn(new Order());
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+        when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
+        when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
+                .thenReturn(new Order());
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
 
@@ -127,17 +135,21 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+        when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
+        when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
+                .thenReturn(new Order());
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(2)).save(any(Order.class));
         verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
         verify(imagingStudyService, never()).createImagingStudy(anyString(), anyString(), anyString(), anyString(), anyString());
-        verify(openMRSService, never()).getOrderDetails(anyString());
+        verify(openMRSService, times(2)).getOrderDetails(anyString());
         verify(locationResolver, never()).resolveLocations(any(OpenMRSOrderDetails.class));
+        verify(studyInstanceUIDGenerator, never()).generateStudyInstanceUID(any(String.class), any(Date.class));
     }
 
     @Test
@@ -155,10 +167,13 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
-        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
-        when(adr_a19.encode()).thenReturn("Request message");
-        when(studyInstanceUIDGenerator.generateStudyInstanceUID("ORD-1")).thenReturn(expectedStudyInstanceUID);
         when(openMRSService.getOrderDetails("uuid1")).thenReturn(new OpenMRSOrderDetails());
+        when(hl7MessageCreator.createHL7Message(any())).thenReturn(adr_a19);
+        when(adr_a19.encode()).thenReturn("Request message");
+        when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
+        when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
+                .thenReturn(new Order());
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(eq("ORD-1"), any(Date.class))).thenReturn(expectedStudyInstanceUID);
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(locationInfo);
 
         pacsIntegrationService.processEncounter(encounter);
@@ -193,12 +208,14 @@ public class PacsIntegrationServiceTest {
                 .build();
         OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", concept1, false, null, null);
         order1.setOrderNumber("ORD-1");
+        order1.setDateCreated(new Date());
 
         OpenMRSConcept concept2 = new OpenMRSConceptBuilder()
                 .addConceptName("Test Order 2")
                 .build();
         OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", concept2, false, null, null);
         order2.setOrderNumber("ORD-2");
+        order2.setDateCreated(new Date());
         
         openMRSEncounter.setOrders(Arrays.asList(order1, order2));
         return openMRSEncounter;

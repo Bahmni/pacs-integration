@@ -3,11 +3,14 @@ package org.bahmni.module.pacsintegration.atomfeed.builders;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConcept;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
 
+import java.util.Date;
+
 public class OpenMRSOrderBuilder {
     private OpenMRSOrder openMRSOrder;
 
     public OpenMRSOrderBuilder() {
         this.openMRSOrder = new OpenMRSOrder();
+        openMRSOrder.setDateCreated(new Date());
     }
 
     public OpenMRSOrderBuilder withOrderUuid(String orderUuid) {
