@@ -3,6 +3,8 @@ package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 import org.bahmni.module.pacsintegration.atomfeed.client.Constants;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Date;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSOrder {
     public static final String ACTION_NEW = "NEW";
@@ -17,6 +19,7 @@ public class OpenMRSOrder {
     private String previousOrderUuid;
     private String commentToFulfiller;
     private String urgency;
+    private Date dateCreated;
 
     public String getUrgency() {
         return urgency;
@@ -129,4 +132,11 @@ public class OpenMRSOrder {
         this.commentToFulfiller = commentToFulfiller;
     }
 
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 }

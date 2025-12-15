@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
+
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -23,12 +25,13 @@ public class StudyInstanceUIDGeneratorImplTest {
     }
 
     @Test
-    public void shouldGenerateStudyInstanceUIDWithPrefixandOrderNumberHash() {
+    public void shouldGenerateStudyInstanceUIDWithPrefixandDateCreatedandOrderNumberHash() {
         String orderNumber = "ORD-123";
+        Date dateCreated = new Date();
 
-        String result = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
+        String result = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber, dateCreated);
 
-        String expectedUid = DEFAULT_PREFIX + "." + Math.abs(orderNumber.hashCode());
+        String expectedUid = DEFAULT_PREFIX + "." + dateCreated.getTime() + "." + Math.abs(orderNumber.hashCode());
 
         assertNotNull(result);
         assertEquals(expectedUid, result);
@@ -37,17 +40,20 @@ public class StudyInstanceUIDGeneratorImplTest {
     @Test
     public void shouldGenerateDifferentStudyInstanceUIDsForDifferentOrderNumbers() {
         String orderNumber1 = "ORD-123";
+        Date dateCreatedOrder1 = new Date();
         String orderNumber2 = "ORD-456";
-        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber1);
-        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber2);
+        Date dateCreatedOrder2 = new Date();
+        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber1, dateCreatedOrder1);
+        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber2, dateCreatedOrder2);
         assertNotSame(uid1, uid2);
     }
 
     @Test
     public void shouldGenerateSameStudyInstanceUIDForSameOrderNumber() {
         String orderNumber = "ORD-123";
-        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
-        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber);
+        Date dateCreatedOrder1 = new Date();
+        String uid1 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber, dateCreatedOrder1);
+        String uid2 = studyInstanceUIDGenerator.generateStudyInstanceUID(orderNumber, dateCreatedOrder1);
         assertEquals(uid1, uid2);
     }
 }

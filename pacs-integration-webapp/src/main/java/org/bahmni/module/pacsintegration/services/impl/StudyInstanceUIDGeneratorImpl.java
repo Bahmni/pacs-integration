@@ -4,6 +4,8 @@ import org.bahmni.module.pacsintegration.services.StudyInstanceUIDGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class StudyInstanceUIDGeneratorImpl implements StudyInstanceUIDGenerator {
 
@@ -11,9 +13,9 @@ public class StudyInstanceUIDGeneratorImpl implements StudyInstanceUIDGenerator 
     private String studyInstanceUIDPrefix;
 
     @Override
-    public String generateStudyInstanceUID(String orderNumber) {
+    public String generateStudyInstanceUID(String orderNumber, Date dateCreated) {
 
         int orderHash = Math.abs(orderNumber.hashCode());
-        return studyInstanceUIDPrefix + "." + orderHash;
+        return studyInstanceUIDPrefix + "." + dateCreated.getTime() + '.' + orderHash;
     }
 }
