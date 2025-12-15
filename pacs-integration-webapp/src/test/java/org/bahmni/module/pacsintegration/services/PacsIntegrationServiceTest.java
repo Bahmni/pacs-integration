@@ -3,8 +3,13 @@ package org.bahmni.module.pacsintegration.services;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.v25.message.ADR_A19;
+import org.bahmni.module.pacsintegration.atomfeed.builders.OpenMRSConceptBuilder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSConcept;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSEncounter;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.OpenMRSOrder;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.LocationDTO;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocationInfo;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrderMapper;
 import org.bahmni.module.pacsintegration.model.Order;
@@ -19,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -26,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -58,12 +63,22 @@ public class PacsIntegrationServiceTest {
     @Mock
     private ModalityService modalityService;
 
+    @Mock
+    private ImagingStudyService imagingStudyService;
+
+    @Mock
+    private StudyInstanceUIDGenerator studyInstanceUIDGenerator;
+
+    @Mock
+    private LocationResolver locationResolver;
+
     private String PATIENT_UUID = "patient1";
 
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        ReflectionTestUtils.setField(pacsIntegrationService, "imagingStudyEnabled", true);
     }
 
     @Test
@@ -74,11 +89,15 @@ public class PacsIntegrationServiceTest {
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
         when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+        when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
+        when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(2)).save(any(Order.class));
         verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
+        verify(imagingStudyService, times(2)).createImagingStudy(anyString(), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -89,18 +108,98 @@ public class PacsIntegrationServiceTest {
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null).thenReturn(new Order());
         when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
         when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+        when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
+        when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
+        verify(imagingStudyService, times(1)).createImagingStudy(anyString(), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void shouldNotCreateImagingStudyWhenDisabled() throws IOException, ParseException, LLPException, HL7Exception {
+        ReflectionTestUtils.setField(pacsIntegrationService, "imagingStudyEnabled", false);
+        
+        OpenMRSEncounter encounter = buildEncounter();
+        when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
+        when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
+        when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
+        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class))).thenReturn("test-study-instance-uid");
+
+        pacsIntegrationService.processEncounter(encounter);
+
+        verify(orderRepository, times(2)).save(any(Order.class));
+        verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
+        verify(imagingStudyService, never()).createImagingStudy(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(openMRSService, never()).getOrderDetails(anyString());
+        verify(locationResolver, never()).resolveLocations(any(OpenMRSOrderDetails.class));
+    }
+
+    @Test
+    public void shouldCreateImagingStudyWithCorrectParameters() throws IOException, ParseException, LLPException, HL7Exception {
+        OpenMRSEncounter encounter = buildEncounter();
+        String expectedStudyInstanceUID = "1.2.826.0.1.3680043.8.498.12345";
+        String expectedLocationUuid = "location-uuid-123";
+
+        LocationDTO sourceLocation = new LocationDTO();
+        sourceLocation.setUuid(expectedLocationUuid);
+        
+        OrderLocationInfo locationInfo = new OrderLocationInfo();
+        locationInfo.setSourceLocation(sourceLocation);
+        
+        when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
+        when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
+        when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
+        when(hl7Service.createMessage(any(OpenMRSOrder.class), any(OpenMRSPatient.class), any(List.class))).thenReturn(adr_a19);
+        when(adr_a19.encode()).thenReturn("Request message");
+        when(studyInstanceUIDGenerator.generateStudyInstanceUID("ORD-1")).thenReturn(expectedStudyInstanceUID);
+        when(openMRSService.getOrderDetails("uuid1")).thenReturn(new OpenMRSOrderDetails());
+        when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(locationInfo);
+
+        pacsIntegrationService.processEncounter(encounter);
+
+        verify(imagingStudyService).createImagingStudy(
+                eq("uuid1"),
+                eq(PATIENT_UUID),
+                eq(expectedLocationUuid),
+                eq(expectedStudyInstanceUID),
+                eq("Imaging Study for Test Order 1")
+        );
+    }
+
+    private OrderLocationInfo buildOrderLocationInfo() {
+        LocationDTO location = new LocationDTO();
+        location.setUuid("location-uuid");
+        location.setName("Test Location");
+        
+        OrderLocationInfo locationInfo = new OrderLocationInfo();
+        locationInfo.setSourceLocation(location);
+        locationInfo.setFulfillingLocation(location);
+        
+        return locationInfo;
     }
 
     OpenMRSEncounter buildEncounter() {
         OpenMRSEncounter openMRSEncounter = new OpenMRSEncounter();
         openMRSEncounter.setPatientUuid(PATIENT_UUID);
-        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", null, false, null, null);
-        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", null, false, null, null);
+
+        OpenMRSConcept concept1 = new OpenMRSConceptBuilder()
+                .addConceptName("Test Order 1")
+                .build();
+        OpenMRSOrder order1 = new OpenMRSOrder("uuid1", "type1", concept1, false, null, null);
+        order1.setOrderNumber("ORD-1");
+
+        OpenMRSConcept concept2 = new OpenMRSConceptBuilder()
+                .addConceptName("Test Order 2")
+                .build();
+        OpenMRSOrder order2 = new OpenMRSOrder("uuid2", "type2", concept2, false, null, null);
+        order2.setOrderNumber("ORD-2");
+        
         openMRSEncounter.setOrders(Arrays.asList(order1, order2));
         return openMRSEncounter;
     }
