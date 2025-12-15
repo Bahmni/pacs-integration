@@ -1,5 +1,6 @@
 package org.bahmni.module.pacsintegration.services.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.ImagingStudyMapper;
 import org.bahmni.module.pacsintegration.services.ImagingStudyService;
@@ -28,7 +29,7 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
             String studyInstanceUID,
             String description) {
         
-        if (studyInstanceUID == null || studyInstanceUID.trim().isEmpty()) {
+        if (StringUtils.isBlank(studyInstanceUID)) {
             logger.warn("Cannot create ImagingStudy for order {} - StudyInstanceUID is null or empty", orderUuid);
             return;
         }

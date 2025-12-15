@@ -2,3 +2,5 @@
 *.iml
 target/
 .mvn/wrapper/maven-wrapper.jar
+.idea/*
+*.DS_Store
