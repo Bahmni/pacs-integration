@@ -9,5 +9,6 @@ data:
   DB_NAME: "{{ .Values.config.PACS_INTEGRATION_DB_NAME }}"
   OPENMRS_HOST: "{{ .Values.config.OPENMRS_HOST }}"
   OPENMRS_PORT: "{{ .Values.config.OPENMRS_PORT }}"
+  CREATE_IMAGING_STUDY_ENABLED: "{{ .Values.config.CREATE_IMAGING_STUDY_ENABLED }}"
       
   
