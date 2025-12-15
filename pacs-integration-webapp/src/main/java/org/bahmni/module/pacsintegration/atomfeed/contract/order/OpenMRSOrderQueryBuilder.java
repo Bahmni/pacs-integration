@@ -9,9 +9,10 @@ public class OpenMRSOrderQueryBuilder {
     private static final String CONCEPT = "concept:(uuid,names,mappings:(conceptMapType:(display),conceptReferenceTerm:(name,code,retired,conceptSource:(uuid,name,hl7Code))))";
     private static final String PATIENT = "patient:(uuid,patientIdentifier:(identifier),person:(gender,age,birthdate,preferredName:(givenName,middleName,familyName)))";
     private static final String PREVIOUS_ORDER_DETAILS = String.format("previousOrder:(%s)", BASE_ORDER_DETAILS);
+    private static final String CREATOR = "creator:(uuid,person:(preferredName:(givenName,middleName,familyName)))";
 
-    public static final String ORDER_DETAILS_REPRESENTATION = String.format("custom:(%s,%s,%s,%s,%s,%s,%s)",
-            BASE_ORDER_DETAILS, ORDER_TYPE, ENCOUNTER, ATTRIBUTES, CONCEPT, PATIENT, PREVIOUS_ORDER_DETAILS);
+    public static final String ORDER_DETAILS_REPRESENTATION = String.format("custom:(%s,%s,%s,%s,%s,%s,%s,%s)",
+            BASE_ORDER_DETAILS, ORDER_TYPE, ENCOUNTER, ATTRIBUTES, CONCEPT, PATIENT, PREVIOUS_ORDER_DETAILS, CREATOR);
 
     public static final String ORDER_DETAILS_QUERY_PARAM = "v=" + ORDER_DETAILS_REPRESENTATION;
 }

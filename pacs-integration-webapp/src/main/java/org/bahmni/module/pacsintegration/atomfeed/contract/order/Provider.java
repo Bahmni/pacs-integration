@@ -5,14 +5,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Patient {
+public class Provider {
     private String uuid;
-    private PatientIdentifier patientIdentifier;
     private Person person;
-
-    @Data
-    public static class PatientIdentifier {
-        private String identifier;
-    }
 }
-

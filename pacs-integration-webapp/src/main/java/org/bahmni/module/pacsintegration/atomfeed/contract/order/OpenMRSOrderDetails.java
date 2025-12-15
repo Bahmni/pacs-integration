@@ -23,6 +23,7 @@ public class OpenMRSOrderDetails extends BaseOrderDetails{
     private OrderConcept concept;
     private Patient patient;
     private BaseOrderDetails previousOrder;
+    private Provider creator;
     private String type;
 
     public boolean isDiscontinuedOrder() {
