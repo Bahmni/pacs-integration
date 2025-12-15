@@ -12,3 +12,5 @@ server.port=9081
 liquibase.change-log=classpath:db/changelog/liquibase.xml
 
 enable.scheduling=true
+
+create.imagingstudy.enabled=${CREATE_IMAGING_STUDY_ENABLED:false}
