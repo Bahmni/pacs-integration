@@ -7,6 +7,7 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.order.LocationDTO;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocationInfo;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.hl7.Constants;
+import org.bahmni.module.pacsintegration.integrationtest.HL7Utils;
 import org.bahmni.module.pacsintegration.services.LocationResolver;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class MessageHeaderMapperImplTest {
 
     private MessageHeaderMapperImpl messageHeaderMapper;
     private MSH messageHeader;
+    private OpenMRSOrderDetails orderDetails;
 
     @Before
     public void setUp() throws HL7Exception {
@@ -46,11 +48,11 @@ public class MessageHeaderMapperImplTest {
 
         ORM_O01 message = new ORM_O01();
         messageHeader = message.getMSH();
+        orderDetails = HL7Utils.createScheduledOrderDetails();
     }
 
     @Test
     public void shouldMapMessageHeaderWithAllRequiredFields() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -66,7 +68,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldSetHL7Constants() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -83,7 +84,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldSetDateTimeOfMessage() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -96,7 +96,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldCallLocationResolverWithOrderDetails() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -108,7 +107,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldMapSourceLocationToSendingFacility() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
         locationInfo.getSourceLocation().setName("Custom Source Location");
 
@@ -121,7 +119,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldMapFulfillingLocationToReceivingFacility() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
         locationInfo.getFulfillingLocation().setName("Custom Fulfilling Location");
 
@@ -134,7 +131,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldGenerateMessageControlIDWithOrderNumber() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         orderDetails.setOrderNumber("ORD-12345");
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
@@ -149,7 +145,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test(expected = RuntimeException.class)
     public void shouldThrowRuntimeExceptionWhenHL7ExceptionOccurs() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
 
         when(locationResolver.resolveLocations(orderDetails)).thenThrow(new RuntimeException("Test exception"));
 
@@ -174,7 +169,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldUseSendingApplicationFromConstructor() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -186,7 +180,6 @@ public class MessageHeaderMapperImplTest {
 
     @Test
     public void shouldUseReceivingApplicationFromConstructor() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         OrderLocationInfo locationInfo = createOrderLocationInfo();
 
         when(locationResolver.resolveLocations(orderDetails)).thenReturn(locationInfo);
@@ -194,15 +187,6 @@ public class MessageHeaderMapperImplTest {
         messageHeaderMapper.map(messageHeader, orderDetails);
 
         assertEquals(RECEIVING_APPLICATION, messageHeader.getReceivingApplication().getNamespaceID().getValue());
-    }
-
-    private OpenMRSOrderDetails createOrderDetails() {
-        OpenMRSOrderDetails orderDetails = new OpenMRSOrderDetails();
-        orderDetails.setUuid("order-uuid");
-        orderDetails.setOrderNumber("ORD-12345");
-        orderDetails.setAction("NEW");
-        orderDetails.setDateCreated(new Date());
-        return orderDetails;
     }
 
     private OrderLocationInfo createOrderLocationInfo() {

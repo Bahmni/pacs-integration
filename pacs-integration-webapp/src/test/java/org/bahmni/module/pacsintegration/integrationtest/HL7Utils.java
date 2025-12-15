@@ -18,6 +18,11 @@ import ca.uhn.hl7v2.*;
 import ca.uhn.hl7v2.model.*;
 import ca.uhn.hl7v2.model.v25.message.*;
 import ca.uhn.hl7v2.model.v25.segment.*;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.BaseOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderConcept;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.Person;
+import org.bahmni.module.pacsintegration.atomfeed.contract.order.Provider;
 
 import java.text.*;
 import java.util.*;
@@ -66,4 +71,71 @@ public class HL7Utils {
         return ack;
     }
 
+    public static ORM_O01 createORM_O01Message() {
+        try {
+            ORM_O01 message = new ORM_O01();
+            message.getMSH().getFieldSeparator().setValue("|");
+            message.getMSH().getEncodingCharacters().setValue("^~\\&");
+            return message;
+        } catch (HL7Exception e) {
+            throw new RuntimeException("Failed to create test HL7 message", e);
+        }
+    }
+
+    public static OpenMRSOrderDetails createScheduledOrderDetails() {
+        OpenMRSOrderDetails orderDetails = new OpenMRSOrderDetails();
+        orderDetails.setUuid("order-uuid");
+        orderDetails.setOrderNumber("ORD-12345");
+        orderDetails.setAction("NEW");
+        orderDetails.setUrgency("ROUTINE");
+        orderDetails.setDateCreated(new Date());
+        return orderDetails;
+    }
+
+    public static OpenMRSOrderDetails createDiscontinuedOrderDetails() {
+        OpenMRSOrderDetails orderDetails = new OpenMRSOrderDetails();
+        orderDetails.setUuid("order-uuid");
+        orderDetails.setOrderNumber("ORD-456");
+        orderDetails.setAction("DISCONTINUE");
+        orderDetails.setUrgency("ROUTINE");
+        orderDetails.setDateCreated(new Date());
+
+        BaseOrderDetails previousOrder = new BaseOrderDetails();
+        previousOrder.setUuid("previous-uuid");
+        previousOrder.setOrderNumber("PREV-ORD-123");
+        previousOrder.setUrgency("ROUTINE");
+        previousOrder.setDateCreated(new Date());
+
+        orderDetails.setPreviousOrder(previousOrder);
+
+        return orderDetails;
+    }
+
+    public static OpenMRSOrderDetails createOrderDetailsWithConcept() {
+        OpenMRSOrderDetails orderDetails = createScheduledOrderDetails();
+
+        OrderConcept concept = new OrderConcept();
+        concept.setUuid("concept-uuid");
+        orderDetails.setConcept(concept);
+
+        return orderDetails;
+    }
+
+    public static OpenMRSOrderDetails createOrderDetailsWithProvider() {
+        OpenMRSOrderDetails orderDetails = createOrderDetailsWithConcept();
+
+        Provider provider = new Provider();
+        provider.setUuid("provider-uuid");
+
+        Person person = new Person();
+        Person.PreferredName preferredName = new Person.PreferredName();
+        preferredName.setGivenName("John");
+        preferredName.setFamilyName("Doe");
+        person.setPreferredName(preferredName);
+        provider.setPerson(person);
+
+        orderDetails.setCreator(provider);
+
+        return orderDetails;
+    }
 }

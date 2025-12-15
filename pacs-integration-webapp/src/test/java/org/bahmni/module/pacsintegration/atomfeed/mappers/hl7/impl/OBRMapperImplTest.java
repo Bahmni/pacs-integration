@@ -6,8 +6,7 @@ import ca.uhn.hl7v2.model.v25.segment.OBR;
 import org.bahmni.module.pacsintegration.atomfeed.contract.hl7.HL7CodedElement;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderConcept;
-import org.bahmni.module.pacsintegration.atomfeed.contract.order.Person;
-import org.bahmni.module.pacsintegration.atomfeed.contract.order.Provider;
+import org.bahmni.module.pacsintegration.integrationtest.HL7Utils;
 import org.bahmni.module.pacsintegration.services.ConceptCodeResolver;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,20 +28,18 @@ public class OBRMapperImplTest {
 
     private OBRMapperImpl obrMapper;
     private OBR obr;
+    private OpenMRSOrderDetails orderDetails;
 
     @Before
     public void setUp() throws HL7Exception {
         obrMapper = new OBRMapperImpl(conceptCodeResolver);
-
-        ORM_O01 message = new ORM_O01();
-        message.getMSH().getFieldSeparator().setValue("|");
-        message.getMSH().getEncodingCharacters().setValue("^~\\&");
+        ORM_O01 message = HL7Utils.createORM_O01Message();
         obr = message.getORDER().getORDER_DETAIL().getOBR();
+        orderDetails = HL7Utils.createOrderDetailsWithProvider();
     }
 
     @Test
     public void shouldMapAllOBRFields() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -60,7 +57,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapProcedureCodeWithPrimaryFields() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -74,7 +70,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapProcedureCodeWithAlternateFields() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -88,7 +83,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapAccessionNumber() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -100,7 +94,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapOrderingProviderWithGivenName() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -112,7 +105,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapOrderingProviderWithFamilyName() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -124,7 +116,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldMapOrderingProviderWithUuid() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class))).thenReturn(codedElement);
@@ -136,7 +127,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldCallConceptCodeResolverWithOrderConcept() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
         HL7CodedElement codedElement = createHL7CodedElement();
         OrderConcept concept = orderDetails.getConcept();
 
@@ -149,7 +139,6 @@ public class OBRMapperImplTest {
 
     @Test(expected = RuntimeException.class)
     public void shouldThrowRuntimeExceptionWhenHL7ExceptionOccurs() throws HL7Exception {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class)))
                 .thenThrow(new RuntimeException("Test exception"));
@@ -159,7 +148,6 @@ public class OBRMapperImplTest {
 
     @Test
     public void shouldPropagateRuntimeExceptionFromConceptCodeResolver() {
-        OpenMRSOrderDetails orderDetails = createOrderDetails();
 
         when(conceptCodeResolver.resolveConceptCode(any(OrderConcept.class)))
                 .thenThrow(new RuntimeException("Concept resolution failed"));
@@ -171,32 +159,6 @@ public class OBRMapperImplTest {
             assertNotNull(e.getMessage());
             assertEquals("Concept resolution failed", e.getMessage());
         }
-    }
-
-    private OpenMRSOrderDetails createOrderDetails() {
-        OpenMRSOrderDetails orderDetails = new OpenMRSOrderDetails();
-        orderDetails.setUuid("order-uuid");
-        orderDetails.setOrderNumber("ORD-12345");
-        orderDetails.setAction("NEW");
-        orderDetails.setDateCreated(new Date());
-
-        OrderConcept concept = new OrderConcept();
-        concept.setUuid("concept-uuid");
-        orderDetails.setConcept(concept);
-
-        Provider provider = new Provider();
-        provider.setUuid("provider-uuid");
-
-        Person person = new Person();
-        Person.PreferredName preferredName = new Person.PreferredName();
-        preferredName.setGivenName("John");
-        preferredName.setFamilyName("Doe");
-        person.setPreferredName(preferredName);
-        provider.setPerson(person);
-
-        orderDetails.setCreator(provider);
-
-        return orderDetails;
     }
 
     private HL7CodedElement createHL7CodedElement() {
