@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,4 +18,5 @@ public class BaseOrderDetails {
     private String urgency;
     private String accessionNumber;
     private String commentToFulfiller;
+    private Date dateCreated;
 }

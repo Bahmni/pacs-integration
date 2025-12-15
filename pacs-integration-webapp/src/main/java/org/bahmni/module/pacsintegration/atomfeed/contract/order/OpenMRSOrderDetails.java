@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.bahmni.module.pacsintegration.atomfeed.mappers.hl7.Constants;
 
 import java.util.Date;
 import java.util.List;
@@ -23,4 +24,8 @@ public class OpenMRSOrderDetails extends BaseOrderDetails{
     private Patient patient;
     private BaseOrderDetails previousOrder;
     private String type;
+
+    public boolean isDiscontinuedOrder() {
+        return this.getAction().equals(Constants.ORDER_ACTION_DISCONTINUE);
+    }
 }

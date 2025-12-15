@@ -2,7 +2,7 @@ package org.bahmni.module.pacsintegration.atomfeed.contract.order;
 
 public class OpenMRSOrderQueryBuilder {
 
-    private static final String BASE_ORDER_DETAILS = "uuid,action,orderNumber,urgency,accessionNumber,commentToFulfiller";
+    private static final String BASE_ORDER_DETAILS = "uuid,action,orderNumber,urgency,accessionNumber,commentToFulfiller,dateCreated";
     private static final String ORDER_TYPE = "orderType:(uuid,display,name)";
     private static final String ENCOUNTER = "encounter:(uuid,location:(uuid,display,name,tags:(display),attributes:(uuid,value,attributeType:(uuid,name))))";
     private static final String ATTRIBUTES = "attributes:(uuid,value,attributeType:(name,uuid))";
