@@ -45,6 +45,11 @@ public class HL7MessageCreatorImpl implements HL7MessageCreator {
     public AbstractMessage createHL7Message(OpenMRSOrderDetails orderDetails) {
         ORM_O01 message = new ORM_O01();
         ORM_O01_ORDER ormOrder = message.getORDER();
+
+        messageHeaderMapper.map(message.getMSH(), orderDetails);
+        patientIdentificationMapper.map(message.getPATIENT().getPID(), orderDetails);
+        obrMapper.map(ormOrder.getORDER_DETAIL().getOBR(), orderDetails);
+
         if (orderDetails.isDiscontinuedOrder()) {
             validatePreviousOrder(orderDetails);
             orcMapper.mapDiscontinuedOrder(ormOrder.getORC(), orderDetails);
@@ -53,10 +58,6 @@ public class HL7MessageCreatorImpl implements HL7MessageCreator {
             orcMapper.mapScheduledOrder(ormOrder.getORC(), orderDetails);
             zdsMapper.mapStudyInstanceUID(message, orderDetails.getOrderNumber(), orderDetails.getDateCreated());
         }
-
-        messageHeaderMapper.map(message.getMSH(), orderDetails);
-        patientIdentificationMapper.map(message.getPATIENT().getPID(), orderDetails);
-        obrMapper.map(ormOrder.getORDER_DETAIL().getOBR(), orderDetails);
 
         return message;
     }
