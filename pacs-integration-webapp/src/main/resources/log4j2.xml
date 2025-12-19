@@ -16,7 +16,7 @@
         </Console>
     </appenders>
     <loggers>
-        <root level="WARN">
+        <root level="INFO">
             <appenderref ref="MyRollingFile"/>
             <appenderref ref="Console"/>
         </root>
