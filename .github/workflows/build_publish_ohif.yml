@@ -1,0 +1,44 @@
+name: Build and Publish OHIF
+on:
+  workflow_dispatch:
+    inputs:
+      ohif_version:
+        description: 'OHIF Viewers version tag (e.g. v3.8.0)'
+        required: true
+        type: string
+
+jobs:
+  build-publish-docker:
+    name: Build & Publish OHIF Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OHIF Viewers Repository
+        uses: actions/checkout@v4
+        with:
+          repository: OHIF/Viewers
+          ref: ${{ inputs.ohif_version }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          file: ./Dockerfile
+          build-args: |
+            PUBLIC_URL=/ohif/
+          push: true
+          tags: |
+            bahmni/ohif:${{ inputs.ohif_version }}
+            bahmni/ohif:latest
