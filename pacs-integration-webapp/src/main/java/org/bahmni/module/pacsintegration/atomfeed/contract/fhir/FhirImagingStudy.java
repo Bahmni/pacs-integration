@@ -8,6 +8,7 @@ import java.util.List;
 public class FhirImagingStudy {
     
     private String resourceType = "ImagingStudy";
+    private String id;
     private List<FhirIdentifier> identifier;
     private String status;
     private FhirReference subject;
@@ -24,6 +25,14 @@ public class FhirImagingStudy {
     
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
     }
     
     public List<FhirIdentifier> getIdentifier() {

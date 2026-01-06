@@ -8,29 +8,45 @@ import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDet
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderQueryBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocation;
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
+import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation;
 import org.bahmni.module.pacsintegration.atomfeed.contract.patient.OpenMRSPatient;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterMapper;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSPatientMapper;
 import org.bahmni.webclients.HttpClient;
+import org.bahmni.webclients.HttpHeaders;
 import org.bahmni.webclients.ObjectMapperRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 @Component
 public class OpenMRSService {
 
-    String patientRestUrl = "/openmrs/ws/rest/v1/patient/";
-    String orderRestUrl = "/openmrs/ws/rest/v1/order/";
-    String visitLocationRestUrl = "/openmrs/ws/rest/v1/bahmnicore/visitLocation/";
-    String locationRestUrl = "/openmrs/ws/rest/v1/location/";
+    private static final Logger logger = LoggerFactory.getLogger(OpenMRSService.class);
 
-    String createImagingStudyRestUrl = "/openmrs/ws/fhir2/R4/ImagingStudy";
+    // REST URL Constants
+    private static final String PATIENT_REST_URL = "/openmrs/ws/rest/v1/patient/";
+    private static final String ORDER_REST_URL = "/openmrs/ws/rest/v1/order/";
+    private static final String VISIT_LOCATION_REST_URL = "/openmrs/ws/rest/v1/bahmnicore/visitLocation/";
+    private static final String LOCATION_REST_URL = "/openmrs/ws/rest/v1/location/";
+    private static final String IMAGING_STUDY_REST_URL = "/openmrs/ws/fhir2/R4/ImagingStudy";
+
+    // FHIR Bundle Constants
+    private static final String UUID_KEY = "uuid";
+
+    // Query Parameters
+    private static final String PATIENT_VERSION_PARAM = "?v=full";
+    private static final String LOCATION_VERSION_PARAM = "?v=custom:(uuid,display,name,tags:(display))";
 
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
@@ -44,7 +60,7 @@ public class OpenMRSService {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
 
-        String patientJSON = webClient.get(URI.create(urlPrefix + patientRestUrl + patientUuid+"?v=full"));
+        String patientJSON = webClient.get(URI.create(urlPrefix + PATIENT_REST_URL + patientUuid + PATIENT_VERSION_PARAM));
         return new OpenMRSPatientMapper().map(patientJSON);
     }
 
@@ -53,15 +69,13 @@ public class OpenMRSService {
             throw new IllegalArgumentException("Order UUID cannot be null or empty");
         }
 
-        try {
-            HttpClient webClient = WebClientFactory.getClient();
-            String urlPrefix = getURLPrefix();
-            String url = urlPrefix + orderRestUrl + orderUuid + "?" + OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM;
+        logger.debug("Fetching order details for UUID: {}", orderUuid);
 
-            return webClient.get(url, OpenMRSOrderDetails.class);
-        } catch (IOException e) {
-            throw new IOException("Failed to fetch order details for UUID: " + orderUuid + ". " + e.getMessage(), e);
-        }
+        HttpClient webClient = WebClientFactory.getClient();
+        String urlPrefix = getURLPrefix();
+        String url = urlPrefix + ORDER_REST_URL + orderUuid + "?" + OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM;
+
+        return webClient.get(url, OpenMRSOrderDetails.class);
     }
 
     public String getVisitLocation(String locationUuid) throws IOException {
@@ -69,16 +83,14 @@ public class OpenMRSService {
             throw new IllegalArgumentException("Location UUID cannot be null or empty");
         }
 
-        try {
-            HttpClient webClient = WebClientFactory.getClient();
-            String urlPrefix = getURLPrefix();
-            String url = urlPrefix + visitLocationRestUrl + locationUuid;
+        logger.debug("Fetching visit location for UUID: {}", locationUuid);
 
-            Map<String, Object> response = webClient.get(url, Map.class);
-            return (String) response.get("uuid");
-        } catch (IOException e) {
-            throw new IOException("Failed to fetch visit location for UUID: " + locationUuid + ". " + e.getMessage(), e);
-        }
+        HttpClient webClient = WebClientFactory.getClient();
+        String urlPrefix = getURLPrefix();
+        String url = urlPrefix + VISIT_LOCATION_REST_URL + locationUuid;
+
+        Map<String, Object> response = webClient.get(url, Map.class);
+        return (String) response.get(UUID_KEY);
     }
 
     public OrderLocation getLocation(String locationUuid) throws IOException {
@@ -88,7 +100,7 @@ public class OpenMRSService {
 
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
-        String url = urlPrefix + locationRestUrl + locationUuid + "?v=custom:(uuid,display,name,tags:(display))";
+        String url = urlPrefix + LOCATION_REST_URL + locationUuid + LOCATION_VERSION_PARAM;
 
         return webClient.get(url, OrderLocation.class);
     }
@@ -96,8 +108,24 @@ public class OpenMRSService {
     public void createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
-        String url = urlPrefix + createImagingStudyRestUrl;
+        String url = urlPrefix + IMAGING_STUDY_REST_URL;
         webClient.post(url, payload, Object.class);
+    }
+
+    public void updateFhirImagingStudyStatus(String imagingStudyId, List<JsonPatchOperation> patchOperations) throws IOException {
+        if (StringUtils.isBlank(imagingStudyId)) {
+            throw new IllegalArgumentException("ImagingStudy ID cannot be null or empty");
+        }
+        if (patchOperations == null || patchOperations.isEmpty()) {
+            throw new IllegalArgumentException("Patch operations cannot be null or empty");
+        }
+
+        String urlPrefix = getURLPrefix();
+        String url = urlPrefix + IMAGING_STUDY_REST_URL + "/" + imagingStudyId;
+        HttpClient webClient = WebClientFactory.getClient();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.put("Content-Type", "application/json-patch+json");
+        webClient.patch(url, patchOperations, Object.class, httpHeaders);
     }
 
     private String getURLPrefix() {
@@ -108,9 +136,8 @@ public class OpenMRSService {
         try {
             openMRSAuthURL = new URL(authenticationURI);
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Is not a valid URI - " + authenticationURI);
+            throw new RuntimeException("Is not a valid URI - " + authenticationURI, e);
         }
         return String.format("%s://%s", openMRSAuthURL.getProtocol(), openMRSAuthURL.getAuthority());
     }
-
 }

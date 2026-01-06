@@ -11,4 +11,6 @@ public interface ImagingStudyService {
             String locationUuid, 
             String studyInstanceUID,
             String description);
+
+    void updateImagingStudyStatus(String studyInstanceUID);
 }

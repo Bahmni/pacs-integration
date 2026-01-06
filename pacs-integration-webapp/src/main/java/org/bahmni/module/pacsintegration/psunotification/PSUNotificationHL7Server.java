@@ -7,6 +7,7 @@ import ca.uhn.hl7v2.util.idgenerator.InMemoryIDGenerator;
 import ca.uhn.hl7v2.validation.impl.NoValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,9 @@ public class PSUNotificationHL7Server implements SmartLifecycle {
 
     private HL7Service server;
     private volatile boolean running = false;
+
+    @Autowired
+    private OMGO19MessageHandler omgo19MessageHandler;
 
     @Override
     public void start() {
@@ -62,7 +66,7 @@ public class PSUNotificationHL7Server implements SmartLifecycle {
         context.setValidationContext(new NoValidation());
 
         server = context.newServer(port, false);
-        server.registerApplication("OMG", "O19", new OMGO19MessageHandler());
+        server.registerApplication("OMG", "O19", omgo19MessageHandler);
         server.start();
         running = true;
         logger.info("HL7 server for listening to PSU Notification started on port {}", port);
