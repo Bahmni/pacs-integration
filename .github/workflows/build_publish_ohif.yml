@@ -11,7 +11,12 @@ jobs:
   build-publish-docker:
     name: Build & Publish OHIF Docker Image
     runs-on: ubuntu-latest
+    env:
+      HELM_CHART_PATH: package/ohif/helm
     steps:
+      - name: Checkout Pacs Integration Repository
+        uses: actions/checkout@v6
+
       - name: Checkout OHIF Viewers Repository
         uses: actions/checkout@v6
         with:
@@ -32,6 +37,7 @@ jobs:
 
       - name: Docker Build and Push
         uses: docker/build-push-action@v6
+        working-directory: Viewers/
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -42,6 +48,7 @@ jobs:
           tags: |
             bahmni/ohif:${{ inputs.ohif_version }}
             bahmni/ohif:latest
+
       - name: Helm - Update Version and Image Tag
         run: |
           yq --inplace '.image.tag = "${{ inputs.ohif_version }}"' $HELM_CHART_PATH/values.yaml
