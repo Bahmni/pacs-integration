@@ -4,6 +4,10 @@ import org.apache.commons.lang.StringUtils;
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.ImagingStudyMapper;
+import org.bahmni.module.pacsintegration.model.ImagingStudyReference;
+import org.bahmni.module.pacsintegration.model.Order;
+import org.bahmni.module.pacsintegration.repository.ImagingStudyReferenceRepository;
+import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.services.ImagingStudyService;
 import org.bahmni.module.pacsintegration.services.OpenMRSService;
 import org.slf4j.Logger;
@@ -25,8 +29,14 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
     @Autowired
     private ImagingStudyMapper imagingStudyMapper;
 
+    @Autowired
+    private ImagingStudyReferenceRepository imagingStudyReferenceRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
     @Override
-    public void createImagingStudy(
+    public String createImagingStudy(
             String orderUuid, 
             String patientUuid, 
             String locationUuid, 
@@ -35,15 +45,35 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
         
         if (StringUtils.isBlank(studyInstanceUID)) {
             logger.warn("Cannot create ImagingStudy for order {} - StudyInstanceUID is null or empty", orderUuid);
-            return;
+            return null;
         }
 
         try {
             FhirImagingStudy payload = imagingStudyMapper.buildFhirPayload(orderUuid, patientUuid, locationUuid, studyInstanceUID, description);
-            openMRSService.createFhirImagingStudy(payload);
-            logger.info("Successfully created ImagingStudy for order: {} with StudyInstanceUID: {}", orderUuid, studyInstanceUID);
+            String imagingStudyUuid = openMRSService.createFhirImagingStudy(payload);
+            
+            if (StringUtils.isBlank(imagingStudyUuid)) {
+                logger.error("Failed to get ImagingStudy UUID from OpenMRS for order: {}", orderUuid);
+                return null;
+            }
+
+            Order order = orderRepository.findByOrderUuid(orderUuid);
+            if (order == null) {
+                logger.error("Order not found with UUID: {}. Cannot save ImagingStudyReference", orderUuid);
+                return imagingStudyUuid;
+            }
+            
+            ImagingStudyReference imagingStudyReference = new ImagingStudyReference(
+                    studyInstanceUID,
+                    imagingStudyUuid,
+                    order
+            );
+            
+            imagingStudyReferenceRepository.save(imagingStudyReference);
+            return imagingStudyUuid;
         } catch (Exception e) {
             logger.error("Failed to create ImagingStudy for order: {}", orderUuid, e);
+            return null;
         }
     }
 
@@ -55,16 +85,27 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
         }
 
         try {
-            // Hardcoded ID below for testing
-            String imagingStudyId = "3b0eef01-d054-49a3-ad8e-29857933f8cc";
+            ImagingStudyReference imagingStudyReference = imagingStudyReferenceRepository.findByStudyInstanceUid(studyInstanceUID);
+            
+            if (imagingStudyReference == null) {
+                logger.warn("ImagingStudyReference not found for StudyInstanceUID: {}. Cannot update status.", studyInstanceUID);
+                return;
+            }
+            
+            String imagingStudyUuid = imagingStudyReference.getImagingStudyUuid();
+            
+            if (StringUtils.isBlank(imagingStudyUuid)) {
+                logger.error("ImagingStudy UUID is null or empty for StudyInstanceUID: {}", studyInstanceUID);
+                return;
+            }
 
             List<JsonPatchOperation> patchOperations = new ArrayList<>();
             patchOperations.add(new JsonPatchOperation("replace", "/status", "available"));
             
-            logger.info("Sending JSON Patch request to update ImagingStudy {} status to 'available'", imagingStudyId);
-            openMRSService.updateFhirImagingStudyStatus(imagingStudyId, patchOperations);
+            openMRSService.updateFhirImagingStudyStatus(imagingStudyUuid, patchOperations);
             
-            logger.info("Successfully updated ImagingStudy status to 'available' for StudyInstanceUID: {}", studyInstanceUID);
+            logger.info("Successfully updated ImagingStudy status to 'available' for StudyInstanceUID: {} (UUID: {})", 
+                    studyInstanceUID, imagingStudyUuid);
             
         } catch (Exception e) {
             logger.error("Failed to update ImagingStudy status for StudyInstanceUID: {}", studyInstanceUID, e);

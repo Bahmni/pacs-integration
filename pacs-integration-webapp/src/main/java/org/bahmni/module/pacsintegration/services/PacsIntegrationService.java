@@ -79,22 +79,28 @@ public class PacsIntegrationService {
                 orderRepository.save(order);
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
 
-                logger.info("Imagining study creation enabled: {}", imagingStudyEnabled);
+                logger.info("Imaging study creation enabled: {}", imagingStudyEnabled);
 
                 if (imagingStudyEnabled) {
-                    OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
-                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
-                            openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
+                    try {
+                        OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
+                        String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
+                                openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
 
-                    logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}",
-                            openMRSOrder.getUuid(), studyInstanceUID);
-                    imagingStudyService.createImagingStudy(
-                            openMRSOrder.getUuid(),
-                            openMRSEncounter.getPatientUuid(),
-                            orderLocationInfo.getSourceLocation().getUuid(),
-                            studyInstanceUID,
-                            "Imaging Study for " + openMRSOrder.getTestName()
-                    );
+                        logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}",
+                                openMRSOrder.getUuid(), studyInstanceUID);
+
+                        String imagingStudy = imagingStudyService.createImagingStudy(
+                                openMRSOrder.getUuid(),
+                                openMRSEncounter.getPatientUuid(),
+                                orderLocationInfo.getSourceLocation().getUuid(),
+                                studyInstanceUID,
+                                "Imaging Study for " + openMRSOrder.getTestName()
+                        );
+                        logger.debug("Imaging Study is created with uuid: {}", imagingStudy);
+                    } catch (Exception e) {
+                        logger.error("Error creating ImagingStudy for Order: {}", openMRSOrder.getUuid(), e);
+                    }
                 }
 
             }

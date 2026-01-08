@@ -2,7 +2,9 @@ package org.bahmni.module.pacsintegration.model;
 
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "test_order")
@@ -46,6 +48,9 @@ public class Order extends BaseModel {
 
     @Column(name = "comment")
     private String comment;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ImagingStudyReference> imagingStudyReferences = new ArrayList<>();
 
     public Order(int id, OrderType orderType, String orderUuid, String testName, String testUuid, String result, String orderNumber, String comment) {
         this.id = id;
@@ -155,5 +160,12 @@ public class Order extends BaseModel {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public List<ImagingStudyReference> getImagingStudyReferences() {
+        return imagingStudyReferences;
+    }
+    public void setImagingStudyReferences(List<ImagingStudyReference> imagingStudyReferences) {
+        this.imagingStudyReferences = imagingStudyReferences;
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ImagingStudyService {
 
-    void createImagingStudy(
+    String createImagingStudy(
             String orderUuid, 
             String patientUuid, 
             String locationUuid, 

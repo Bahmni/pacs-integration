@@ -105,11 +105,19 @@ public class OpenMRSService {
         return webClient.get(url, OrderLocation.class);
     }
 
-    public void createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
+    public String createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
         String url = urlPrefix + IMAGING_STUDY_REST_URL;
-        webClient.post(url, payload, Object.class);
+        
+        Map<String, Object> response = webClient.post(url, payload, Map.class);
+        
+        if (response != null && response.containsKey("id")) {
+            return  (String) response.get("id");
+        }
+        
+        logger.warn("ImagingStudy created but UUID not found in response");
+        return null;
     }
 
     public void updateFhirImagingStudyStatus(String imagingStudyId, List<JsonPatchOperation> patchOperations) throws IOException {
