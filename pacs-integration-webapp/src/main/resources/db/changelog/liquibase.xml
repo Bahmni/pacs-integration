@@ -182,4 +182,11 @@
             <column name="comment" type="varchar(255)"/>
         </addColumn>
     </changeSet>
+    <changeSet id="PACS-20220804" author="Mohankumar">
+        <comment>Adding default entry to modality and order type</comment>
+        <sql>
+            INSERT INTO modality(id,name,description,ip,port,timeout) VALUES(1,'DCM4CHEE','DCM4CHEE PACS','dcm4chee',2575,20000) ON CONFLICT(id) DO NOTHING;
+            INSERT INTO order_type(id,name,modality_id) VALUES(1,'Radiology Order',1) ON CONFLICT(id) DO NOTHING;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
