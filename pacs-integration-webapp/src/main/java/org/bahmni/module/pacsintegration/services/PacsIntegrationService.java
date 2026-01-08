@@ -11,6 +11,8 @@ import org.bahmni.module.pacsintegration.atomfeed.mappers.OpenMRSEncounterToOrde
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.model.OrderDetails;
 import org.bahmni.module.pacsintegration.model.OrderType;
+import org.bahmni.module.pacsintegration.model.ImagingStudyReference;
+import org.bahmni.module.pacsintegration.repository.ImagingStudyReferenceRepository;
 import org.bahmni.module.pacsintegration.repository.OrderDetailsRepository;
 import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.repository.OrderTypeRepository;
@@ -64,47 +66,66 @@ public class PacsIntegrationService {
     @Autowired
     private LocationResolver locationResolver;
 
+    @Autowired
+    private ImagingStudyReferenceRepository imagingStudyReferenceRepository;
+
     public void processEncounter(OpenMRSEncounter openMRSEncounter) throws IOException, HL7Exception, LLPException {
         List<OrderType> acceptableOrderTypes = orderTypeRepository.findAll();
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         Collections.reverse(newAcceptableTestOrders);
         for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
-            if(orderRepository.findByOrderUuid(openMRSOrder.getUuid()) == null) {
-                OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
-                AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
-                String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
-                Order order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
+            Order existingOrder = orderRepository.findByOrderUuid(openMRSOrder.getUuid());
+            boolean needsProcessing = existingOrder == null || shouldCreateImagingStudy(existingOrder);
 
-                orderRepository.save(order);
-                orderDetailsRepository.save(new OrderDetails(order, request.encode(),response));
+            if (needsProcessing) {
+                Order order = existingOrder;
+                OpenMRSOrderDetails orderDetails = null;
 
-                logger.info("Imaging study creation enabled: {}", imagingStudyEnabled);
+                if (existingOrder == null) {
+                    orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+                    AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
+                    String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
+                    order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
 
-                if (imagingStudyEnabled) {
-                    try {
-                        OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
-                        String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
-                                openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
-
-                        logger.info("Creating ImagingStudy for Order: {} with StudyInstanceUID: {}",
-                                openMRSOrder.getUuid(), studyInstanceUID);
-
-                        String imagingStudy = imagingStudyService.createImagingStudy(
-                                openMRSOrder.getUuid(),
-                                openMRSEncounter.getPatientUuid(),
-                                orderLocationInfo.getSourceLocation().getUuid(),
-                                studyInstanceUID,
-                                "Imaging Study for " + openMRSOrder.getTestName()
-                        );
-                        logger.debug("Imaging Study is created with uuid: {}", imagingStudy);
-                    } catch (Exception e) {
-                        logger.error("Error creating ImagingStudy for Order: {}", openMRSOrder.getUuid(), e);
-                    }
+                    orderRepository.save(order);
+                    orderDetailsRepository.save(new OrderDetails(order, request.encode(), response));
+                    logger.info("Order created successfully for UUID: {}", openMRSOrder.getUuid());
+                } else {
+                    logger.info("Order already exists for UUID: {}, checking ImagingStudy status", openMRSOrder.getUuid());
                 }
 
+                if (shouldCreateImagingStudy(order)) {
+                    if (orderDetails == null) {
+                        orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+                    }
+                    
+                    OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
+                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
+                            openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
+
+                    String imagingStudyUuid = imagingStudyService.createImagingStudy(
+                            openMRSOrder.getUuid(),
+                            openMRSEncounter.getPatientUuid(),
+                            orderLocationInfo.getSourceLocation().getUuid(),
+                            studyInstanceUID,
+                            "Imaging Study for " + openMRSOrder.getTestName()
+                    );
+                    
+                    logger.info("ImagingStudy created successfully with UUID: {} for Order: {}", 
+                            imagingStudyUuid, openMRSOrder.getUuid());
+                }
             }
         }
+    }
+
+    private boolean shouldCreateImagingStudy(Order order) {
+        if (!imagingStudyEnabled || order == null) {
+            return false;
+        }
+
+        List<ImagingStudyReference> references = imagingStudyReferenceRepository.findByOrderId(order.getId());
+        return references == null || references.isEmpty();
     }
 
 }

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,74 +42,59 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
             String patientUuid, 
             String locationUuid, 
             String studyInstanceUID,
-            String description) {
+            String description) throws IOException {
         
         if (StringUtils.isBlank(studyInstanceUID)) {
-            logger.warn("Cannot create ImagingStudy for order {} - StudyInstanceUID is null or empty", orderUuid);
-            return null;
+            throw new IllegalArgumentException("StudyInstanceUID cannot be null or empty");
         }
 
-        try {
-            FhirImagingStudy payload = imagingStudyMapper.buildFhirPayload(orderUuid, patientUuid, locationUuid, studyInstanceUID, description);
-            String imagingStudyUuid = openMRSService.createFhirImagingStudy(payload);
-            
-            if (StringUtils.isBlank(imagingStudyUuid)) {
-                logger.error("Failed to get ImagingStudy UUID from OpenMRS for order: {}", orderUuid);
-                return null;
-            }
+        FhirImagingStudy payload = imagingStudyMapper.buildFhirPayload(orderUuid, patientUuid, locationUuid, studyInstanceUID, description);
+        String imagingStudyUuid = openMRSService.createFhirImagingStudy(payload);
+        
+        if (StringUtils.isBlank(imagingStudyUuid)) {
+            throw new IOException("Failed to create ImagingStudy - UUID not returned from OpenMRS");
+        }
 
-            Order order = orderRepository.findByOrderUuid(orderUuid);
-            if (order == null) {
-                logger.error("Order not found with UUID: {}. Cannot save ImagingStudyReference", orderUuid);
-                return imagingStudyUuid;
-            }
-            
-            ImagingStudyReference imagingStudyReference = new ImagingStudyReference(
-                    studyInstanceUID,
-                    imagingStudyUuid,
-                    order
-            );
-            
-            imagingStudyReferenceRepository.save(imagingStudyReference);
+        Order order = orderRepository.findByOrderUuid(orderUuid);
+        if (order == null) {
+            logger.error("Order not found with UUID: {}. Cannot save ImagingStudyReference", orderUuid);
             return imagingStudyUuid;
-        } catch (Exception e) {
-            logger.error("Failed to create ImagingStudy for order: {}", orderUuid, e);
-            return null;
         }
+        
+        ImagingStudyReference imagingStudyReference = new ImagingStudyReference(
+                studyInstanceUID,
+                imagingStudyUuid,
+                order
+        );
+        
+        imagingStudyReferenceRepository.save(imagingStudyReference);
+        return imagingStudyUuid;
     }
 
     @Override
-    public void updateImagingStudyStatus(String studyInstanceUID) {
+    public void updateImagingStudyStatus(String studyInstanceUID) throws IOException {
         if (StringUtils.isBlank(studyInstanceUID)) {
-            logger.warn("Cannot update ImagingStudy status - StudyInstanceUID is null or empty");
-            return;
+            throw new IllegalArgumentException("StudyInstanceUID cannot be null or empty");
         }
 
-        try {
-            ImagingStudyReference imagingStudyReference = imagingStudyReferenceRepository.findByStudyInstanceUid(studyInstanceUID);
-            
-            if (imagingStudyReference == null) {
-                logger.warn("ImagingStudyReference not found for StudyInstanceUID: {}. Cannot update status.", studyInstanceUID);
-                return;
-            }
-            
-            String imagingStudyUuid = imagingStudyReference.getImagingStudyUuid();
-            
-            if (StringUtils.isBlank(imagingStudyUuid)) {
-                logger.error("ImagingStudy UUID is null or empty for StudyInstanceUID: {}", studyInstanceUID);
-                return;
-            }
-
-            List<JsonPatchOperation> patchOperations = new ArrayList<>();
-            patchOperations.add(new JsonPatchOperation("replace", "/status", "available"));
-            
-            openMRSService.updateFhirImagingStudyStatus(imagingStudyUuid, patchOperations);
-            
-            logger.info("Successfully updated ImagingStudy status to 'available' for StudyInstanceUID: {} (UUID: {})", 
-                    studyInstanceUID, imagingStudyUuid);
-            
-        } catch (Exception e) {
-            logger.error("Failed to update ImagingStudy status for StudyInstanceUID: {}", studyInstanceUID, e);
+        ImagingStudyReference imagingStudyReference = imagingStudyReferenceRepository.findByStudyInstanceUid(studyInstanceUID);
+        
+        if (imagingStudyReference == null) {
+            throw new IOException("ImagingStudyReference not found for StudyInstanceUID: " + studyInstanceUID);
         }
+        
+        String imagingStudyUuid = imagingStudyReference.getImagingStudyUuid();
+        
+        if (StringUtils.isBlank(imagingStudyUuid)) {
+            throw new IOException("ImagingStudy UUID is null or empty for StudyInstanceUID: " + studyInstanceUID);
+        }
+
+        List<JsonPatchOperation> patchOperations = new ArrayList<>();
+        patchOperations.add(new JsonPatchOperation("replace", "/status", "available"));
+        
+        openMRSService.updateFhirImagingStudyStatus(imagingStudyUuid, patchOperations);
+        
+        logger.info("Successfully updated ImagingStudy status to 'available' for StudyInstanceUID: {} (UUID: {})", 
+                studyInstanceUID, imagingStudyUuid);
     }
 }
