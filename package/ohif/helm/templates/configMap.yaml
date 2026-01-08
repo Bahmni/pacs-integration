@@ -3,4 +3,5 @@ kind: ConfigMap
 metadata:
   name: {{ .Chart.Name }}-config
 data:
-  APP_CONFIG: "{{ .Values.config.APP_CONFIG }}"
+  APP_CONFIG: |
+    {{- .Values.config.APP_CONFIG | nindent 4 }}
