@@ -22,6 +22,7 @@ jobs:
         with:
           repository: OHIF/Viewers
           ref: ${{ inputs.ohif_version }}
+          path: Viewers
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
