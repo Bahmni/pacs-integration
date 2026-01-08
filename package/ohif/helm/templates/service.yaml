@@ -10,8 +10,8 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 80
-      name: '80'
+      targetPort: 4005
+      name: '4005'
   selector:
     app: {{ .Chart.Name }}
     environment: {{ .Values.metadata.labels.environment }}

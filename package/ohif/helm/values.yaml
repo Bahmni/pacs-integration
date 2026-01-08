@@ -86,4 +86,8 @@ config:
         viewportType: "stack",
       },
     };
-  PORT: "4005"  
+  PORT: "4005"
+
+service:
+  type: ClusterIP
+  port: 4005  
