@@ -5,3 +5,4 @@ metadata:
 data:
   APP_CONFIG: |
     {{- .Values.config.APP_CONFIG | nindent 4 }}
+  PORT: "{{ .Values.config.PORT }}"  
