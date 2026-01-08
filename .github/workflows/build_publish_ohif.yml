@@ -22,6 +22,7 @@ jobs:
         with:
           repository: OHIF/Viewers
           ref: ${{ inputs.ohif_version }}
+          path: Viewers
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -80,5 +81,5 @@ jobs:
           git config user.name ${{ secrets.BAHMNI_USERNAME}}
           git config user.email ${{ secrets.BAHMNI_EMAIL}}
           git add .
-          git commit -m "Release of bahmni-web-${{ inputs.ohif_version }}"
+          git commit -m "Release of ohif-${{ inputs.ohif_version }}"
           git push 'https://${{ secrets.BAHMNI_USERNAME}}:${{ secrets.BAHMNI_PAT}}@github.com/bahmni/helm-charts.git' gh-pages
