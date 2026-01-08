@@ -37,11 +37,10 @@ jobs:
 
       - name: Docker Build and Push
         uses: docker/build-push-action@v6
-        working-directory: Viewers/
         with:
-          context: .
+          context: Viewers/
           platforms: linux/amd64,linux/arm64
-          file: ./Dockerfile
+          file: Viewers/Dockerfile
           build-args: |
             PUBLIC_URL=/ohif/
           push: true
