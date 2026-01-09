@@ -74,58 +74,44 @@ public class PacsIntegrationService {
 
         List<OpenMRSOrder> newAcceptableTestOrders = openMRSEncounter.getAcceptableTestOrders(acceptableOrderTypes);
         Collections.reverse(newAcceptableTestOrders);
-        for(OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
+        for (OpenMRSOrder openMRSOrder : newAcceptableTestOrders) {
             Order existingOrder = orderRepository.findByOrderUuid(openMRSOrder.getUuid());
-            boolean needsProcessing = existingOrder == null || shouldCreateImagingStudy(existingOrder);
-
-            if (needsProcessing) {
-                Order order = existingOrder;
-                OpenMRSOrderDetails orderDetails = null;
-
-                if (existingOrder == null) {
-                    orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
-                    AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
-                    String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
-                    order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
-
-                    orderRepository.save(order);
-                    orderDetailsRepository.save(new OrderDetails(order, request.encode(), response));
-                    logger.info("Order created successfully for UUID: {}", openMRSOrder.getUuid());
-                } else {
-                    logger.info("Order already exists for UUID: {}, checking ImagingStudy status", openMRSOrder.getUuid());
-                }
-
-                if (shouldCreateImagingStudy(order)) {
-                    if (orderDetails == null) {
-                        orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
-                    }
-                    
-                    OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
-                    String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
-                            openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
-
-                    String imagingStudyUuid = imagingStudyService.createImagingStudy(
-                            order,
-                            openMRSEncounter.getPatientUuid(),
-                            orderLocationInfo.getSourceLocation().getUuid(),
-                            studyInstanceUID,
-                            "Imaging Study for " + openMRSOrder.getTestName()
-                    );
-                    
-                    logger.info("ImagingStudy created successfully with UUID: {} for Order: {}", 
-                            imagingStudyUuid, openMRSOrder.getUuid());
-                }
+            Order order = existingOrder;
+            OpenMRSOrderDetails orderDetails = openMRSService.getOrderDetails(openMRSOrder.getUuid());
+            if (existingOrder == null) {
+                AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
+                String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
+                order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
+                orderRepository.save(order);
+                orderDetailsRepository.save(new OrderDetails(order, request.encode(), response));
+                logger.info("Order created successfully for UUID: {}", openMRSOrder.getUuid());
+            } else {
+                logger.info("Order already exists for UUID: {}, checking ImagingStudy status", openMRSOrder.getUuid());
             }
+            
+            if (imagingStudyEnabled) {
+                createImagingStudy(order, openMRSOrder, openMRSEncounter, orderDetails);
+            }
+
         }
     }
 
-    private boolean shouldCreateImagingStudy(Order order) {
-        if (!imagingStudyEnabled || order == null) {
-            return false;
-        }
+    private void createImagingStudy(Order order, OpenMRSOrder openMRSOrder, 
+                                   OpenMRSEncounter openMRSEncounter, OpenMRSOrderDetails orderDetails) throws IOException {
+        OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
+        String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
+                openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
 
-        List<ImagingStudyReference> references = imagingStudyReferenceRepository.findByOrderId(order.getId());
-        return references == null || references.isEmpty();
+        String imagingStudyUuid = imagingStudyService.createImagingStudy(
+                order,
+                openMRSEncounter.getPatientUuid(),
+                orderLocationInfo.getSourceLocation().getUuid(),
+                studyInstanceUID,
+                "Imaging Study for " + openMRSOrder.getTestName()
+        );
+
+        logger.info("ImagingStudy created successfully with UUID: {} for Order: {}",
+                imagingStudyUuid, openMRSOrder.getUuid());
     }
 
 }

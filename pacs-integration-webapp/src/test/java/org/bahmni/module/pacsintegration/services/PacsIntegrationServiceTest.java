@@ -137,7 +137,7 @@ public class PacsIntegrationServiceTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
-        verify(imagingStudyService, times(1)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+        verify(imagingStudyService, times(2)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test
