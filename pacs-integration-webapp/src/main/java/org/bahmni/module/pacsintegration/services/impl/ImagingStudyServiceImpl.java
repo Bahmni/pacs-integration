@@ -33,12 +33,9 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
     @Autowired
     private ImagingStudyReferenceRepository imagingStudyReferenceRepository;
 
-    @Autowired
-    private OrderRepository orderRepository;
-
     @Override
     public String createImagingStudy(
-            String orderUuid, 
+            Order order,
             String patientUuid, 
             String locationUuid, 
             String studyInstanceUID,
@@ -48,17 +45,12 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
             throw new IllegalArgumentException("StudyInstanceUID cannot be null or empty");
         }
 
-        FhirImagingStudy payload = imagingStudyMapper.buildFhirPayload(orderUuid, patientUuid, locationUuid, studyInstanceUID, description);
-        String imagingStudyUuid = openMRSService.createFhirImagingStudy(payload);
-        
+        FhirImagingStudy payload = imagingStudyMapper.buildFhirPayload(order.getOrderUuid(), patientUuid, locationUuid, studyInstanceUID, description);
+        FhirImagingStudy fhirImagingStudy = openMRSService.createFhirImagingStudy(payload);
+        String imagingStudyUuid= fhirImagingStudy.getId();
+
         if (StringUtils.isBlank(imagingStudyUuid)) {
             throw new IOException("Failed to create ImagingStudy - UUID not returned from OpenMRS");
-        }
-
-        Order order = orderRepository.findByOrderUuid(orderUuid);
-        if (order == null) {
-            logger.error("Order not found with UUID: {}. Cannot save ImagingStudyReference", orderUuid);
-            return imagingStudyUuid;
         }
         
         ImagingStudyReference imagingStudyReference = new ImagingStudyReference(

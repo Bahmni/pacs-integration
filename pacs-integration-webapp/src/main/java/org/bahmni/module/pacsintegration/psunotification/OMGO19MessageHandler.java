@@ -27,18 +27,13 @@ public class OMGO19MessageHandler implements ReceivingApplication {
         try {
             String studyInstanceUID = extractStudyInstanceUID(message);
             imagingStudyService.updateImagingStudyStatus(studyInstanceUID);
-
-        } catch (Exception e) {
-            logger.error("Error processing HL7 message: {}", e.getMessage(), e);
-        }
-
-        try {
             return message.generateACK();
         } catch (IOException e) {
             throw new HL7Exception("Failed to generate ACK", e);
         }
     }
 
+    //TODO: Resolve this message once DCM4 provide the fix
     private String extractStudyInstanceUID(Message message) {
        try {
            Terser terser = new Terser(message);

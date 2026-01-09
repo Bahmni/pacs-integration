@@ -47,19 +47,28 @@ public class OpenMRSService {
     private static final String LOCATION_VERSION_PARAM = "?v=custom:(uuid,display,name,tags:(display))";
 
     public OpenMRSEncounter getEncounter(String encounterUrl) throws IOException {
-        HttpClient webClient = WebClientFactory.getClient();
-        String urlPrefix = getURLPrefix();
-
-        String encounterJSON = webClient.get(URI.create(urlPrefix + encounterUrl));
-        return new OpenMRSEncounterMapper(ObjectMapperRepository.objectMapper).map(encounterJSON);
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String encounterJSON = webClient.get(URI.create(urlPrefix + encounterUrl));
+            return new OpenMRSEncounterMapper(ObjectMapperRepository.objectMapper).map(encounterJSON);
+        } catch (IOException e) {
+            logger.error("Failed to fetch encounter from URL: {}", encounterUrl, e);
+            throw e;
+        }
     }
 
     public OpenMRSPatient getPatient(String patientUuid) throws IOException, ParseException {
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
 
-        String patientJSON = webClient.get(URI.create(urlPrefix + PATIENT_REST_URL + patientUuid + PATIENT_VERSION_PARAM));
-        return new OpenMRSPatientMapper().map(patientJSON);
+        try {
+            String patientJSON = webClient.get(URI.create(urlPrefix + PATIENT_REST_URL + patientUuid + PATIENT_VERSION_PARAM));
+            return new OpenMRSPatientMapper().map(patientJSON);
+        } catch (IOException e) {
+            logger.error("Failed to fetch patient with UUID: {}", patientUuid, e);
+            throw e;
+        }
     }
 
     public OpenMRSOrderDetails getOrderDetails(String orderUuid) throws IOException {
@@ -68,54 +77,51 @@ public class OpenMRSService {
         }
 
         logger.debug("Fetching order details for UUID: {}", orderUuid);
-
-        HttpClient webClient = WebClientFactory.getClient();
-        String urlPrefix = getURLPrefix();
-        String url = urlPrefix + ORDER_REST_URL + orderUuid + "?" + OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM;
-
-        return webClient.get(url, OpenMRSOrderDetails.class);
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + ORDER_REST_URL + orderUuid + "?" + OpenMRSOrderQueryBuilder.ORDER_DETAILS_QUERY_PARAM;
+            return webClient.get(url, OpenMRSOrderDetails.class);
+        } catch (IOException e) {
+            throw new IOException("Failed to fetch order details for UUID: " + orderUuid + ". " + e.getMessage(), e);
+        }
     }
 
     public String getVisitLocation(String locationUuid) throws IOException {
         if (StringUtils.isBlank(locationUuid)) {
             throw new IllegalArgumentException("Location UUID cannot be null or empty");
         }
-
         logger.debug("Fetching visit location for UUID: {}", locationUuid);
-
-        HttpClient webClient = WebClientFactory.getClient();
-        String urlPrefix = getURLPrefix();
-        String url = urlPrefix + VISIT_LOCATION_REST_URL + locationUuid;
-
-        Map<String, Object> response = webClient.get(url, Map.class);
-        return (String) response.get(UUID_KEY);
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + VISIT_LOCATION_REST_URL + locationUuid;
+            Map<String, Object> response = webClient.get(url, Map.class);
+            return (String) response.get(UUID_KEY);
+        } catch (IOException e) {
+            throw new IOException("Failed to fetch visit location for UUID: " + locationUuid + ". " + e.getMessage(), e);
+        }
     }
 
     public OrderLocation getLocation(String locationUuid) throws IOException {
         if (StringUtils.isBlank(locationUuid)) {
             throw new IllegalArgumentException("Location UUID cannot be null or empty");
         }
-
         HttpClient webClient = WebClientFactory.getClient();
         String urlPrefix = getURLPrefix();
         String url = urlPrefix + LOCATION_REST_URL + locationUuid + LOCATION_VERSION_PARAM;
-
         return webClient.get(url, OrderLocation.class);
     }
 
-    public String createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
-        HttpClient webClient = WebClientFactory.getClient();
-        String urlPrefix = getURLPrefix();
-        String url = urlPrefix + IMAGING_STUDY_REST_URL;
-        
-        Map<String, Object> response = webClient.post(url, payload, Map.class);
-        
-        if (response != null && response.containsKey("id")) {
-            return  (String) response.get("id");
+    public FhirImagingStudy createFhirImagingStudy(FhirImagingStudy payload) throws IOException {
+        try {
+            HttpClient webClient = WebClientFactory.getClient();
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + IMAGING_STUDY_REST_URL;
+            return webClient.post(url, payload, FhirImagingStudy.class);
+        } catch (IOException e) {
+            throw new IOException("Failed to create FHIR Imaging study", e);
         }
-        
-        logger.warn("ImagingStudy created but UUID not found in response");
-        return null;
     }
 
     public void updateFhirImagingStudyStatus(String imagingStudyId, List<JsonPatchOperation> patchOperations) throws IOException {
@@ -125,13 +131,17 @@ public class OpenMRSService {
         if (patchOperations == null || patchOperations.isEmpty()) {
             throw new IllegalArgumentException("Patch operations cannot be null or empty");
         }
-
-        String urlPrefix = getURLPrefix();
-        String url = urlPrefix + IMAGING_STUDY_REST_URL + "/" + imagingStudyId;
-        HttpClient webClient = WebClientFactory.getClient();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.put("Content-Type", "application/json-patch+json");
-        webClient.patch(url, patchOperations, Object.class, httpHeaders);
+        try {
+            String urlPrefix = getURLPrefix();
+            String url = urlPrefix + IMAGING_STUDY_REST_URL + "/" + imagingStudyId;
+            HttpClient webClient = WebClientFactory.getClient();
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.put("Content-Type", "application/json-patch+json");
+            webClient.patch(url, patchOperations, Object.class, httpHeaders);
+        } catch (IOException e) {
+            logger.error("Failed to update FHIR ImagingStudy status for ID: {}", imagingStudyId, e);
+            throw e;
+        }
     }
 
     private String getURLPrefix() {

@@ -109,7 +109,7 @@ public class PacsIntegrationServiceTest {
 
         verify(orderRepository, times(2)).save(any(Order.class));
         verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
-        verify(imagingStudyService, times(2)).createImagingStudy(anyString(), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+        verify(imagingStudyService, times(2)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class PacsIntegrationServiceTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
-        verify(imagingStudyService, times(1)).createImagingStudy(anyString(), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+        verify(imagingStudyService, times(1)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class PacsIntegrationServiceTest {
 
         verify(orderRepository, times(2)).save(any(Order.class));
         verify(orderDetailsRepository, times(2)).save(any(OrderDetails.class));
-        verify(imagingStudyService, never()).createImagingStudy(anyString(), anyString(), anyString(), anyString(), anyString());
+        verify(imagingStudyService, never()).createImagingStudy(any(Order.class), anyString(), anyString(), anyString(), anyString());
         verify(openMRSService, times(2)).getOrderDetails(anyString());
         verify(locationResolver, never()).resolveLocations(any(OpenMRSOrderDetails.class));
         verify(studyInstanceUIDGenerator, never()).generateStudyInstanceUID(any(String.class), any(Date.class));
@@ -176,6 +176,9 @@ public class PacsIntegrationServiceTest {
         
         OrderLocationInfo locationInfo = new OrderLocationInfo();
         locationInfo.setSourceLocation(sourceLocation);
+
+        Order order = new Order();
+        order.setOrderUuid("uuid1");
         
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
@@ -185,14 +188,14 @@ public class PacsIntegrationServiceTest {
         when(adr_a19.encode()).thenReturn("Request message");
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
-                .thenReturn(new Order());
+                .thenReturn(order);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(eq("ORD-1"), any(Date.class))).thenReturn(expectedStudyInstanceUID);
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(locationInfo);
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(imagingStudyService).createImagingStudy(
-                eq("uuid1"),
+                eq(order),
                 eq(PATIENT_UUID),
                 eq(expectedLocationUuid),
                 eq(expectedStudyInstanceUID),
@@ -216,7 +219,7 @@ public class PacsIntegrationServiceTest {
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
         when(imagingStudyReferenceRepository.findByOrderId(null)).thenReturn(Collections.emptyList());
-        when(imagingStudyService.createImagingStudy(anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(imagingStudyService.createImagingStudy(any(Order.class), anyString(), anyString(), anyString(), anyString()))
                 .thenThrow(new IOException("ImagingStudy creation failed"));
 
         pacsIntegrationService.processEncounter(encounter);
@@ -247,7 +250,7 @@ public class PacsIntegrationServiceTest {
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
-        verify(imagingStudyService, times(2)).createImagingStudy(anyString(), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+        verify(imagingStudyService, times(2)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test(expected = HL7MessageException.class)

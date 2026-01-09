@@ -219,19 +219,19 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
         when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
 
         String expectedImagingStudyUuid = "imaging-study-uuid-123";
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", expectedImagingStudyUuid);
+        FhirImagingStudy imagingStudy = new FhirImagingStudy();
+        imagingStudy.setId(expectedImagingStudyUuid);
 
         FhirImagingStudy payload = new FhirImagingStudy();
         String requestURL = "http://localhost:8050/openmrs/ws/fhir2/R4/ImagingStudy";
 
-        when(webClient.post(eq(requestURL), eq(payload), eq(Map.class))).thenReturn(response);
+        when(webClient.post(eq(requestURL), eq(payload), eq(FhirImagingStudy.class))).thenReturn(imagingStudy);
 
-        String result = new OpenMRSService().createFhirImagingStudy(payload);
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
 
         assertNotNull(result);
-        assertEquals(expectedImagingStudyUuid, result);
-        verify(webClient).post(eq(requestURL), eq(payload), eq(Map.class));
+        assertEquals(expectedImagingStudyUuid, result.getId());
+        verify(webClient).post(eq(requestURL), eq(payload), eq(FhirImagingStudy.class));
     }
 
     @Test
@@ -246,7 +246,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         when(webClient.post(anyString(), eq(payload), eq(Map.class))).thenReturn(response);
 
-        String result = new OpenMRSService().createFhirImagingStudy(payload);
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
 
         assertNull(result);
     }
@@ -261,7 +261,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         when(webClient.post(anyString(), eq(payload), eq(Map.class))).thenReturn(null);
 
-        String result = new OpenMRSService().createFhirImagingStudy(payload);
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
 
         assertNull(result);
     }
@@ -274,7 +274,7 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
 
         FhirImagingStudy payload = new FhirImagingStudy();
 
-        when(webClient.post(anyString(), eq(payload), eq(Map.class)))
+        when(webClient.post(anyString(), eq(payload), eq(FhirImagingStudy.class)))
                 .thenThrow(new IOException("Network error"));
 
         new OpenMRSService().createFhirImagingStudy(payload);

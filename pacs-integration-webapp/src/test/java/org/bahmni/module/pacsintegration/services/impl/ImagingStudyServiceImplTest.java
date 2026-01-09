@@ -21,7 +21,7 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ImagingStudyServiceImplTest {
+public class ImagingStudyServiceImplTest  {
 
     @Mock
     private OpenMRSService openMRSService;
@@ -31,9 +31,6 @@ public class ImagingStudyServiceImplTest {
 
     @Mock
     private ImagingStudyReferenceRepository imagingStudyReferenceRepository;
-
-    @Mock
-    private OrderRepository orderRepository;
 
     @InjectMocks
     private ImagingStudyServiceImpl imagingStudyService;
@@ -48,108 +45,96 @@ public class ImagingStudyServiceImplTest {
     public void shouldCreateImagingStudyWhenValidStudyInstanceUID() throws Exception {
         String expectedUuid = "imaging-study-uuid-123";
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
+        fhirImagingStudy.setId(expectedUuid);
         Order order = new Order();
         order.setId(1);
+        order.setOrderUuid(ORDER_UUID);
         
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
-        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(expectedUuid);
-        when(orderRepository.findByOrderUuid(ORDER_UUID)).thenReturn(order);
+        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(fhirImagingStudy);
 
-        String result = imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+        String result = imagingStudyService.createImagingStudy(order, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
 
         assertNotNull(result);
         assertEquals(expectedUuid, result);
         verify(imagingStudyMapper).buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
         verify(openMRSService).createFhirImagingStudy(fhirImagingStudy);
-        verify(orderRepository).findByOrderUuid(ORDER_UUID);
         verify(imagingStudyReferenceRepository).save(any(ImagingStudyReference.class));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenStudyInstanceUIDIsNull() throws Exception {
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, null, DESCRIPTION);
+        imagingStudyService.createImagingStudy(new Order(), PATIENT_UUID, LOCATION_UUID, null, DESCRIPTION);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenStudyInstanceUIDIsEmpty() throws Exception {
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, "", DESCRIPTION);
+        imagingStudyService.createImagingStudy(new Order(), PATIENT_UUID, LOCATION_UUID, "", DESCRIPTION);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenStudyInstanceUIDIsWhitespace() throws Exception {
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, "   ", DESCRIPTION);
+        imagingStudyService.createImagingStudy(new Order(), PATIENT_UUID, LOCATION_UUID, "   ", DESCRIPTION);
     }
 
     @Test(expected = IOException.class)
     public void shouldThrowIOExceptionWhenOpenMRSServiceFails() throws Exception {
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
+        Order order = new Order();
+        order.setOrderUuid(ORDER_UUID);
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
         when(openMRSService.createFhirImagingStudy(fhirImagingStudy))
                 .thenThrow(new IOException("Failed to create imaging study"));
 
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+        imagingStudyService.createImagingStudy(order, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
     }
 
     @Test(expected = IOException.class)
     public void shouldThrowIOExceptionWhenOpenMRSReturnsNullUuid() throws Exception {
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
+        Order order = new Order();
+        order.setOrderUuid(ORDER_UUID);
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
-        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(null);
+        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(fhirImagingStudy);
 
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+        imagingStudyService.createImagingStudy(order, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
     }
 
     @Test(expected = IOException.class)
     public void shouldThrowIOExceptionWhenOpenMRSReturnsEmptyUuid() throws Exception {
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
+        Order order = new Order();
+        order.setOrderUuid(ORDER_UUID);
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
-        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn("");
+        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(new FhirImagingStudy());
 
-        imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+        imagingStudyService.createImagingStudy(order, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
     }
 
     @Test
     public void shouldCreateImagingStudyAndSaveReference() throws Exception {
         String expectedUuid = "imaging-study-uuid-123";
         FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
+        fhirImagingStudy.setId(expectedUuid);
         Order order = new Order();
         order.setId(1);
-        
+        order.setOrderUuid(ORDER_UUID);
+
         when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
                 .thenReturn(fhirImagingStudy);
-        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(expectedUuid);
-        when(orderRepository.findByOrderUuid(ORDER_UUID)).thenReturn(order);
+        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(fhirImagingStudy);
 
-        String result = imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
+        String result = imagingStudyService.createImagingStudy(order, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
 
         assertNotNull(result);
         assertEquals(expectedUuid, result);
         verify(imagingStudyMapper).buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
         verify(openMRSService).createFhirImagingStudy(fhirImagingStudy);
-        verify(orderRepository).findByOrderUuid(ORDER_UUID);
         verify(imagingStudyReferenceRepository).save(any(ImagingStudyReference.class));
-    }
-
-    @Test
-    public void shouldCreateImagingStudyButNotSaveReferenceWhenOrderNotFound() throws Exception {
-        String expectedUuid = "imaging-study-uuid-123";
-        FhirImagingStudy fhirImagingStudy = new FhirImagingStudy();
-        
-        when(imagingStudyMapper.buildFhirPayload(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION))
-                .thenReturn(fhirImagingStudy);
-        when(openMRSService.createFhirImagingStudy(fhirImagingStudy)).thenReturn(expectedUuid);
-        when(orderRepository.findByOrderUuid(ORDER_UUID)).thenReturn(null);
-
-        String result = imagingStudyService.createImagingStudy(ORDER_UUID, PATIENT_UUID, LOCATION_UUID, STUDY_INSTANCE_UID, DESCRIPTION);
-
-        assertNotNull(result);
-        assertEquals(expectedUuid, result);
-        verify(orderRepository).findByOrderUuid(ORDER_UUID);
-        verify(imagingStudyReferenceRepository, never()).save(any(ImagingStudyReference.class));
     }
 
     @Test(expected = IllegalArgumentException.class)

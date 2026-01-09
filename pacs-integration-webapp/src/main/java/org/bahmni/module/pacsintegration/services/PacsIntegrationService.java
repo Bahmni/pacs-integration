@@ -105,7 +105,7 @@ public class PacsIntegrationService {
                             openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
 
                     String imagingStudyUuid = imagingStudyService.createImagingStudy(
-                            openMRSOrder.getUuid(),
+                            order,
                             openMRSEncounter.getPatientUuid(),
                             orderLocationInfo.getSourceLocation().getUuid(),
                             studyInstanceUID,
