@@ -98,18 +98,10 @@ public class PacsIntegrationService {
 
     private void createImagingStudy(Order order, OpenMRSOrder openMRSOrder, 
                                    OpenMRSEncounter openMRSEncounter, OpenMRSOrderDetails orderDetails) throws IOException {
-        logger.info("Starting ImagingStudy creation for Order UUID: {}, Order ID: {}", 
-                openMRSOrder.getUuid(), order != null ? order.getId() : "null");
-        
         OrderLocationInfo orderLocationInfo = locationResolver.resolveLocations(orderDetails);
-        logger.debug("Resolved location info: {}", 
-                orderLocationInfo.getSourceLocation() != null ? orderLocationInfo.getSourceLocation().getUuid() : "null");
-        
         String studyInstanceUID = studyInstanceUIDGenerator.generateStudyInstanceUID(
                 openMRSOrder.getOrderNumber(), openMRSOrder.getDateCreated());
-        logger.debug("Generated studyInstanceUID: {}", studyInstanceUID);
 
-        logger.info("Calling imagingStudyService.createImagingStudy for Order UUID: {}", openMRSOrder.getUuid());
         String imagingStudyUuid = imagingStudyService.createImagingStudy(
                 order,
                 openMRSEncounter.getPatientUuid(),
