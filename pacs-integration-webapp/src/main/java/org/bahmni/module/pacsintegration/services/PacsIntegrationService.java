@@ -82,14 +82,14 @@ public class PacsIntegrationService {
                 AbstractMessage request = hl7MessageCreator.createHL7Message(orderDetails);
                 String response = modalityService.sendMessage(request, openMRSOrder.getOrderType());
                 order = openMRSEncounterToOrderMapper.map(openMRSOrder, openMRSEncounter, acceptableOrderTypes);
-                orderRepository.save(order);
+                order=orderRepository.save(order);
                 orderDetailsRepository.save(new OrderDetails(order, request.encode(), response));
                 logger.info("Order created successfully for UUID: {}", openMRSOrder.getUuid());
             } else {
                 logger.info("Order already exists for UUID: {}, checking ImagingStudy status", openMRSOrder.getUuid());
             }
             
-            if (imagingStudyEnabled) {
+            if (imagingStudyEnabled && order.getImagingStudyReferences().isEmpty()) {
                 createImagingStudy(order, openMRSOrder, openMRSEncounter, orderDetails);
             }
 

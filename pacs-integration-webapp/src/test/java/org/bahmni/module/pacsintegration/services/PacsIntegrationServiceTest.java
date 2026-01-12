@@ -92,6 +92,11 @@ public class PacsIntegrationServiceTest {
     @Test
     public void shouldProcessAnEncounterWithTwoOrders() throws LLPException, HL7Exception, ParseException, IOException {
         OpenMRSEncounter encounter = buildEncounter();
+        Order savedOrder1 = createOrderWithImagingStudyReferences();
+        savedOrder1.setId(1);
+        Order savedOrder2 = createOrderWithImagingStudyReferences();
+        savedOrder2.setId(2);
+        
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
         when(orderRepository.findByOrderUuid(any(String.class))).thenReturn(null);
@@ -99,11 +104,12 @@ public class PacsIntegrationServiceTest {
         when(adr_a19.encode()).thenReturn("Request message");
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
-                .thenReturn(new Order());
+                .thenReturn(createOrderWithImagingStudyReferences())
+                .thenReturn(createOrderWithImagingStudyReferences());
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder1).thenReturn(savedOrder2);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
-        when(imagingStudyReferenceRepository.findByOrderId(null)).thenReturn(Collections.emptyList());
 
         pacsIntegrationService.processEncounter(encounter);
 
@@ -115,8 +121,11 @@ public class PacsIntegrationServiceTest {
     @Test
     public void shouldNotProcessAlreadyProcessedOrder() throws IOException, ParseException, LLPException, HL7Exception {
         OpenMRSEncounter encounter = buildEncounter();
-        Order existingOrder = new Order();
+        Order existingOrder = createOrderWithImagingStudyReferences();
         existingOrder.setId(2);
+        existingOrder.getImagingStudyReferences().add(new ImagingStudyReference()); // Already has imaging study
+        Order savedOrder = createOrderWithImagingStudyReferences();
+        savedOrder.setId(1);
         
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
@@ -125,19 +134,17 @@ public class PacsIntegrationServiceTest {
         when(adr_a19.encode()).thenReturn("Request message");
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
-                .thenReturn(new Order());
+                .thenReturn(createOrderWithImagingStudyReferences());
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
-        
-        when(imagingStudyReferenceRepository.findByOrderId(null)).thenReturn(Collections.emptyList());
-        when(imagingStudyReferenceRepository.findByOrderId(2)).thenReturn(Collections.singletonList(new ImagingStudyReference()));
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(orderDetailsRepository, times(1)).save(any(OrderDetails.class));
-        verify(imagingStudyService, times(2)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
+        verify(imagingStudyService, times(1)).createImagingStudy(any(Order.class), eq(PATIENT_UUID), anyString(), anyString(), anyString());
     }
 
     @Test
@@ -177,8 +184,10 @@ public class PacsIntegrationServiceTest {
         OrderLocationInfo locationInfo = new OrderLocationInfo();
         locationInfo.setSourceLocation(sourceLocation);
 
-        Order order = new Order();
+        Order order = createOrderWithImagingStudyReferences();
         order.setOrderUuid("uuid1");
+        Order savedOrder = createOrderWithImagingStudyReferences();
+        savedOrder.setId(1);
         
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
@@ -189,13 +198,14 @@ public class PacsIntegrationServiceTest {
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
                 .thenReturn(order);
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(eq("ORD-1"), any(Date.class))).thenReturn(expectedStudyInstanceUID);
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(locationInfo);
 
         pacsIntegrationService.processEncounter(encounter);
 
         verify(imagingStudyService).createImagingStudy(
-                eq(order),
+                eq(savedOrder),
                 eq(PATIENT_UUID),
                 eq(expectedLocationUuid),
                 eq(expectedStudyInstanceUID),
@@ -206,6 +216,8 @@ public class PacsIntegrationServiceTest {
     @Test(expected = IOException.class)
     public void shouldPropagateExceptionWhenImagingStudyCreationFails() throws IOException, ParseException, LLPException, HL7Exception {
         OpenMRSEncounter encounter = buildEncounter();
+        Order savedOrder = createOrderWithImagingStudyReferences();
+        savedOrder.setId(1);
         
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
@@ -214,11 +226,11 @@ public class PacsIntegrationServiceTest {
         when(adr_a19.encode()).thenReturn("Request message");
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
-                .thenReturn(new Order());
+                .thenReturn(createOrderWithImagingStudyReferences());
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
-        when(imagingStudyReferenceRepository.findByOrderId(null)).thenReturn(Collections.emptyList());
         when(imagingStudyService.createImagingStudy(any(Order.class), anyString(), anyString(), anyString(), anyString()))
                 .thenThrow(new IOException("ImagingStudy creation failed"));
 
@@ -228,8 +240,10 @@ public class PacsIntegrationServiceTest {
     @Test
     public void shouldRetryOnlyImagingStudyCreationWhenOrderAlreadyExists() throws IOException, ParseException, LLPException, HL7Exception {
         OpenMRSEncounter encounter = buildEncounter();
-        Order existingOrder = new Order();
+        Order existingOrder = createOrderWithImagingStudyReferences();
         existingOrder.setId(1);
+        Order savedOrder = createOrderWithImagingStudyReferences();
+        savedOrder.setId(2);
         
         when(openMRSService.getPatient(PATIENT_UUID)).thenReturn(new OpenMRSPatient());
         when(orderTypeRepository.findAll()).thenReturn(getAcceptableOrderTypes());
@@ -239,12 +253,11 @@ public class PacsIntegrationServiceTest {
         when(adr_a19.encode()).thenReturn("Request message");
         when(modalityService.sendMessage(any(AbstractMessage.class), any(String.class))).thenReturn("Response message");
         when(openMRSEncounterToOrderMapper.map(any(OpenMRSOrder.class), any(OpenMRSEncounter.class), any(List.class)))
-                .thenReturn(new Order());
+                .thenReturn(createOrderWithImagingStudyReferences());
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(studyInstanceUIDGenerator.generateStudyInstanceUID(any(String.class), any(Date.class))).thenReturn("test-study-instance-uid");
         when(openMRSService.getOrderDetails(anyString())).thenReturn(new OpenMRSOrderDetails());
         when(locationResolver.resolveLocations(any(OpenMRSOrderDetails.class))).thenReturn(buildOrderLocationInfo());
-        when(imagingStudyReferenceRepository.findByOrderId(1)).thenReturn(Collections.emptyList());
-        when(imagingStudyReferenceRepository.findByOrderId(null)).thenReturn(Collections.emptyList());
 
         pacsIntegrationService.processEncounter(encounter);
 
@@ -305,6 +318,12 @@ public class PacsIntegrationServiceTest {
         acceptableOrderTypes.add(new OrderType(1, "type1", null));
         acceptableOrderTypes.add(new OrderType(2, "type2", null));
         return acceptableOrderTypes;
+    }
+
+    private Order createOrderWithImagingStudyReferences() {
+        Order order = new Order();
+        order.setImagingStudyReferences(new ArrayList<>()); // Initialize empty list to prevent NPE
+        return order;
     }
 
 }
