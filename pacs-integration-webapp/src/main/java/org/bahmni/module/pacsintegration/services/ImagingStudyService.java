@@ -15,5 +15,5 @@ public interface ImagingStudyService {
             String studyInstanceUID,
             String description) throws IOException;
 
-    void updateImagingStudyStatus(String studyInstanceUID) throws IOException;
+    void updateImagingStudyAsAvailable(String studyInstanceUID) throws IOException;
 }

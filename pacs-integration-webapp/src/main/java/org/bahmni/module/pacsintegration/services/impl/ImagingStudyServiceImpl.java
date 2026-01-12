@@ -64,7 +64,7 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
     }
 
     @Override
-    public void updateImagingStudyStatus(String studyInstanceUID) throws IOException {
+    public void updateImagingStudyAsAvailable(String studyInstanceUID) throws IOException {
         if (StringUtils.isBlank(studyInstanceUID)) {
             throw new IllegalArgumentException("StudyInstanceUID cannot be null or empty");
         }

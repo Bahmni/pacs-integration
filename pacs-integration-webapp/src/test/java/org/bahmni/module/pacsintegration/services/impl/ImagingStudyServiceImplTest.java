@@ -5,7 +5,6 @@ import org.bahmni.module.pacsintegration.atomfeed.mappers.ImagingStudyMapper;
 import org.bahmni.module.pacsintegration.model.ImagingStudyReference;
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.repository.ImagingStudyReferenceRepository;
-import org.bahmni.module.pacsintegration.repository.OrderRepository;
 import org.bahmni.module.pacsintegration.services.OpenMRSService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -139,24 +138,24 @@ public class ImagingStudyServiceImplTest  {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenUpdateStatusWithNullStudyInstanceUID() throws Exception {
-        imagingStudyService.updateImagingStudyStatus(null);
+        imagingStudyService.updateImagingStudyAsAvailable(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenUpdateStatusWithEmptyStudyInstanceUID() throws Exception {
-        imagingStudyService.updateImagingStudyStatus("");
+        imagingStudyService.updateImagingStudyAsAvailable("");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionWhenUpdateStatusWithBlankStudyInstanceUID() throws Exception {
-        imagingStudyService.updateImagingStudyStatus("   ");
+        imagingStudyService.updateImagingStudyAsAvailable("   ");
     }
 
     @Test(expected = IOException.class)
     public void shouldThrowIOExceptionWhenImagingStudyReferenceNotFound() throws Exception {
         when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(null);
 
-        imagingStudyService.updateImagingStudyStatus(STUDY_INSTANCE_UID);
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
     }
 
     @Test(expected = IOException.class)
@@ -165,7 +164,7 @@ public class ImagingStudyServiceImplTest  {
         reference.setImagingStudyUuid(null);
         when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
 
-        imagingStudyService.updateImagingStudyStatus(STUDY_INSTANCE_UID);
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
     }
 
     @Test(expected = IOException.class)
@@ -174,18 +173,18 @@ public class ImagingStudyServiceImplTest  {
         reference.setImagingStudyUuid("");
         when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
 
-        imagingStudyService.updateImagingStudyStatus(STUDY_INSTANCE_UID);
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
     }
 
     @Test
-    public void shouldUpdateImagingStudyStatus() throws Exception {
+    public void shouldUpdateImagingStudyAsAvailable() throws Exception {
         String imagingStudyUuid = "imaging-study-uuid-123";
         ImagingStudyReference reference = new ImagingStudyReference();
         reference.setImagingStudyUuid(imagingStudyUuid);
         
         when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
 
-        imagingStudyService.updateImagingStudyStatus(STUDY_INSTANCE_UID);
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
 
         verify(imagingStudyReferenceRepository).findByStudyInstanceUid(STUDY_INSTANCE_UID);
         verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), anyList());
@@ -201,6 +200,6 @@ public class ImagingStudyServiceImplTest  {
         doThrow(new IOException("Network error")).when(openMRSService)
                 .updateFhirImagingStudyStatus(eq(imagingStudyUuid), anyList());
 
-        imagingStudyService.updateImagingStudyStatus(STUDY_INSTANCE_UID);
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
     }
 }

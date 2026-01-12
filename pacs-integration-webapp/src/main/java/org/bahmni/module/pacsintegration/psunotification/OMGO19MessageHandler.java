@@ -26,7 +26,7 @@ public class OMGO19MessageHandler implements ReceivingApplication {
             throws HL7Exception {
         try {
             String studyInstanceUID = extractStudyInstanceUID(message);
-            imagingStudyService.updateImagingStudyStatus(studyInstanceUID);
+            imagingStudyService.updateImagingStudyAsAvailable(studyInstanceUID);
             return message.generateACK();
         } catch (IOException e) {
             throw new HL7Exception("Failed to generate ACK", e);
