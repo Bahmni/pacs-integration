@@ -3,6 +3,7 @@ package org.bahmni.module.pacsintegration.services;
 import org.bahmni.module.pacsintegration.atomfeed.*;
 import org.bahmni.module.pacsintegration.atomfeed.client.*;
 import org.bahmni.module.pacsintegration.atomfeed.contract.encounter.*;
+import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderDetails;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OpenMRSOrderQueryBuilder;
 import org.bahmni.module.pacsintegration.atomfeed.contract.order.OrderLocation;
@@ -21,6 +22,7 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static junit.framework.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -208,6 +210,131 @@ public class OpenMRSServiceTest extends OpenMRSMapperBaseTest {
                 .thenThrow(new IOException("Network error"));
 
         new OpenMRSService().getLocation(locationUuid);
+    }
 
+    @Test
+    public void shouldCreateFhirImagingStudy() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String expectedImagingStudyUuid = "imaging-study-uuid-123";
+        FhirImagingStudy imagingStudy = new FhirImagingStudy();
+        imagingStudy.setId(expectedImagingStudyUuid);
+
+        FhirImagingStudy payload = new FhirImagingStudy();
+        String requestURL = "http://localhost:8050/openmrs/ws/fhir2/R4/ImagingStudy";
+
+        when(webClient.post(eq(requestURL), eq(payload), eq(FhirImagingStudy.class))).thenReturn(imagingStudy);
+
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
+
+        assertNotNull(result);
+        assertEquals(expectedImagingStudyUuid, result.getId());
+        verify(webClient).post(eq(requestURL), eq(payload), eq(FhirImagingStudy.class));
+    }
+
+    @Test
+    public void shouldReturnNullWhenCreateFhirImagingStudyResponseHasNoId() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        Map<String, Object> response = new HashMap<>();
+
+        FhirImagingStudy payload = new FhirImagingStudy();
+
+        when(webClient.post(anyString(), eq(payload), eq(Map.class))).thenReturn(response);
+
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenCreateFhirImagingStudyResponseIsNull() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        FhirImagingStudy payload = new FhirImagingStudy();
+
+        when(webClient.post(anyString(), eq(payload), eq(Map.class))).thenReturn(null);
+
+        FhirImagingStudy result = new OpenMRSService().createFhirImagingStudy(payload);
+
+        assertNull(result);
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowIOExceptionWhenCreateFhirImagingStudyFails() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        FhirImagingStudy payload = new FhirImagingStudy();
+
+        when(webClient.post(anyString(), eq(payload), eq(FhirImagingStudy.class)))
+                .thenThrow(new IOException("Network error"));
+
+        new OpenMRSService().createFhirImagingStudy(payload);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenUpdateFhirImagingStudyStatusIdIsNull() throws Exception {
+        new OpenMRSService().updateFhirImagingStudyStatus(null, emptyList());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenUpdateFhirImagingStudyStatusIdIsEmpty() throws Exception {
+        new OpenMRSService().updateFhirImagingStudyStatus("", emptyList());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenUpdateFhirImagingStudyStatusIdIsBlank() throws Exception {
+        new OpenMRSService().updateFhirImagingStudyStatus("   ", emptyList());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenPatchOperationsIsNull() throws Exception {
+        new OpenMRSService().updateFhirImagingStudyStatus("imaging-study-123", null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenPatchOperationsIsEmpty() throws Exception {
+        new OpenMRSService().updateFhirImagingStudyStatus("imaging-study-123", emptyList());
+    }
+
+    @Test
+    public void shouldUpdateFhirImagingStudyStatus() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String imagingStudyId = "imaging-study-123";
+        java.util.List<org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation> patchOperations = new java.util.ArrayList<>();
+        patchOperations.add(new org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation("replace", "/status", "available"));
+
+        String requestURL = "http://localhost:8050/openmrs/ws/fhir2/R4/ImagingStudy/" + imagingStudyId;
+
+        new OpenMRSService().updateFhirImagingStudyStatus(imagingStudyId, patchOperations);
+
+        verify(webClient).patch(eq(requestURL), eq(patchOperations), eq(Object.class), any(HttpHeaders.class));
+    }
+
+    @Test(expected = IOException.class)
+    public void shouldThrowIOExceptionWhenUpdateFhirImagingStudyStatusFails() throws Exception {
+        PowerMockito.mockStatic(WebClientFactory.class);
+        when(WebClientFactory.getClient()).thenReturn(webClient);
+        when(connectionDetails.getAuthUrl()).thenReturn("http://localhost:8050");
+
+        String imagingStudyId = "imaging-study-123";
+        java.util.List<org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation> patchOperations = new java.util.ArrayList<>();
+        patchOperations.add(new org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation("replace", "/status", "available"));
+
+        when(webClient.patch(anyString(), eq(patchOperations), eq(Object.class), any(HttpHeaders.class)))
+                .thenThrow(new IOException("Network error"));
+
+        new OpenMRSService().updateFhirImagingStudyStatus(imagingStudyId, patchOperations);
     }
 }
