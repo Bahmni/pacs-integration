@@ -34,6 +34,11 @@ secrets:
 autoscaling:
   enabled: false
 
+service:
+  type: ClusterIP
+  port: 2576
+  targetPort: 2576
+
 nodeSelector: {}
 affinity: {}
 tolerations: {}
