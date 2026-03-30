@@ -2,4 +2,4 @@ apiVersion: v2
 name: pacs-integration
 description: Helm chart for pacs-integration
 type: application
-version: 1.0.0
+version: 1.1.0
