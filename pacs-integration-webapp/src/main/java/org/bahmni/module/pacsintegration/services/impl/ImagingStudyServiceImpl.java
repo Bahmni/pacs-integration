@@ -104,18 +104,32 @@ public class ImagingStudyServiceImpl implements ImagingStudyService {
                 studyInstanceUID, imagingStudyUuid);
     }
 
-    private static Date getStudyDateTime(String studyInstanceUID, DicomMetadataDTO[] metadataArray) throws IOException {
+    private static Date getStudyDateTime(String studyInstanceUID, DicomMetadataDTO[] metadataArray) {
         if (metadataArray == null || metadataArray.length == 0) {
             return null;
         }
 
         DicomMetadataDTO metadata = metadataArray[0];
-
+        String acquisitionDateTime = metadata.getAcquisitionDateTime();
         String acquisitionDate = metadata.getAcquisitionDate();
         String acquisitionTime = metadata.getAcquisitionTime();
+        String utcOffset = metadata.getTimezoneOffsetFromUTC();
 
-        logger.info("Extracted acquisition date: {}, time: {}, for study {}", acquisitionDate, acquisitionTime, studyInstanceUID);
-        return DateUtils.combineDicomDateTime(acquisitionDate, acquisitionTime);
+        if (StringUtils.isNotBlank(acquisitionDateTime)) {
+            logger.info("Using acquisition date time(0008002A) as : {} for study {}", acquisitionDateTime, studyInstanceUID);
+            return DateUtils.parseDicomDateTimeWithOffset(acquisitionDateTime);
+        }
+
+        if (StringUtils.isNotBlank(acquisitionDate) && StringUtils.isNotBlank(acquisitionTime) && StringUtils.isNotBlank(utcOffset)) {
+            logger.info("Using datetime with UTC offset(00080201) for study {}", studyInstanceUID);
+            return DateUtils.parseDicomDateTimeWithOffset(acquisitionDate + acquisitionTime + utcOffset);
+        }
+
+        if (StringUtils.isNotBlank(acquisitionDate) && StringUtils.isNotBlank(acquisitionTime)) {
+            logger.info("Using local datetime (no UTC offset) for study {}", studyInstanceUID);
+            return DateUtils.combineDicomDateTime(acquisitionDate, acquisitionTime);
+        }
+        return null;
     }
 
     private Map<String, Object> createDateCompletedExtension(Date studyDateTime) {

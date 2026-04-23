@@ -16,6 +16,8 @@ public class DicomMetadataDTO {
 
     public static final String AQUISITION_DATE_TAG = "00080022";
     public static final String AQUISITION_TIME_TAG = "00080032";
+    public static final String AQUISITION_DATETIME_WITH_OFFSET_TAG = "0008002A";
+    public static final String TIMEZONE_OFFSET_FROM_UTC_TAG = "00080201";
     private Map<String, DicomField> metadata = new HashMap<>();
 
     public DicomMetadataDTO() {
@@ -32,6 +34,14 @@ public class DicomMetadataDTO {
 
     public String getAcquisitionTime() {
         return getFirstValue(AQUISITION_TIME_TAG);
+    }
+
+    public String getAcquisitionDateTime() {
+        return getFirstValue(AQUISITION_DATETIME_WITH_OFFSET_TAG);
+    }
+
+    public String getTimezoneOffsetFromUTC() {
+        return getFirstValue(TIMEZONE_OFFSET_FROM_UTC_TAG);
     }
 
     private String getFirstValue(String tag) {
