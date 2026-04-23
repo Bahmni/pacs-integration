@@ -1,5 +1,6 @@
 package org.bahmni.module.pacsintegration.services;
 
+import org.apache.commons.lang.StringUtils;
 import org.bahmni.module.pacsintegration.client.HttpClientFactory;
 import org.bahmni.module.pacsintegration.dto.DicomMetadataDTO;
 import org.bahmni.webclients.HttpClient;
@@ -23,6 +24,9 @@ public class Dcm4CheeService {
     private String dcm4cheeAet;
 
     public DicomMetadataDTO[] fetchStudyMetadata(String studyInstanceUID) throws IOException {
+        if (StringUtils.isBlank(dcm4cheeBaseUrl)) {
+            return null;
+        }
         HttpClient webClient = HttpClientFactory.getDcm4CheeClient();
         String url = buildMetadataUrl(studyInstanceUID);
         logger.debug("Calling DCM4CHEE metadata API: {}", url);

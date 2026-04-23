@@ -165,4 +165,13 @@ public class Dcm4CheeServiceTest {
         assertEquals(1, result.length);
         verify(webClient).get(expectedUrl, DicomMetadataDTO[].class);
     }
+
+    @Test
+    public void shouldReturnNullWhenDcm4cheeBaseUrlIsNull() throws Exception {
+        ReflectionTestUtils.setField(dcm4CheeService, "dcm4cheeBaseUrl", null);
+
+        DicomMetadataDTO[] result = dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID);
+
+        assertNull(result);
+    }
 }
