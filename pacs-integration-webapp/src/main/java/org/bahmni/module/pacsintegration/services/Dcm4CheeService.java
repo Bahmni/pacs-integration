@@ -25,6 +25,7 @@ public class Dcm4CheeService {
 
     public DicomMetadataDTO[] fetchStudyMetadata(String studyInstanceUID) throws IOException {
         if (StringUtils.isBlank(dcm4cheeBaseUrl)) {
+            logger.info("dcm4cheeBaseUrl is not configured, Skipping fetchStudyMetadata api call");
             return null;
         }
         HttpClient webClient = HttpClientFactory.getDcm4CheeClient();
