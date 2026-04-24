@@ -23,6 +23,7 @@ public class DateUtils {
 
     public static String formatFhirDateTime(Date date) {
         SimpleDateFormat fhirFormat = new SimpleDateFormat(FHIR_DATETIME_FORMAT);
+        fhirFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return fhirFormat.format(date);
     }
 

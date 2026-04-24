@@ -404,7 +404,7 @@ public class ImagingStudyServiceImplTest  {
         assertEquals("http://fhir.bahmni.org/ext/imaging-study/completion-date", extension.get("url"));
         assertNotNull(extension.get("valueDateTime"));
         String valueDateTime = (String) extension.get("valueDateTime");
-        assertEquals("2024-01-15T14:30:00", valueDateTime);
+        assertEquals("2024-01-15T09:00:00", valueDateTime);
     }
 
     // Helper methods to create metadata DTOs
