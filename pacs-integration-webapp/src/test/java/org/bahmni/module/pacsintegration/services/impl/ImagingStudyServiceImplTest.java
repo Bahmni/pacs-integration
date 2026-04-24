@@ -1,18 +1,24 @@
 package org.bahmni.module.pacsintegration.services.impl;
 
 import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.FhirImagingStudy;
+import org.bahmni.module.pacsintegration.atomfeed.contract.fhir.JsonPatchOperation;
 import org.bahmni.module.pacsintegration.atomfeed.mappers.ImagingStudyMapper;
+import org.bahmni.module.pacsintegration.dto.DicomMetadataDTO;
 import org.bahmni.module.pacsintegration.model.ImagingStudyReference;
 import org.bahmni.module.pacsintegration.model.Order;
 import org.bahmni.module.pacsintegration.repository.ImagingStudyReferenceRepository;
+import org.bahmni.module.pacsintegration.services.Dcm4CheeService;
 import org.bahmni.module.pacsintegration.services.OpenMRSService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,6 +30,9 @@ public class ImagingStudyServiceImplTest  {
 
     @Mock
     private OpenMRSService openMRSService;
+
+    @Mock
+    private Dcm4CheeService dcm4CheeService;
 
     @Mock
     private ImagingStudyMapper imagingStudyMapper;
@@ -201,5 +210,241 @@ public class ImagingStudyServiceImplTest  {
                 .updateFhirImagingStudyStatus(eq(imagingStudyUuid), anyList());
 
         imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+    }
+
+    @Test
+    public void shouldFetchMetadataFromDcm4CheeService() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO metadata = createMetadataWithAcquisitionDateTime("20240115143000+0530");
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[]{metadata};
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        verify(dcm4CheeService).fetchStudyMetadata(STUDY_INSTANCE_UID);
+    }
+
+    @Test
+    public void shouldUpdateWithDateExtensionWhenAcquisitionDateTimePresent() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO metadata = createMetadataWithAcquisitionDateTime("20240115143000+0530");
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[]{metadata};
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(2, patchOperations.size());
+        
+        JsonPatchOperation statusOp = patchOperations.get(0);
+        assertEquals("replace", statusOp.getOp());
+        assertEquals("/status", statusOp.getPath());
+        assertEquals("available", statusOp.getValue());
+        
+        JsonPatchOperation extensionOp = patchOperations.get(1);
+        assertEquals("add", extensionOp.getOp());
+        assertEquals("/extension", extensionOp.getPath());
+        assertNotNull(extensionOp.getValue());
+    }
+
+    @Test
+    public void shouldUpdateWithDateExtensionWhenDateTimeAndOffsetPresent() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO metadata = createMetadataWithDateTimeAndOffset("20240115", "143000", "+0530");
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[]{metadata};
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(2, patchOperations.size());
+        
+        JsonPatchOperation extensionOp = patchOperations.get(1);
+        assertEquals("add", extensionOp.getOp());
+        assertEquals("/extension", extensionOp.getPath());
+        
+        List<Map<String, Object>> extensionList = (List<Map<String, Object>>) extensionOp.getValue();
+        assertNotNull(extensionList);
+        assertEquals(1, extensionList.size());
+        
+        Map<String, Object> extension = extensionList.get(0);
+        assertEquals("http://fhir.bahmni.org/ext/imaging-study/completion-date", extension.get("url"));
+        assertNotNull(extension.get("valueDateTime"));
+    }
+
+    @Test
+    public void shouldUpdateWithDateExtensionWhenDateAndTimePresent() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO metadata = createMetadataWithDateAndTime("20240115", "143000");
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[]{metadata};
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(2, patchOperations.size());
+        
+        JsonPatchOperation extensionOp = patchOperations.get(1);
+        assertEquals("add", extensionOp.getOp());
+        assertEquals("/extension", extensionOp.getPath());
+        assertNotNull(extensionOp.getValue());
+    }
+
+    @Test
+    public void shouldUpdateWithoutDateExtensionWhenMetadataIsNull() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(null);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(1, patchOperations.size());
+        
+        JsonPatchOperation statusOp = patchOperations.get(0);
+        assertEquals("replace", statusOp.getOp());
+        assertEquals("/status", statusOp.getPath());
+        assertEquals("available", statusOp.getValue());
+    }
+
+    @Test
+    public void shouldUpdateWithoutDateExtensionWhenMetadataIsEmpty() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[0];
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(1, patchOperations.size());
+        
+        JsonPatchOperation statusOp = patchOperations.get(0);
+        assertEquals("replace", statusOp.getOp());
+        assertEquals("/status", statusOp.getPath());
+        assertEquals("available", statusOp.getValue());
+    }
+
+    @Test
+    public void shouldVerifyPatchOperationsContainCorrectDateExtension() throws Exception {
+        String imagingStudyUuid = "imaging-study-uuid-123";
+        ImagingStudyReference reference = new ImagingStudyReference();
+        reference.setImagingStudyUuid(imagingStudyUuid);
+        
+        DicomMetadataDTO metadata = createMetadataWithAcquisitionDateTime("20240115143000+0530");
+        DicomMetadataDTO[] metadataArray = new DicomMetadataDTO[]{metadata};
+        
+        when(imagingStudyReferenceRepository.findByStudyInstanceUid(STUDY_INSTANCE_UID)).thenReturn(reference);
+        when(dcm4CheeService.fetchStudyMetadata(STUDY_INSTANCE_UID)).thenReturn(metadataArray);
+
+        imagingStudyService.updateImagingStudyAsAvailable(STUDY_INSTANCE_UID);
+
+        ArgumentCaptor<List> patchOpsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(openMRSService).updateFhirImagingStudyStatus(eq(imagingStudyUuid), patchOpsCaptor.capture());
+        
+        List<JsonPatchOperation> patchOperations = patchOpsCaptor.getValue();
+        assertEquals(2, patchOperations.size());
+        
+        JsonPatchOperation statusOp = patchOperations.get(0);
+        assertEquals("replace", statusOp.getOp());
+        assertEquals("/status", statusOp.getPath());
+        assertEquals("available", statusOp.getValue());
+        
+        JsonPatchOperation extensionOp = patchOperations.get(1);
+        assertEquals("add", extensionOp.getOp());
+        assertEquals("/extension", extensionOp.getPath());
+        
+        List<Map<String, Object>> extensionList = (List<Map<String, Object>>) extensionOp.getValue();
+        assertNotNull(extensionList);
+        assertEquals(1, extensionList.size());
+        
+        Map<String, Object> extension = extensionList.get(0);
+        assertEquals("http://fhir.bahmni.org/ext/imaging-study/completion-date", extension.get("url"));
+        assertNotNull(extension.get("valueDateTime"));
+        String valueDateTime = (String) extension.get("valueDateTime");
+        assertEquals("2024-01-15T09:00:00", valueDateTime);
+    }
+
+    // Helper methods to create metadata DTOs
+    private DicomMetadataDTO createMetadataWithAcquisitionDateTime(String acquisitionDateTime) {
+        DicomMetadataDTO metadata = new DicomMetadataDTO();
+        DicomMetadataDTO.DicomField field = new DicomMetadataDTO.DicomField();
+        field.setValue(new Object[]{acquisitionDateTime});
+        metadata.setDicomTag(DicomMetadataDTO.AQUISITION_DATETIME_WITH_OFFSET_TAG, field);
+        return metadata;
+    }
+
+    private DicomMetadataDTO createMetadataWithDateTimeAndOffset(String date, String time, String offset) {
+        DicomMetadataDTO metadata = new DicomMetadataDTO();
+        
+        DicomMetadataDTO.DicomField dateField = new DicomMetadataDTO.DicomField();
+        dateField.setValue(new Object[]{date});
+        metadata.setDicomTag(DicomMetadataDTO.AQUISITION_DATE_TAG, dateField);
+        
+        DicomMetadataDTO.DicomField timeField = new DicomMetadataDTO.DicomField();
+        timeField.setValue(new Object[]{time});
+        metadata.setDicomTag(DicomMetadataDTO.AQUISITION_TIME_TAG, timeField);
+        
+        DicomMetadataDTO.DicomField offsetField = new DicomMetadataDTO.DicomField();
+        offsetField.setValue(new Object[]{offset});
+        metadata.setDicomTag(DicomMetadataDTO.TIMEZONE_OFFSET_FROM_UTC_TAG, offsetField);
+        
+        return metadata;
+    }
+
+    private DicomMetadataDTO createMetadataWithDateAndTime(String date, String time) {
+        DicomMetadataDTO metadata = new DicomMetadataDTO();
+        
+        DicomMetadataDTO.DicomField dateField = new DicomMetadataDTO.DicomField();
+        dateField.setValue(new Object[]{date});
+        metadata.setDicomTag(DicomMetadataDTO.AQUISITION_DATE_TAG, dateField);
+        
+        DicomMetadataDTO.DicomField timeField = new DicomMetadataDTO.DicomField();
+        timeField.setValue(new Object[]{time});
+        metadata.setDicomTag(DicomMetadataDTO.AQUISITION_TIME_TAG, timeField);
+        
+        return metadata;
     }
 }

@@ -14,3 +14,9 @@ liquibase.change-log=classpath:db/changelog/liquibase.xml
 enable.scheduling=true
 
 create.imagingstudy.enabled=${CREATE_IMAGING_STUDY_ENABLED:false}
+
+# DCM4CHEE Configuration
+dcm4chee.base.url=${DCM4CHEE_BASE_URL}
+dcm4chee.aet=${DCM4CHEE_AET:DCM4CHEE}
+dcm4chee.connection.timeout=${DCM4CHEE_CONNECTION_TIMEOUT:10000}
+dcm4chee.read.timeout=${DCM4CHEE_READ_TIMEOUT:10000}
