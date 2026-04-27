@@ -28,6 +28,8 @@ config:
   HL7_SENDING_FACILITY: "Bahmni Hospital"
   HL7_RECEIVING_APPLICATION: "Bahmni PACS"
   HL7_RECEIVING_FACILITY: "Bahmni Radiology"
+  DCM4CHEE_BASE_URL: ""
+  DCM4CHEE_AET: "DCM4CHEE"
 
 
 secrets:
