@@ -6,7 +6,7 @@
 
     <groupId>org.bahmni</groupId>
     <artifactId>pacs-integration</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -19,6 +19,14 @@
         <module>vagrant-deploy</module>
         <module>pacs-integration-webapp</module>
     </modules>
+
+    <licenses>
+        <license>
+            <name>Mozilla Public License Version 2.0</name>
+            <url>https://www.bahmni.org/license/mplv2hd</url>
+        </license>
+    </licenses>
+    
     <build>
         <extensions>
             <extension>
@@ -34,7 +42,7 @@
             <id>repo.mybahmni.org</id>
             <name>bahmni-artifactory-snapshots</name>
             <url>s3://repo.mybahmni.org/artifactory/snapshot</url>
-        </snapshotRepository>
+        </snapshotRepository> 
     </distributionManagement>
 
     <repositories>
