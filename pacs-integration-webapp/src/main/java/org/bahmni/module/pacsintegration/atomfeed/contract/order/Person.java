@@ -9,11 +9,13 @@
 
 package org.bahmni.module.pacsintegration.atomfeed.contract.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Person {
     private String gender;
     private Integer age;
@@ -22,6 +24,7 @@ public class Person {
 
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PreferredName {
         private String givenName;
         private String middleName;
