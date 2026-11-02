@@ -9,6 +9,9 @@
 
 package org.bahmni.module.pacsintegration.atomfeed.contract.encounter;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OpenMRSConceptMapping {
     private String source;
     private String name;

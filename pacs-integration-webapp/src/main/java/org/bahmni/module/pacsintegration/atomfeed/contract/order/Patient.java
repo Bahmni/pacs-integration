@@ -20,6 +20,7 @@ public class Patient {
     private Person person;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PatientIdentifier {
         private String identifier;
     }
