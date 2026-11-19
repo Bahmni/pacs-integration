@@ -64,6 +64,10 @@ public class AtomFeedProperties {
         return properties.getProperty(propertyName);
     }
 
+    public Properties getProperties() {
+        return properties;
+    }
+
     public String getFeedConnectionTimeout() {
         return getProperty(FEED_CONNECT_TIMEOUT);
     }
