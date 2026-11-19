@@ -44,10 +44,10 @@ public class WebClientFactory {
         String clientId = trimmedOrNull(properties, "openmrs.oauth.client.id");
         String clientSecret = trimmedOrNull(properties, "openmrs.oauth.client.secret");
         validateOAuth2Settings(tokenUrl, clientId, clientSecret);
-        OAuth2ConnectionDetails credentials = new OAuth2ConnectionDetails(connectionDetails.getAuthUrl(), tokenUrl,
+        OAuth2ConnectionDetails oAuth2ConnectionDetails = new OAuth2ConnectionDetails(connectionDetails.getAuthUrl(), tokenUrl,
                 clientId, clientSecret, null, connectionDetails.getConnectionTimeout(),
                 connectionDetails.getReadTimeout(), OAuth2ConnectionDetails.DEFAULT_EXPIRY_SKEW_SECONDS);
-        return new OpenMRSOAuthLoginAuthenticator(credentials);
+        return new OpenMRSOAuthLoginAuthenticator(oAuth2ConnectionDetails);
     }
 
     private static void validateOAuth2Settings(String tokenUrl, String clientId, String clientSecret) {
