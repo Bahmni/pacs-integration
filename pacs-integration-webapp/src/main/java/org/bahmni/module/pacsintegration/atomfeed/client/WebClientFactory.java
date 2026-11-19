@@ -36,7 +36,7 @@ public class WebClientFactory {
     }
 
     private static boolean isOAuth2Enabled(Properties properties) {
-        return "true".equalsIgnoreCase(trimmedOrNull(properties, "oauth2.enabled"));
+        return "true".equalsIgnoreCase(trimmedOrNull(properties, "openmrs.oauth.enabled"));
     }
 
     private static Authenticator createOAuth2Authenticator(ConnectionDetails connectionDetails, Properties properties) {
