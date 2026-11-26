@@ -9,6 +9,7 @@
 
 package org.bahmni.module.pacsintegration.atomfeed.jobs;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.bahmni.module.pacsintegration.atomfeed.client.AtomFeedClientFactory;
 import org.bahmni.module.pacsintegration.atomfeed.worker.EncounterFeedWorker;
 import org.ict4h.atomfeed.client.service.FeedClient;
@@ -45,7 +46,21 @@ public class EncounterFailedFeedJob implements FeedJob {
             atomFeedClient = atomFeedClientFactory.get(OPENMRS_ENCOUNTER_FEED_NAME, encounterFeedWorker);
         }
         logger.info("Processing failed event.");
-        atomFeedClient.processFailedEvents();
+        try {
+            atomFeedClient.processFailedEvents();
+        } catch (RuntimeException e) {
+            if (isAuthFailure(e)) {
+                atomFeedClient = null;
+            }
+            throw e;
+        }
         logger.info("Completed processing failed event.");
+    }
+
+    private boolean isAuthFailure(RuntimeException e) {
+        String stackTrace = ExceptionUtils.getStackTrace(e);
+        return stackTrace.contains("Unexpected response status 302")
+                || stackTrace.contains("HTTP response code: 401")
+                || stackTrace.contains("Bad response code of 403");
     }
 }
