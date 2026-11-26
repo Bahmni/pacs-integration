@@ -59,6 +59,8 @@ public class EncounterFailedFeedJob implements FeedJob {
 
     private boolean isAuthFailure(RuntimeException e) {
         String stackTrace = ExceptionUtils.getStackTrace(e);
-        return stackTrace.contains("Unexpected response status 302");
+        return stackTrace.contains("Unexpected response status 302")
+                || stackTrace.contains("HTTP response code: 401")
+                || stackTrace.contains("Bad response code of 403");
     }
 }
